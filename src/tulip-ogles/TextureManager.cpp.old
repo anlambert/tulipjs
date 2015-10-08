@@ -1,0 +1,256 @@
+#include <GL/glew.h>
+
+#include "TextureManager.h"
+#include "Utils.h"
+
+using namespace std;
+using namespace tlp;
+
+map<string, TextureManager *> TextureManager::_instances;
+string TextureManager::_currentCanvasId("");
+
+static int maxTextureSize = 0;
+
+TextureManager::TextureManager() :
+    _currentUnit(0) {
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    if (maxTextureSize > 4096) {
+      maxTextureSize = 4096;
+    }
+    glGenTextures(4, _texturesAtlasId);
+    for (int i = 0 ; i < 4 ; ++i) {
+        _texturesAtlas[i] = NULL;
+    }
+    _textureNeedsUpload.resize(4, false);
+}
+
+TextureManager::~TextureManager() {
+    glDeleteTextures(4, _texturesAtlasId);
+    for (int i = 0 ; i < 4 ; ++i) {
+        texture_atlas_delete(_texturesAtlas[i]);
+    }
+}
+
+TextureManager *TextureManager::instance(const std::string &canvasId) {
+    if (_instances.find(canvasId) == _instances.end()) {
+        _instances[canvasId] = new TextureManager();
+    }
+    return _instances[canvasId];
+}
+
+TextureManager *TextureManager::instance() {
+  return instance(_currentCanvasId);
+}
+
+static unsigned char * rgbTextureToRgbaTexture(int width, int height, unsigned char *textureData) {
+  unsigned char *textureDataRgba = new unsigned char[width*height*4];
+  for (int i = 0 ; i < height ; ++i) {
+      for (int j = 0 ; j < width ; ++j) {
+          textureDataRgba[4*(i*width+j)] = textureData[3*(i*width+j)];
+          textureDataRgba[4*(i*width+j)+1] = textureData[3*(i*width+j)+1];
+          textureDataRgba[4*(i*width+j)+2] = textureData[3*(i*width+j)+2];
+          textureDataRgba[4*(i*width+j)+3] = 255;
+      }
+  }
+  return textureDataRgba;
+}
+
+void TextureManager::addTextureInAtlasFromFile(const std::string &textureFile) {
+    if (textureFile.empty() || _textureAtlasUnit.find(textureFile) != _textureAtlasUnit.end()) {
+        return;
+    }
+    SDL_Surface *surface = createTextureSurfaceFromImage(textureFile.c_str());
+    if (!surface) {
+        return;
+    }
+    unsigned char *textureData = static_cast<unsigned char*>(surface->pixels);
+    bool deleteTextureData = false;
+    if (surface->format->BytesPerPixel == 3) {
+        unsigned char *textureDataRgba = rgbTextureToRgbaTexture(surface->w, surface->h, static_cast<unsigned char*>(surface->pixels));
+        textureData = textureDataRgba;
+        deleteTextureData = true;
+    }
+    bool ok = false;
+    while (!ok && _currentUnit < 4) {
+        if (!_texturesAtlas[_currentUnit]) {
+            _texturesAtlas[_currentUnit] = texture_atlas_new(maxTextureSize, maxTextureSize, 4);
+        }
+        ivec4 region = texture_atlas_get_region(_texturesAtlas[_currentUnit], surface->w, surface->h);
+        if (region.x >= 0 && region.y >=0) {
+            texture_atlas_set_region(_texturesAtlas[_currentUnit], region.x, region.y, region.width, region.height, textureData, surface->w*4);
+            _textureAtlasUnit[textureFile] = _currentUnit;
+            float offset = 0;
+            _coordinatesOffsets[textureFile] = Vec4f((region.x+offset)/static_cast<float>(maxTextureSize), (region.y+offset)/static_cast<float>(maxTextureSize),
+                                                     (region.x+region.width-offset)/static_cast<float>(maxTextureSize), (region.y+region.height-offset)/static_cast<float>(maxTextureSize));
+            ok = true;
+            _textureNeedsUpload[_currentUnit] = true;
+        } else {
+            ++_currentUnit;
+        }
+    }
+    if (deleteTextureData) {
+        delete [] textureData;
+    }
+    SDL_FreeSurface(surface);
+
+}
+
+GLint TextureManager::getSamplerIdForTexture(const std::string &texture, bool forceUseAtlas) {
+    GLint ret = -1;
+    GLint retAtlas = -1;
+    if (_textureUnit.find(texture) != _textureUnit.end()) {
+        ret = _textureUnit[texture];
+    }
+    if (_textureAtlasUnit.find(texture) != _textureAtlasUnit.end()) {
+        retAtlas = _textureAtlasUnit[texture];
+    }
+    if (ret >= 0) {
+      if (retAtlas >= 0 && forceUseAtlas) {
+        return retAtlas;
+      } else {
+        return ret;
+      }
+    } else {
+      return retAtlas;
+    }
+}
+
+Vec4f TextureManager::getCoordinatesOffsetsForTexture(const std::string &texture, bool forceUseAtlas) {
+    Vec4f ret(0, 0, 1, 1);
+    if (_textureUnit.find(texture) != _textureUnit.end()) {
+      if (forceUseAtlas && _coordinatesOffsets.find(texture) != _coordinatesOffsets.end()) {
+          ret = _coordinatesOffsets[texture];
+      }
+    } else {
+      if (_coordinatesOffsets.find(texture) != _coordinatesOffsets.end()) {
+          ret = _coordinatesOffsets[texture];
+      }
+    }
+    return ret;
+}
+
+void TextureManager::bindTexturesAtlas() {
+    for (size_t i = 0 ; i < _textureNeedsUpload.size() ; ++i) {
+        if (!_textureNeedsUpload[i]) continue;
+        glBindTexture(GL_TEXTURE_2D, _texturesAtlasId[i]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, maxTextureSize, maxTextureSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, _texturesAtlas[i]->data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        _textureNeedsUpload[i] = false;
+    }
+
+    if (_texturesAtlas[0]) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _texturesAtlasId[0]);
+    }
+    if (_texturesAtlas[1]) {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, _texturesAtlasId[1]);
+    }
+    if (_texturesAtlas[2]) {
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, _texturesAtlasId[2]);
+    }
+    if (_texturesAtlas[3]) {
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, _texturesAtlasId[3]);
+    }
+}
+
+void TextureManager::unbindTexturesAtlas() {
+    if (_texturesAtlas[3]) {
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    if (_texturesAtlas[2]) {
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    if (_texturesAtlas[1]) {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    if (_texturesAtlas[0]) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+}
+
+void TextureManager::addTextureFromFile(const std::string &textureFile, bool addAlsoInAtlas) {
+  if (textureFile.empty() || (!addAlsoInAtlas && _coordinatesOffsets.find(textureFile) != _coordinatesOffsets.end()) || _textures.find(textureFile) != _textures.end()) {
+      return;
+  }
+
+  SDL_Surface *surface = createTextureSurfaceFromImage(textureFile.c_str());
+  if (!surface) {
+      return;
+  }
+  GLuint textureId;
+  glGenTextures(1, &textureId);
+  glBindTexture(GL_TEXTURE_2D, textureId);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  GLenum format = surface->format->BytesPerPixel == 3 ? GL_RGB : GL_RGBA;
+  glTexImage2D(GL_TEXTURE_2D, 0, format, surface->w, surface->h, 0, format, GL_UNSIGNED_BYTE, surface->pixels);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  SDL_FreeSurface(surface);
+  _textures[textureFile] = textureId;
+  if (addAlsoInAtlas) {
+    addTextureInAtlasFromFile(textureFile);
+  }
+}
+
+void TextureManager::addExternalTexture(const string &textureId, const GLuint glTextureId) {
+  if (textureId.empty() || _textures.find(textureId) != _textures.end()) {
+      return;
+  }
+  _textures[textureId] = glTextureId;
+}
+
+void TextureManager::bindTexture(const std::string &textureId, const unsigned int textureUnit) {
+  if (_textures.find(textureId) == _textures.end()) {
+      return;
+  }
+  if (textureUnit == 0) {
+    glActiveTexture(GL_TEXTURE0);
+    _textureUnit[textureId] = textureUnit;
+  } else if (textureUnit == 1) {
+    glActiveTexture(GL_TEXTURE1);
+    _textureUnit[textureId] = textureUnit;
+  } else if (textureUnit == 2) {
+    glActiveTexture(GL_TEXTURE2);
+    _textureUnit[textureId] = textureUnit;
+  } else if (textureUnit == 3) {
+    glActiveTexture(GL_TEXTURE3);
+    _textureUnit[textureId] = textureUnit;
+  } else {
+    glActiveTexture(GL_TEXTURE0);
+    _textureUnit[textureId] = 0;
+  }
+  glBindTexture(GL_TEXTURE_2D, _textures[textureId]);
+}
+
+void TextureManager::unbindTexture(const std::string &textureId) {
+  if (_textures.find(textureId) == _textures.end()) {
+      return;
+  }
+  if (_textureUnit[textureId] == 0) {
+    glActiveTexture(GL_TEXTURE0);
+  } else if (_textureUnit[textureId] == 1) {
+    glActiveTexture(GL_TEXTURE1);
+  } else if (_textureUnit[textureId] == 2) {
+    glActiveTexture(GL_TEXTURE2);
+  } else {
+    glActiveTexture(GL_TEXTURE3);
+  }
+  glBindTexture(GL_TEXTURE_2D, 0);
+  _textureUnit.erase(textureId);
+}
+

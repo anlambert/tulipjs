@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+     <meta charset="utf-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=yes">
+     <title>Tulip Web</title>
+     <link rel="stylesheet" href="http://css-spinners.com/css/spinner/whirly.css" type="text/css">
+     <link rel="stylesheet" href="https://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+     <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+     <script type="text/javascript" src="https://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+     <script async type="text/javascript" src="tulip.js"></script>
+
+     <style type="text/css">
+        .ui-icon-interactor-navigation {
+             background-image: url("images/i_navigation.png");
+             background-color: transparent;
+             box-shadow: none;
+             -moz-border-radius: 0px;
+             -webkit-border-radius:0px;
+             border-radius:0px;
+        }
+        .ui-icon-interactor-zoom {
+             background-image: url("images/i_zoom.png");
+             background-color: transparent;
+             box-shadow: none;
+             -moz-border-radius: 0px;
+             -webkit-border-radius:0px;
+             border-radius:0px;
+        }
+        .ui-icon-interactor-selection {
+             background-image: url("images/i_selection.png");
+             background-color: transparent;
+             box-shadow: none;
+             -moz-border-radius: 0px;
+             -webkit-border-radius:0px;
+             border-radius:0px;
+        }
+        .ui-icon-interactor-selection-modifier {
+             background-image: url("images/i_move.png");
+             background-color: transparent;
+             box-shadow: none;
+             -moz-border-radius: 0px;
+             -webkit-border-radius:0px;
+             border-radius:0px;
+        }
+        .ui-icon-interactor-lasso-selection {
+             background-image: url("images/i_lasso.png");
+             background-color: transparent;
+             box-shadow: none;
+             -moz-border-radius: 0px;
+             -webkit-border-radius:0px;
+             border-radius:0px;
+        }
+        .ui-icon-interactor-neighborhood {
+             background-image: url("images/i_neighborhood_highlighter.png");
+             /*background-color: transparent;*/
+             box-shadow: none;
+             -moz-border-radius: 0px;
+             -webkit-border-radius:0px;
+             border-radius:0px;
+        }
+        .ui-focus,
+        .ui-btn:focus {
+            -moz-box-shadow: none;
+            -webkit-box-shadow: none;
+            box-shadow: none ;
+        }
+
+        #tulip-view {
+          display: table-cell;
+          text-align: center;
+          vertical-align: middle;
+        }
+
+      </style>
+
+    </head>
+
+    <body>
+    <!-- page #one -->
+    <div data-role="page" id="one" align="center" class="ui-responsive-panel" >
+    <!-- header -->
+      <div data-role="header">
+        <!-- <h1>Tulip Web</h> -->
+        <a href="#computepanel" class="ui-btn-left">Menu</a>
+        <div data-role="controlgroup" data-type="horizontal" style="display: inline-block;">
+
+        <a id="navigation-button" href=# class="ui-icon-nodisc ui-btn-active" data-role="button" data-icon="interactor-navigation" data-iconpos="notext">Navigate in graph</a>
+        <a id="zoom-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-zoom" data-iconpos="notext">Zoom on rectangle</a>
+        <a id="selection-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-selection" data-iconpos="notext">Select nodes/edges in a rectangle</a>
+        <a id="lasso-selection-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-lasso-selection" data-iconpos="notext">Select nodes in a freehand drawn region</a>
+        <a id="neighborhood-highlighter-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-neighborhood" data-iconpos="notext">Highlight node neighborhood</a>
+        <a id="selection-modifier-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-selection-modifier" data-iconpos="notext">Move rectangle selection</a>
+        <a id="js-interactor-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="" data-iconpos="notext">Javascript interactor</a>
+
+        </div>
+
+      </div>
+      <!-- content -->
+      <div id ="main-content" data-role="content" data-theme="a" style='min-height:60px'>
+        <div id="tulip-view">
+          <div id='spinner-div' class="whirly-loader"></div>
+        </div>
+      </div>
+      <!-- content -->
+
+      <!-- footer -->
+      <!--<div data-role="footer" data-theme="d">
+        <a href="http://www.tulip-software.org" data-role="dialog">www.tulip-software.org</a>
+      </div>-->
+
+
+      <!-- Left panel -->
+      <div data-role="panel" id="computepanel" data-position="left" data-theme="a" data-display="overlay">
+      <input type="file" id="graph_file"/>
+
+      <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
+      <h3> Force directed layouts </h3>
+      <div data-role = "controlgroup" data-type = "vertical" >
+      <a data-role = "button" class = "show-page-loading-msg" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'Davidson Harel (OGDF)' graph layout" onclick ="computeLayout('Davidson Harel (OGDF)')" > Davidson Harel (OGDF) </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'Fast Multipole Embedder (OGDF)' graph layout" onclick ="computeLayout('Fast Multipole Embedder (OGDF)')" > Fast Multipole Embedder (OGDF) </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'FM^3 (OGDF)' graph layout" onclick ="computeLayout('FM^3 (OGDF)')" > FM^3 (OGDF) </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'GEM (Frick)' graph layout" onclick ="computeLayout('GEM (Frick)')" > GEM (Frick) </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'Frutcherman Reingold (OGDF)' graph layout" onclick ="computeLayout('Frutcherman Reingold (OGDF)')" > Frutcherman Reingold (OGDF) </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'Kamada Kawai (OGDF)' graph layout" onclick ="computeLayout('Kamada Kawai (OGDF)')" > Kamada Kawai (OGDF) </a>
+      </div>
+      </div>
+
+      <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
+      <h3> Multilevel layouts </h3>
+      <div data-role = "controlgroup" data-type = "vertical" >
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'GRIP' graph layout" onclick ="computeLayout('GRIP')" > GRIP </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'Fast Multipole Multilevel Embedder (OGDF)' graph layout" onclick ="computeLayout('Fast Multipole Multilevel Embedder (OGDF)')" > Fast Multipole Multilevel Embedder (OGDF) </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'MMM Example Fast Layout (OGDF)' graph layout" onclick ="computeLayout('MMM Example Fast Layout (OGDF)')" > MMM Example Fast Layout (OGDF) </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'MMM Example Nice Layout (OGDF)' graph layout" onclick ="computeLayout('MMM Example Nice Layout (OGDF)')" > MMM Example Nice Layout (OGDF) </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'MMM Example No Twist Layout (OGDF)' graph layout" onclick ="computeLayout('MMM Example No Twist Layout (OGDF)')" > MMM Example No Twist Layout (OGDF) </a>
+      </div>
+      </div>
+
+      <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
+      <h3> Tree layouts </h3>
+      <div data-role = "controlgroup" data-type = "vertical" >
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'Bubble Tree' graph layout" onclick ="computeLayout('Bubble Tree')" > Bubble Tree </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'Cone Tree' graph layout" onclick ="computeLayout('Cone Tree')" > Cone Tree </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'Hierarchical Tree (R-T Extended)' graph layout" onclick ="computeLayout('Hierarchical Tree (R-T Extended)')" > Hierarchical Tree (R-T Extended) </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'Tree Radial' graph layout" onclick ="computeLayout('Tree Radial')" > Tree Radial </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Computing 'Sugiyama (OGDF)' graph layout" onclick ="computeLayout('Sugiyama (OGDF)')" > Sugiyama (OGDF) </a>
+      </div>
+      </div>
+
+      <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
+      <h3> Miscellaneous algorithms </h3>
+      <div data-role = "controlgroup" data-type = "vertical" >
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Auto-Sizing' algorithm" onclick ="computeAutoSizing()" > Auto-Sizing </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Edge bundling' algorithm" onclick ="computeEdgeBundling()" > Edge bundling </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="applyGraphScript()" > Magic script </a>
+      </div>
+      </div>
+
+      <a data-role = "button" data-icon = "star" data-mini = "true" onclick ="graph.downloadTlpFile();">Save graph to TLP format</a>
+      <a data-role = "button" data-icon = "refresh" data-mini = "true" onclick ="tulipView.centerScene();">Center</a>
+      <!-- <a data-role="button" data-icon="grid" data-mini = "true" onclick="tulipView.resize(tulipView.getWidth() + 0.1 * tulipView.getWidth(), tulipView.getHeight() + 0.1 * tulipView.getHeight());">Increase canvas size</a> -->
+      <!-- <a data-role="button" data-icon="grid" data-mini = "true" onclick="tulipView.resize(tulipView.getWidth() - 0.1 * tulipView.getWidth(), tulipView.getHeight() - 0.1 * tulipView.getHeight());">Decrease canvas size</a> -->
+      <a data-role="button" data-icon="grid" data-mini = "true" onclick="tulipView.fullScreen();">Fullscreen</a>
+      <a data-role = "button" data-icon = "close" data-mini = "true" data-rel="close">Close panel</a>
+
+      </div><!-- /panel left-->
+    </div> <!-- /page one -->
+
+
+
+</body>
+<script type='text/javascript'>
+
+ var tulipView = null;
+ var jsInteractor = false;
+
+ $('#navigation-button').button().bind('click', function(){
+    jsInteractor = false;
+    $(this).addClass('ui-btn-active');
+    $('#zoom-button').removeClass('ui-btn-active');
+    $('#selection-button').removeClass('ui-btn-active');
+    $('#selection-modifier-button').removeClass('ui-btn-active');
+    $('#lasso-selection-button').removeClass('ui-btn-active');
+    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
+    $('#js-interactor-button').removeClass('ui-btn-active');
+    tulipView.activateNavigationInteractor();
+    tulipView.clearCanvas2d();
+    tulipView.draw();
+ });
+
+ $('#zoom-button').button().bind('click', function(){
+    jsInteractor = false;
+    $(this).addClass('ui-btn-active');
+    $('#navigation-button').removeClass('ui-btn-active')
+    $('#selection-button').removeClass('ui-btn-active');
+    $('#selection-modifier-button').removeClass('ui-btn-active');
+    $('#lasso-selection-button').removeClass('ui-btn-active');
+    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
+    $('#js-interactor-button').removeClass('ui-btn-active');
+    tulipView.activateZoomInteractor();
+    tulipView.clearCanvas2d();
+    tulipView.draw();
+ });
+
+ $('#selection-button').button().bind('click', function(){
+    jsInteractor = false;
+    $(this).addClass('ui-btn-active');
+    $('#navigation-button').removeClass('ui-btn-active');
+    $('#zoom-button').removeClass('ui-btn-active');
+    $('#selection-modifier-button').removeClass('ui-btn-active');
+    $('#lasso-selection-button').removeClass('ui-btn-active');
+    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
+    $('#js-interactor-button').removeClass('ui-btn-active');
+    tulipView.activateSelectionInteractor();
+    tulipView.clearCanvas2d();
+    tulipView.draw();
+ });
+
+ $('#selection-modifier-button').button().bind('click', function(){
+    jsInteractor = false;
+    $(this).addClass('ui-btn-active');
+    $('#navigation-button').removeClass('ui-btn-active');
+    $('#selection-button').removeClass('ui-btn-active');
+    $('#zoom-button').removeClass('ui-btn-active');
+    $('#lasso-selection-button').removeClass('ui-btn-active');
+    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
+    $('#js-interactor-button').removeClass('ui-btn-active');
+    tulipView.activateSelectionModifierInteractor();
+    tulipView.clearCanvas2d();
+    tulipView.draw();
+ });
+
+ $('#lasso-selection-button').button().bind('click', function(){
+    jsInteractor = false;
+    $(this).addClass('ui-btn-active');
+    $('#navigation-button').removeClass('ui-btn-active');
+    $('#selection-button').removeClass('ui-btn-active');
+    $('#selection-modifier-button').removeClass('ui-btn-active');
+    $('#zoom-button').removeClass('ui-btn-active');
+    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
+    $('#js-interactor-button').removeClass('ui-btn-active');
+    tulipView.activateLassoSelectionInteractor();
+    tulipView.clearCanvas2d();
+    tulipView.draw();
+ });
+
+ $('#neighborhood-highlighter-button').button().bind('click', function(){
+    jsInteractor = false;
+    $(this).addClass('ui-btn-active');
+    $('#navigation-button').removeClass('ui-btn-active');
+    $('#selection-button').removeClass('ui-btn-active');
+    $('#selection-modifier-button').removeClass('ui-btn-active');
+    $('#zoom-button').removeClass('ui-btn-active');
+    $('#lasso-selection-button').removeClass('ui-btn-active');
+    $('#js-interactor-button').removeClass('ui-btn-active');
+    tulipView.activateNeighborhoodInteractor();
+    tulipView.clearCanvas2d();
+    tulipView.draw();
+ });
+
+ $('#js-interactor-button').button().bind('click', function(){
+    jsInteractor = true;
+    $(this).addClass('ui-btn-active');
+    $('#navigation-button').removeClass('ui-btn-active');
+    $('#selection-button').removeClass('ui-btn-active');
+    $('#selection-modifier-button').removeClass('ui-btn-active');
+    $('#zoom-button').removeClass('ui-btn-active');
+    $('#lasso-selection-button').removeClass('ui-btn-active');
+    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
+    tulipView.activateJsInteractor();
+ });
+
+ var start = null;
+ var graph = null;
+ var subgraph = null;
+
+ function setGlobalVars(g) {
+   graph = g;
+   viewLayout = graph.getLayoutProperty('viewLayout');
+   viewSelection = graph.getBooleanProperty("viewSelection");
+   viewRotation = graph.getDoubleProperty("viewRotation");
+   viewShape = graph.getIntegerProperty("viewShape");
+   viewFontAwesomeIcon = graph.getStringProperty("viewFontAwesomeIcon");
+   viewColor = graph.getColorProperty("viewColor");
+   viewBorderWidth = graph.getDoubleProperty("viewBorderWidth")
+   viewBorderColor = graph.getColorProperty("viewBorderColor")
+   viewSize = graph.getSizeProperty("viewSize")
+   viewMetric = graph.getDoubleProperty("viewMetric")
+   viewSrcAnchorShape = graph.getIntegerProperty("viewSrcAnchorShape")
+   viewTgtAnchorShape = graph.getIntegerProperty("viewTgtAnchorShape")
+   viewTexture = graph.getStringProperty("viewTexture")
+ }
+
+ function computeEdgeBundling() {
+   viewShape.setAllEdgeValue(tulip.EdgeShape.BezierCurve);
+   graph.applyAlgorithmInWorker('Edge bundling');
+ }
+
+ function computeLayout(layoutAlgoName) {
+   graph.applyLayoutAlgorithmInWorker(layoutAlgoName, viewLayout);
+ }
+
+ function computeAutoSizing() {
+   graph.applySizeAlgorithmInWorker('Auto Sizing', viewSize);
+ }
+
+ function graphScript(graph) {
+    var viewLayout = graph.getLayoutProperty('viewLayout');
+    var viewSize = graph.getSizeProperty('viewSize');
+    var viewShape = graph.getIntegerProperty('viewShape');
+    viewShape.setAllEdgeValue(tulip.EdgeShape.BezierCurve);
+    graph.applyLayoutAlgorithm('FM^3 (OGDF)', viewLayout);
+    graph.applySizeAlgorithm('Auto Sizing', viewSize);
+    graph.applyLayoutAlgorithm('Fast Overlap Removal', viewLayout);
+    graph.applyAlgorithm('Edge bundling', {}, true);
+ }
+
+ function applyGraphScript() {
+   graph.executeScriptInWorker(graphScript);
+ }
+
+ function graphScriptEndedCallback(succeed, graph) {
+   console.log(succeed);
+ }
+
+ function genRandomColor() {
+   var r = (Math.random() * 256) | 0;
+   var g = (Math.random() * 256) | 0;
+   var b = (Math.random() * 256) | 0;
+   return tulip.Color(r, g, b);
+ }
+
+ function graphLoaded(g) {
+
+   setGlobalVars(g);
+
+   var end = new Date().getTime();
+   var time = (end - start) / 1000;
+   console.log('Time for loading graph: ' + time + 's');
+   var sum = 0;
+   graph.getNodes().forEach(function(node) {
+     sum += graph.deg(node);
+   });
+
+   var avgEdgeLength = 0;
+   graph.getEdges().forEach(function(edge) {
+    var srcCoord = viewLayout.getNodeValue(graph.source(edge));
+    var tgtCoord = viewLayout.getNodeValue(graph.target(edge));
+    var bends = viewLayout.getEdgeValue(edge);
+    if (bends.length == 0) {
+      avgEdgeLength += srcCoord.dist(tgtCoord);
+    } else {
+      avgEdgeLength += srcCoord.dist(bends[0]);
+      for (var i = 1 ; i < bends.length ; ++i) {
+        avgEdgeLength += bends[i-1].dist(bends[i]);
+      }
+      avgEdgeLength += bends[bends.length-1].dist(tgtCoord);
+    }
+   });
+   console.log("average node degree = ", sum / graph.numberOfNodes());
+   console.log("average edge length = ", avgEdgeLength / graph.numberOfEdges());
+
+   //graph.executeScriptInWorker(graphScript, graphScriptEndedCallback);
+
+   //var setNodes = [];
+
+   //var randomNode = graph.getRandomNode();
+   //setNodes.push(randomNode);
+
+   //var reachableSubGraphsParams = {};
+   //reachableSubGraphsParams["edges direction"] = "all edges";
+   //reachableSubGraphsParams["distance"] = 3;
+
+   //viewSelection.setNodeValue(randomNode, true);
+   //graph.getInOutNodes(randomNode).forEach(function(n) {
+     //viewSelection.setNodeValue(n, true);
+     //setNodes.push(n);
+   //});
+
+
+   //graph.applyBooleanAlgorithm("Reachable Sub-Graph", viewSelection, reachableSubGraphsParams);
+   //graph.applyBooleanAlgorithm("Induced Sub-Graph", viewSelection);
+
+   //subgraph = graph.addSubGraph(viewSelection, "reachable");
+
+   //console.log(subgraph.numberOfNodes(), subgraph.numberOfEdges());
+
+   //tulipView.setGraph(subgraph);
+   //tulipView.centerScene();
+
+   //var sg = graph.inducedSubGraph(setNodes);
+
+   var iconNames = [];
+   for (var key in tulip.FontAwesomeIcon) {
+      if (tulip.FontAwesomeIcon.hasOwnProperty(key)) {
+          iconNames.push(tulip.FontAwesomeIcon[key]);
+      }
+   }
+
+   viewRotation.setAllNodeValue(0);
+
+   viewShape.setAllNodeValue(tulip.NodeShape.FontAwesomeIcon);
+   graph.getNodes().forEach(function(n) {
+       var idx = (Math.random() * iconNames.length) | 0;
+       viewFontAwesomeIcon.setNodeValue(n, iconNames[idx]);
+       viewColor.setNodeValue(n, genRandomColor());
+   });
+
+   //tulipView.setGraph(sg);
+   //tulipView.centerScene();
+
+ }
+
+ function handleFileSelect(evt) {
+    var files = evt.target.files;
+    if (files[0]) {
+        var reader = new FileReader();
+        // Closure to capture the file information.
+        reader.onload = (function(theFile) {
+            return function(e) {
+              start = new Date().getTime();
+              tulipView.loadGraphFromData(theFile.name, e.target.result, true, setGlobalVars);
+            };
+        })(files[0]);
+        reader.readAsArrayBuffer(files[0]);
+    }
+ }
+
+ document.getElementById('graph_file').addEventListener('change', handleFileSelect, false);
+
+ function tulipGraphEventHandler(event) {
+   console.log("Received event : ", event.eventType, " for graph ", event.graph.getName());
+ }
+
+ function tulipPropertyEventHandler(event) {
+   console.log("Received event : ", event.eventType, " for graph property ", event.property.getName());
+ }
+
+ function getMousePos(canvas, evt) {
+   var rect = canvas.getBoundingClientRect();
+   return {
+     x: (evt.clientX - rect.left) | 0,
+     y: (evt.clientY - rect.top) | 0,
+   };
+ }
+
+ function initTulipView() {
+   if (typeof tulip == 'undefined' || !tulip.isLoaded()) {
+     setTimeout(initTulipView, 1000);
+   } else {
+     $('#spinner-div').hide();
+     $('#tulip-view').css('vertical-align', 'baseline');
+     tulip.addListener("GraphEvent", tulipGraphEventHandler);
+     tulip.addListener("PropertyEvent", tulipPropertyEventHandler);
+     var container = document.getElementById("tulip-view");
+     tulipView = tulip.View(container, window.innerWidth-50, window.innerHeight-80);
+     start = new Date().getTime();
+     tulipView.loadGraphFromFile("data/little_grid.tlp.gz", true, graphLoaded);
+     tulipView.canvas.addEventListener('mousedown', function(evt) {
+       if (!jsInteractor) return;
+       var mousePos = getMousePos(tulipView.canvas, evt);
+       var context = tulipView.getCanvas2dContext();
+       context.beginPath();
+       context.arc(mousePos.x, mousePos.y, 10, 0, 2 * Math.PI, false);
+       context.fillStyle = 'green';
+       context.fill();
+       context.lineWidth = 5;
+       context.strokeStyle = '#003300';
+       context.stroke();
+       tulipView.draw();
+
+     }, false);
+   }
+ }
+
+function resize() {
+  if (tulipView && tulipView.fullScreenActivated) return;
+  if (tulipView) {
+    tulipView.resize(window.innerWidth-50, window.innerHeight-80);
+  }
+}
+
+$( document ).ready(function() {
+  $('#tulip-view').width(window.innerWidth-50);
+  $('#tulip-view').height(window.innerHeight-80);
+  window.addEventListener('resize', resize, false);
+  initTulipView();
+});
+
+</script>
+
+</html>

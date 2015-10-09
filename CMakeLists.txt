@@ -232,7 +232,7 @@ ADD_EXECUTABLE(tulipcore.js ${TULIPJS_CORE_SRCS})
 
 TARGET_LINK_LIBRARIES(tulipcore.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
 
-SET_TARGET_PROPERTIES(tulipcore.js PROPERTIES LINK_FLAGS "-O3 --llvm-lto 1 --bind -s USE_ZLIB=1 -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --memory-init-file 0")
+SET_TARGET_PROPERTIES(tulipcore.js PROPERTIES LINK_FLAGS "--bind -s USE_ZLIB=1 -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --memory-init-file 0")
 
 EM_LINK_PRE_JS(tulipcore.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_pre.js)
 EM_LINK_POST_JS(tulipcore.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)
@@ -246,7 +246,7 @@ ADD_EXECUTABLE(tulip.js ${TULIPJS_SRCS})
 
 TARGET_LINK_LIBRARIES(tulip.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
 
-SET_TARGET_PROPERTIES(tulip.js PROPERTIES LINK_FLAGS "-O3 --llvm-lto 1 --bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s STB_IMAGE=1 -s LZ4=1 -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
+SET_TARGET_PROPERTIES(tulip.js PROPERTIES LINK_FLAGS "--bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s STB_IMAGE=1 -s LZ4=1 -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
 
 EM_LINK_PRE_JS(tulip.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_pre.js)
 EM_LINK_POST_JS(tulip.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)

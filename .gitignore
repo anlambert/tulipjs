@@ -10,6 +10,7 @@ build_emscripten/
 *.creator
 *.includes
 *.files
+*.user
 
 # Compiled Object files
 *.slo

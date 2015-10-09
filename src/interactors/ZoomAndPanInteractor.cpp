@@ -128,6 +128,13 @@ bool ZoomAndPanInteractor::keyboardCallback(const std::string &keyStr, const int
       glDraw();
       return true;
     }
-  }
+  } else if (keyStr == "F7") {
+    if (glGraph) {
+      bool edges = !glGraph->getRenderingParameters().displayEdges();
+      glGraph->getRenderingParameters().setDisplayEdges(edges);
+      glDraw();
+      return true;
+    }
+}
   return false;
 }

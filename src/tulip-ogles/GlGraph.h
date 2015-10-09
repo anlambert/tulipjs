@@ -137,11 +137,14 @@ private :
   
   std::map<tlp::edge, std::vector<tlp::Vec3f> > _edgePoints;
   std::map<tlp::edge, std::pair<tlp::Vec3f, tlp::Vec3f> > _edgeAnchors;
+  std::map<tlp::edge, std::vector<unsigned int> > _edgeLineVerticesIndices;
 
   GlBuffer *_edgeRenderingDataBuffer;
   GlBuffer *_edgeIndicesBuffer;
   GlBuffer *_curveEdgeRenderingDataBuffer;
   GlBuffer *_curveEdgeIndicesBuffer;
+  GlBuffer *_edgeLineRenderingDataBuffer;
+  GlBuffer *_edgeLineRenderingIndicesBuffer;
 
   std::map<int, GlShaderProgram *> _edgesShaders;
 

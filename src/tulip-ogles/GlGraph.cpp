@@ -395,6 +395,8 @@ GlGraph::GlGraph(Graph *graph, GlLODCalculator *lodCalculator) :
   _edgeIndicesBuffer = new GlBuffer(GlBuffer::IndexBuffer);
   _curveEdgeRenderingDataBuffer = new GlBuffer(GlBuffer::VertexBuffer);
   _curveEdgeIndicesBuffer = new GlBuffer(GlBuffer::IndexBuffer);
+  _edgeLineRenderingDataBuffer = new GlBuffer(GlBuffer::VertexBuffer);
+  _edgeLineRenderingIndicesBuffer = new GlBuffer(GlBuffer::IndexBuffer);
 
   const map<int, Glyph*> &glyphs = GlyphsManager::getGlyphs();
   map<int, Glyph*>::const_iterator it = glyphs.begin();
@@ -432,6 +434,8 @@ GlGraph::~GlGraph() {
   delete _edgeIndicesBuffer;
   delete _curveEdgeRenderingDataBuffer;
   delete _curveEdgeIndicesBuffer;
+  delete _edgeLineRenderingDataBuffer;
+  delete _edgeLineRenderingIndicesBuffer;
   delete _lodCalculator;
 }
 
@@ -456,6 +460,7 @@ void GlGraph::setGraph(tlp::Graph *graph) {
   _edgesToUpdate.clear();
   _nodesToUpdate.clear();
   _edgePoints.clear();
+  _edgeLineVerticesIndices.clear();
 
   prepareEdgesData();
 
@@ -581,6 +586,41 @@ void GlGraph::endEdgesData() {
 
   _curveEdgeRenderingDataBuffer->allocate(edgeVerticesData);
   _curveEdgeIndicesBuffer->allocate(edgeIndices);
+
+  vector<float> edgesLinesRenderingData;
+  edge e;
+  forEach(e, _graph->getEdges()) {
+
+    const Coord &srcCoord = _viewLayout->getNodeValue(_graph->source(e));
+    const Coord &tgtCoord = _viewLayout->getNodeValue(_graph->target(e));
+    const Color &edgeColor = _viewColor->getEdgeValue(e);
+    const Color &srcColor = _viewColor->getNodeValue(_graph->source(e));
+    const Color &tgtColor = _viewColor->getNodeValue(_graph->target(e));
+
+    vector<Coord> edgePoints;
+    edgePoints.push_back(srcCoord);
+    edgePoints.insert(edgePoints.end(), _edgePoints[e].begin(), _edgePoints[e].end());
+    edgePoints.push_back(tgtCoord);
+
+    vector<Color> edgeColors;
+    getColors(edgePoints, srcColor, tgtColor, edgeColors);
+
+    std::vector<unsigned int> lineIndices;
+
+    for (size_t i = 0 ; i < edgePoints.size() ; ++i) {
+      unsigned int currentNbVertices = edgesLinesRenderingData.size() / 11;
+      if (i != edgePoints.size() - 1) {
+        lineIndices.push_back(currentNbVertices);
+        lineIndices.push_back(currentNbVertices+1);
+      }
+      addTlpVecToVecFloat(edgePoints[i], edgesLinesRenderingData);
+      addColorToVecFloat(edgeColor, edgesLinesRenderingData);
+      addColorToVecFloat(edgeColors[i], edgesLinesRenderingData);
+    }
+    _edgeLineVerticesIndices[e] = lineIndices;
+  }
+  _edgeLineRenderingDataBuffer->allocate(edgesLinesRenderingData);
+
 
   _updateQuadTree = true;
 
@@ -805,7 +845,7 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
 
 }
 
-void GlGraph::renderMetaNodes(const std::vector<tlp::node> &metaNodes, const Camera &camera, const Light &light) {
+void GlGraph::renderMetaNodes(const std::vector<tlp::node> &metaNodes, const Camera &camera, const Light &) {
   GlScene subScene;
   subScene.setBackupBackBuffer(false);
   GlGraph *glMetaGraph = new GlGraph(NULL, new GlCPULODCalculator());
@@ -1178,8 +1218,7 @@ void GlGraph::renderEdges(const Camera &camera, const std::vector<edge> &edges, 
 
   glStencilFunc(GL_LEQUAL, _renderingParameters.edgesStencil(), 0xFF);
 
-
-
+  std::vector<unsigned int> edgesLinesRenderingIndices;
   set<GlShaderProgram*> globalUniformsSet;
 
   for (size_t i = 0 ; i < edges.size() ; ++i) {
@@ -1195,8 +1234,6 @@ void GlGraph::renderEdges(const Camera &camera, const std::vector<edge> &edges, 
       tgtColor = _viewColor->getNodeValue(tgt);
     }
     Color borderColor = _viewBorderColor->getEdgeValue(e);
-    string edgeTexture = _viewTexture->getEdgeValue(e);
-    Size edgeSize = ::getEdgeSize(_graph, e, _viewSize, &_renderingParameters);
 
     if (_graphElementsPickingMode) {
       srcColor = tgtColor = borderColor = uintToColor(_graph->getRoot()->numberOfNodes()+e.id+1);
@@ -1227,114 +1264,146 @@ void GlGraph::renderEdges(const Camera &camera, const std::vector<edge> &edges, 
       edgeShape = tlp::EdgeShape::Polyline;
     }
 
-    vector<Vec4f> edgePoints;
-    float length = 0;
-    if (lineMode) {
-      edgePoints.push_back(Vec4f(srcCoord, length));
-      for (size_t j = 1 ; j < _edgePoints[e].size() - 1; ++j) {
-        if (j > 0) {
-          if (!catmullMode) {
-            length += _edgePoints[e][j].dist(edgePoints.back());
-          } else {
-            length += pow(_edgePoints[e][j].dist(edgePoints.back()), alpha);
+    if (!lineMode || parametricCurveMode) {
+
+      string edgeTexture = _viewTexture->getEdgeValue(e);
+      Size edgeSize = ::getEdgeSize(_graph, e, _viewSize, &_renderingParameters);
+
+      vector<Vec4f> edgePoints;
+      float length = 0;
+      if (lineMode) {
+        edgePoints.push_back(Vec4f(srcCoord, length));
+        for (size_t j = 1 ; j < _edgePoints[e].size() - 1; ++j) {
+          if (j > 0) {
+            if (!catmullMode) {
+              length += _edgePoints[e][j].dist(edgePoints.back());
+            } else {
+              length += pow(_edgePoints[e][j].dist(edgePoints.back()), alpha);
+            }
           }
+          edgePoints.push_back(Vec4f(_edgePoints[e][j], length));
         }
-        edgePoints.push_back(Vec4f(_edgePoints[e][j], length));
-      }
-      if (!catmullMode) {
-        length += tgtCoord.dist(edgePoints.back());
+        if (!catmullMode) {
+          length += tgtCoord.dist(edgePoints.back());
+        } else {
+          length += pow(tgtCoord.dist(edgePoints.back()), alpha);
+        }
+        edgePoints.push_back(Vec4f(tgtCoord, length));
       } else {
-        length += pow(tgtCoord.dist(edgePoints.back()), alpha);
-      }
-      edgePoints.push_back(Vec4f(tgtCoord, length));
-    } else {
-      for (size_t j = 0 ; j < _edgePoints[e].size() ; ++j) {
-        if (j > 0) {
-          if (!catmullMode) {
-            length += _edgePoints[e][j].dist(_edgePoints[e][j-1]);
-          } else {
-            length += pow(_edgePoints[e][j].dist(_edgePoints[e][j-1]), alpha);
+        for (size_t j = 0 ; j < _edgePoints[e].size() ; ++j) {
+          if (j > 0) {
+            if (!catmullMode) {
+              length += _edgePoints[e][j].dist(_edgePoints[e][j-1]);
+            } else {
+              length += pow(_edgePoints[e][j].dist(_edgePoints[e][j-1]), alpha);
+            }
           }
+          edgePoints.push_back(Vec4f(_edgePoints[e][j], length));
         }
-        edgePoints.push_back(Vec4f(_edgePoints[e][j], length));
-      }
-    }
-
-    GlShaderProgram *edgeShader = getEdgeShader(edgeShape);
-    edgeShader->activate();
-    if (globalUniformsSet.find(edgeShader) == globalUniformsSet.end()) {
-      edgeShader->setUniformBool("u_lineMode", lineMode);
-      edgeShader->setUniformBool("u_billboard", billboard);
-      edgeShader->setUniformBool("u_billboardTex", billboard && !_graphElementsPickingMode);
-      edgeShader->setUniformMat4Float("u_projectionMatrix", camera.projectionMatrix());
-      edgeShader->setUniformMat4Float("u_modelviewMatrix", camera.modelviewMatrix());
-      edgeShader->setUniformVec3Float("u_lookDir", camera.getCenter() - camera.getEyes());
-      edgeShader->setUniformTextureSampler("u_texture0", 0);
-      edgeShader->setUniformTextureSampler("u_texture1", 1);
-      edgeShader->setUniformFloat("u_curveInterpolationStep", 1.0f / (nbCurveInterpolationPoints - 1));
-      globalUniformsSet.insert(edgeShader);
-    }
-
-    edgeShader->setUniformVec4FloatArray("u_curvePoints", _edgePoints[e].size(), &edgePoints[0][0]);
-    edgeShader->setUniformInt("u_nbCurvePoints", _edgePoints[e].size());
-    edgeShader->setUniformFloat("u_startSize", edgeSize[0]);
-    edgeShader->setUniformFloat("u_endSize", edgeSize[1]);
-    edgeShader->setUniformColor("u_startColor", srcColor);
-    edgeShader->setUniformColor("u_endColor", tgtColor);
-    edgeShader->setUniformVec3Float("u_startN", srcCoord);
-    edgeShader->setUniformVec3Float("u_endN", tgtCoord);
-    edgeShader->setUniformBool("u_textureActivated", !lineMode && !edgeTexture.empty() && !_graphElementsPickingMode);
-    edgeShader->setUniformBool("u_bezierMode", bezierMode);
-    edgeShader->setUniformBool("u_bsplineMode", bsplineMode);
-    edgeShader->setUniformBool("u_catmullMode", catmullMode);
-
-    unsigned int nbKnots = edgePoints.size() + bSplineDegree + 1;
-    float stepKnots = 1.0f / ((static_cast<float>(nbKnots) - 2.0f * (static_cast<float>(bSplineDegree) + 1.0f)) + 2.0f - 1.0f);
-
-    edgeShader->setUniformFloat("u_stepKnots", stepKnots);
-
-    TextureManager::instance()->addTextureFromFile(edgeTexture, true);
-    TextureManager::instance()->bindTexture(edgeTexture, 1);
-
-    if (!parametricCurveMode) {
-      _edgeIndicesBuffer->bind();
-      _edgeRenderingDataBuffer->bind();
-    } else {
-      _curveEdgeIndicesBuffer->bind();
-      _curveEdgeRenderingDataBuffer->bind();
-    }
-    edgeShader->setVertexAttribPointer("a_position", 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), BUFFER_OFFSET(0));
-
-    if (lineMode) {
-      glLineWidth(2.0);
-      glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*2*sizeof(unsigned short)));
-    } else {
-      glDrawElements(GL_TRIANGLE_STRIP, nbCurvePoints*2, GL_UNSIGNED_SHORT, BUFFER_OFFSET(0));
-    }
-
-    if (!lineMode && _viewBorderWidth->getEdgeValue(e) > 0) {
-      TextureManager::instance()->unbindTexture(edgeTexture);
-
-      if (!_renderingParameters.interpolateEdgesColors()) {
-        srcColor = borderColor;
-        tgtColor = borderColor;
       }
 
-      edgeShader->setUniformBool("u_textureActivated", false);
+      GlShaderProgram *edgeShader = getEdgeShader(edgeShape);
+      edgeShader->activate();
+      if (globalUniformsSet.find(edgeShader) == globalUniformsSet.end()) {
+        edgeShader->setUniformBool("u_lineMode", lineMode);
+        edgeShader->setUniformBool("u_billboard", billboard);
+        edgeShader->setUniformBool("u_billboardTex", billboard && !_graphElementsPickingMode);
+        edgeShader->setUniformMat4Float("u_projectionMatrix", camera.projectionMatrix());
+        edgeShader->setUniformMat4Float("u_modelviewMatrix", camera.modelviewMatrix());
+        edgeShader->setUniformVec3Float("u_lookDir", camera.getCenter() - camera.getEyes());
+        edgeShader->setUniformTextureSampler("u_texture0", 0);
+        edgeShader->setUniformTextureSampler("u_texture1", 1);
+        edgeShader->setUniformFloat("u_curveInterpolationStep", 1.0f / (nbCurveInterpolationPoints - 1));
+        globalUniformsSet.insert(edgeShader);
+      }
+
+      edgeShader->setUniformVec4FloatArray("u_curvePoints", _edgePoints[e].size(), &edgePoints[0][0]);
+      edgeShader->setUniformInt("u_nbCurvePoints", _edgePoints[e].size());
+      edgeShader->setUniformFloat("u_startSize", edgeSize[0]);
+      edgeShader->setUniformFloat("u_endSize", edgeSize[1]);
       edgeShader->setUniformColor("u_startColor", srcColor);
       edgeShader->setUniformColor("u_endColor", tgtColor);
+      edgeShader->setUniformVec3Float("u_startN", srcCoord);
+      edgeShader->setUniformVec3Float("u_endN", tgtCoord);
+      edgeShader->setUniformBool("u_textureActivated", !lineMode && !edgeTexture.empty() && !_graphElementsPickingMode);
+      edgeShader->setUniformBool("u_bezierMode", bezierMode);
+      edgeShader->setUniformBool("u_bsplineMode", bsplineMode);
+      edgeShader->setUniformBool("u_catmullMode", catmullMode);
 
-      glLineWidth(_viewBorderWidth->getEdgeValue(e));
-      glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*2*sizeof(unsigned short)));
-      glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*3*sizeof(unsigned short)));
+      unsigned int nbKnots = edgePoints.size() + bSplineDegree + 1;
+      float stepKnots = 1.0f / ((static_cast<float>(nbKnots) - 2.0f * (static_cast<float>(bSplineDegree) + 1.0f)) + 2.0f - 1.0f);
 
+      edgeShader->setUniformFloat("u_stepKnots", stepKnots);
+
+      TextureManager::instance()->addTextureFromFile(edgeTexture, true);
+      TextureManager::instance()->bindTexture(edgeTexture, 1);
+
+      if (!parametricCurveMode) {
+        _edgeIndicesBuffer->bind();
+        _edgeRenderingDataBuffer->bind();
+      } else {
+        _curveEdgeIndicesBuffer->bind();
+        _curveEdgeRenderingDataBuffer->bind();
+      }
+      edgeShader->setVertexAttribPointer("a_position", 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), BUFFER_OFFSET(0));
+
+      if (lineMode) {
+        glLineWidth(2.0);
+        glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*2*sizeof(unsigned short)));
+      } else {
+        glDrawElements(GL_TRIANGLE_STRIP, nbCurvePoints*2, GL_UNSIGNED_SHORT, BUFFER_OFFSET(0));
+      }
+
+      if (!lineMode && _viewBorderWidth->getEdgeValue(e) > 0) {
+        TextureManager::instance()->unbindTexture(edgeTexture);
+
+        if (!_renderingParameters.interpolateEdgesColors()) {
+          srcColor = borderColor;
+          tgtColor = borderColor;
+        }
+
+        edgeShader->setUniformBool("u_textureActivated", false);
+        edgeShader->setUniformColor("u_startColor", srcColor);
+        edgeShader->setUniformColor("u_endColor", tgtColor);
+
+        glLineWidth(_viewBorderWidth->getEdgeValue(e));
+        glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*2*sizeof(unsigned short)));
+        glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*3*sizeof(unsigned short)));
+
+      }
+    } else {
+      edgesLinesRenderingIndices.insert(edgesLinesRenderingIndices.end(), _edgeLineVerticesIndices[e].begin(), _edgeLineVerticesIndices[e].end());
     }
+  }
+
+  if (!edgesLinesRenderingIndices.empty()) {
+      _edgeLineRenderingDataBuffer->bind();
+      _edgeLineRenderingIndicesBuffer->bind();
+      _edgeLineRenderingIndicesBuffer->allocate(edgesLinesRenderingIndices);
+      _flatShader->activate();
+      _flatShader->setUniformMat4Float("u_projectionMatrix", camera.projectionMatrix());
+      _flatShader->setUniformMat4Float("u_modelviewMatrix", camera.modelviewMatrix());
+      _flatShader->setUniformBool("u_textureActivated", false);
+      _flatShader->setUniformBool("u_globalColor", false);
+      _flatShader->setUniformBool("u_pointsRendering", false);
+      _flatShader->setVertexAttribPointer("a_position", 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), BUFFER_OFFSET(0));
+      if (_renderingParameters.interpolateEdgesColors()) {
+        _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 11 * sizeof(float), BUFFER_OFFSET(7*sizeof(float)));
+      } else {
+        _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 11 * sizeof(float), BUFFER_OFFSET(3*sizeof(float)));
+      }
+      glLineWidth(2.0);
+      glDrawElements(GL_LINES, edgesLinesRenderingIndices.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+      _flatShader->desactivate();
+
   }
 
   GlBuffer::release(GlBuffer::VertexBuffer);
   GlBuffer::release(GlBuffer::IndexBuffer);
 
-  TextureManager::instance()->unbindTexture("resources/cylinderTexture.png");
+  if (!lineMode && billboard && !_graphElementsPickingMode) {
+    TextureManager::instance()->unbindTexture("resources/cylinderTexture.png");
+  }
 
 }
 

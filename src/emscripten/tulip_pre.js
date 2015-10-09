@@ -17,7 +17,7 @@ Module.noExitRuntime = true;
 if (nodejs) {
     Module.preRun = function() {
       FS.mkdir('root');
-      FS.mount(NODEFS, { root: '/' }, 'root');
-      FS.chdir('root/' + process.cwd());
+      FS.mount(NODEFS, { root: process.cwd() }, 'root');
+      FS.chdir('root');
     }
 }

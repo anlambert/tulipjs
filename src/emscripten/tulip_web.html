@@ -92,7 +92,10 @@
         <a id="lasso-selection-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-lasso-selection" data-iconpos="notext">Select nodes in a freehand drawn region</a>
         <a id="neighborhood-highlighter-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-neighborhood" data-iconpos="notext">Highlight node neighborhood</a>
         <a id="selection-modifier-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-selection-modifier" data-iconpos="notext">Move rectangle selection</a>
+
+        <!--
         <a id="js-interactor-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="" data-iconpos="notext">Javascript interactor</a>
+        -->
 
         </div>
 
@@ -184,7 +187,7 @@
     $('#selection-modifier-button').removeClass('ui-btn-active');
     $('#lasso-selection-button').removeClass('ui-btn-active');
     $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    $('#js-interactor-button').removeClass('ui-btn-active');
+    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateNavigationInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
@@ -198,7 +201,7 @@
     $('#selection-modifier-button').removeClass('ui-btn-active');
     $('#lasso-selection-button').removeClass('ui-btn-active');
     $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    $('#js-interactor-button').removeClass('ui-btn-active');
+    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateZoomInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
@@ -212,7 +215,7 @@
     $('#selection-modifier-button').removeClass('ui-btn-active');
     $('#lasso-selection-button').removeClass('ui-btn-active');
     $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    $('#js-interactor-button').removeClass('ui-btn-active');
+    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateSelectionInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
@@ -226,7 +229,7 @@
     $('#zoom-button').removeClass('ui-btn-active');
     $('#lasso-selection-button').removeClass('ui-btn-active');
     $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    $('#js-interactor-button').removeClass('ui-btn-active');
+    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateSelectionModifierInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
@@ -240,7 +243,7 @@
     $('#selection-modifier-button').removeClass('ui-btn-active');
     $('#zoom-button').removeClass('ui-btn-active');
     $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    $('#js-interactor-button').removeClass('ui-btn-active');
+    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateLassoSelectionInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
@@ -254,23 +257,23 @@
     $('#selection-modifier-button').removeClass('ui-btn-active');
     $('#zoom-button').removeClass('ui-btn-active');
     $('#lasso-selection-button').removeClass('ui-btn-active');
-    $('#js-interactor-button').removeClass('ui-btn-active');
+    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateNeighborhoodInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
  });
 
- $('#js-interactor-button').button().bind('click', function(){
-    jsInteractor = true;
-    $(this).addClass('ui-btn-active');
-    $('#navigation-button').removeClass('ui-btn-active');
-    $('#selection-button').removeClass('ui-btn-active');
-    $('#selection-modifier-button').removeClass('ui-btn-active');
-    $('#zoom-button').removeClass('ui-btn-active');
-    $('#lasso-selection-button').removeClass('ui-btn-active');
-    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    tulipView.activateJsInteractor();
- });
+ //$('#js-interactor-button').button().bind('click', function(){
+ //   jsInteractor = true;
+ //   $(this).addClass('ui-btn-active');
+ //   $('#navigation-button').removeClass('ui-btn-active');
+ //   $('#selection-button').removeClass('ui-btn-active');
+ //   $('#selection-modifier-button').removeClass('ui-btn-active');
+ //   $('#zoom-button').removeClass('ui-btn-active');
+ //   $('#lasso-selection-button').removeClass('ui-btn-active');
+ //   $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
+ //   tulipView.activateJsInteractor();
+ //});
 
  var start = null;
  var graph = null;
@@ -457,21 +460,20 @@
      var container = document.getElementById("tulip-view");
      tulipView = tulip.View(container, window.innerWidth-50, window.innerHeight-80);
      start = new Date().getTime();
-     tulipView.loadGraphFromFile("data/little_grid.tlp.gz", true, graphLoaded);
-     tulipView.canvas.addEventListener('mousedown', function(evt) {
-       if (!jsInteractor) return;
-       var mousePos = getMousePos(tulipView.canvas, evt);
-       var context = tulipView.getCanvas2dContext();
-       context.beginPath();
-       context.arc(mousePos.x, mousePos.y, 10, 0, 2 * Math.PI, false);
-       context.fillStyle = 'green';
-       context.fill();
-       context.lineWidth = 5;
-       context.strokeStyle = '#003300';
-       context.stroke();
-       tulipView.draw();
-
-     }, false);
+     tulipView.loadGraphFromFile("data/programming_language_network.tlp.gz", true, graphLoaded);
+     //tulipView.canvas.addEventListener('mousedown', function(evt) {
+     //  if (!jsInteractor) return;
+     //  var mousePos = getMousePos(tulipView.canvas, evt);
+     //  var context = tulipView.getCanvas2dContext();
+     //  context.beginPath();
+     //  context.arc(mousePos.x, mousePos.y, 10, 0, 2 * Math.PI, false);
+     //  context.fillStyle = 'green';
+     //  context.fill();
+     //  context.lineWidth = 5;
+     //  context.strokeStyle = '#003300';
+     //  context.stroke();
+     //  tulipView.draw();
+     //}, false);
    }
  }
 

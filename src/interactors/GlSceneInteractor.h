@@ -3,8 +3,7 @@
 
 #include <string>
 
-extern void glDraw();
-extern void timerFunc(unsigned int msecs, void (*func)(int value), int value);
+extern void timerFunc(unsigned int msecs, void (*func)(void *value), void *value);
 
 class GlScene;
 

@@ -102,7 +102,7 @@ bool SelectionInteractor::mouseCallback(const MouseButton &button, const MouseBu
       tlp::Observable::unholdObservers();
       _firstX = _curX = -1;
       _firstY = _curY = -1;
-      glDraw();
+      _glScene->requestDraw();
       return true;
     }
   } else if (button == WHEEL) {
@@ -118,7 +118,7 @@ bool SelectionInteractor::mouseMoveCallback(int x, int y, const int & /* modifie
   if (_mouseButton == LEFT_BUTTON && _dragStarted) {
     _curX = x;
     _curY = y;
-    glDraw();
+    _glScene->requestDraw();
     return true;
   }
   return false;

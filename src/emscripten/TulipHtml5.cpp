@@ -80,7 +80,7 @@ extern "C" {
 void refreshWebGLCanvas(void (*drawFunc)());
 void resizeWebGLCanvas(const char *canvasId, int width, int height, bool sizeRelativeToContainer);
 void requestFullScreenCanvas(const char *canvasId);
-void safeSetTimeout(unsigned int msecs, void (*func)(int value), int value);
+void safeSetTimeout(unsigned int msecs, void (*func)(void *value), void *value);
 void setCurrentCanvas(const char *canvasId);
 bool domElementExists(const char *elementId);
 bool canXhrOnUrl(const char *url);
@@ -142,8 +142,6 @@ void EMSCRIPTEN_KEEPALIVE updateGlScene(const char *canvasId) {
   setCurrentCanvas(curCanvasBak.c_str());
 }
 
-}
-
 static void drawCallback(void) {
   for (size_t i = 0 ; i < canvasIds.size() ; ++i) {
     if (domElementExists(canvasIds[i].c_str())) {
@@ -153,6 +151,18 @@ static void drawCallback(void) {
     }
   }
 }
+
+void EMSCRIPTEN_KEEPALIVE draw(bool refreshDisplay = true) {
+  if (refreshDisplay) {
+    refreshWebGLCanvas(drawCallback);
+  } else {
+    drawCallback();
+  }
+}
+
+}
+
+
 
 static int getModifiers(const EmscriptenMouseEvent &mouseEvent) {
   int modifiers = 0;
@@ -233,11 +243,7 @@ static EM_BOOL keyCallback(int /* eventType */, const EmscriptenKeyboardEvent *k
 static std::ostringstream oss;
 static std::string staticString;
 
-void glDraw() {
-  refreshWebGLCanvas(drawCallback);
-}
-
-void timerFunc(unsigned int msecs, void (*func)(int value), int value) {
+void timerFunc(unsigned int msecs, void (*func)(void *value), void *value) {
   safeSetTimeout(msecs, func, value);
 }
 
@@ -252,7 +258,7 @@ static void onTextureLoaded(const char *texture) {
     for (auto it = glScene.begin() ; it != glScene.end() ; ++it) {
       it->second->forceRedraw();
     }
-    glDraw();
+    draw();
   }
 }
 
@@ -266,7 +272,7 @@ static void onTextureLoadError(const char *texture) {
     for (auto it = glScene.begin() ; it != glScene.end() ; ++it) {
       it->second->forceRedraw();
     }
-    glDraw();
+    draw();
   }
 }
 
@@ -277,7 +283,7 @@ static void registerTextureFromData(const char *textureName, const unsigned char
     for (auto it = glScene.begin() ; it != glScene.end() ; ++it) {
       it->second->forceRedraw();
     }
-    glDraw();
+    draw();
   }
 }
 
@@ -322,6 +328,8 @@ public:
         glSceneEvent->getGlLayer()->addListener(this);
       } else if (glSceneEvent->getType() == GlSceneEvent::LAYER_REMOVED_FROM_SCENE) {
         glSceneEvent->getGlLayer()->removeListener(this);
+      } else if(glSceneEvent->getType() == GlSceneEvent::DRAW_REQUEST) {
+        draw();
       }
     }
 
@@ -361,7 +369,7 @@ public:
       drawNeeded = drawNeeded || (glEntity != NULL);
     }
     if (drawNeeded) {
-      glDraw();
+      draw();
     }
   }
 
@@ -476,7 +484,7 @@ void EMSCRIPTEN_KEEPALIVE initCanvas(const char *canvasId, int width, int height
 
     activateNavigationInteractor(currentCanvasId.c_str());
 
-    glDraw();
+    draw();
 
   }
 
@@ -528,7 +536,7 @@ void EMSCRIPTEN_KEEPALIVE resizeCanvas(const char *canvasId, int width, int heig
   glProgressBar[canvasId]->setCenter(tlp::Coord(viewport[2]/2.f, viewport[3]/2.f));
   glProgressBar[canvasId]->setWidth(0.8f * viewport[2]);
   glProgressBar[canvasId]->setHeight(0.1f * viewport[3]);
-  //glDraw();
+  //draw();
 }
 
 void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
@@ -547,13 +555,13 @@ void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
   glScene[canvasId]->centerScene();
   glProgressBar[currentCanvasId]->setVisible(false);
   if (nbTextureToLoad == 0) {
-    glDraw();
+    draw();
   }
 }
 
 void EMSCRIPTEN_KEEPALIVE centerScene(const char *canvasId) {
   glScene[canvasId]->centerScene();
-  glDraw();
+  draw();
 }
 
 static std::vector<SelectedEntity> selectedNodes;
@@ -631,10 +639,6 @@ void EMSCRIPTEN_KEEPALIVE setProgressBarPercent(const char *canvasId, int percen
 
 void EMSCRIPTEN_KEEPALIVE setProgressBarComment(const char *canvasId, const char *comment) {
   glProgressBar[canvasId]->setComment(comment);
-}
-
-void EMSCRIPTEN_KEEPALIVE draw() {
-  glDraw();
 }
 
 void EMSCRIPTEN_KEEPALIVE setGraphRenderingDataReady(const char *canvasId, bool ready) {

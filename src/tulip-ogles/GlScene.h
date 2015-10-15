@@ -68,6 +68,8 @@ public:
 
   ~GlScene();
 
+  void requestDraw();
+
   void draw();
 
   void centerScene();
@@ -169,11 +171,12 @@ private:
 class GlSceneEvent : public tlp::Event {
 public:
 
-  enum GlSceneEventType {LAYER_ADDED_IN_SCENE = 0,
+  enum GlSceneEventType {DRAW_REQUEST=0,
+                         LAYER_ADDED_IN_SCENE,
                          LAYER_REMOVED_FROM_SCENE
                          };
 
-  GlSceneEvent(GlSceneEventType type, GlScene *scene, GlLayer *layer,
+  GlSceneEvent(GlSceneEventType type, GlScene *scene, GlLayer *layer = NULL,
                Event::EventType evtType = Event::TLP_MODIFICATION)
 
     : Event(*scene, evtType), _type(type), _scene(scene), _layer(layer) {}

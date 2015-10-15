@@ -28,11 +28,11 @@ bool ZoomAndPanInteractor::mouseCallback(const MouseButton &button, const MouseB
     }
   } else if (button == WHEEL && state == UP) {
     _glScene->zoomXY(x, y, 1);
-    glDraw();
+    _glScene->requestDraw();
     return true;
   } else if (button == WHEEL && state == DOWN) {
     _glScene->zoomXY(x, y, -1);
-    glDraw();
+    _glScene->requestDraw();
     return true;
   }
   return false;
@@ -47,13 +47,13 @@ bool ZoomAndPanInteractor::mouseMoveCallback(int x, int y, const int &modifiers)
     _glScene->translate(_lastX - x, y - _lastY);
     _lastX = x;
     _lastY = y;
-    glDraw();
+    _glScene->requestDraw();
     return true;
   } else if (_mouseButton == LEFT_BUTTON && modifiers == ACTIVE_CTRL) {
     _glScene->rotate(0, 0, x - _lastX);
     _lastX = x;
     _lastY = y;
-    glDraw();
+    _glScene->requestDraw();
     return true;
   } else if (_mouseButton == LEFT_BUTTON && modifiers == ACTIVE_SHIFT) {
 
@@ -71,7 +71,7 @@ bool ZoomAndPanInteractor::mouseMoveCallback(int x, int y, const int &modifiers)
 
     _lastX = x;
     _lastY = y;
-    glDraw();
+    _glScene->requestDraw();
     return true;
   }
   return false;
@@ -82,27 +82,27 @@ bool ZoomAndPanInteractor::keyboardCallback(const std::string &keyStr, const int
   GlGraph *glGraph = dynamic_cast<GlGraph*>(_glScene->getMainLayer()->findGlEntity("graph"));
   if (keyStr == "c") {
     _glScene->centerScene();
-    glDraw();
+    _glScene->requestDraw();
     return true;
   } else if (keyStr == "F1") {
     if (glGraph) {
       bool edgeColorsInterpolation = glGraph->getRenderingParameters().interpolateEdgesColors();
       glGraph->getRenderingParameters().setInterpolateEdgesColors(!edgeColorsInterpolation);
-      glDraw();
+      _glScene->requestDraw();
       return true;
     }
   } else if (keyStr == "F2") {
     if (glGraph) {
       bool edgeSizesInterpolation = glGraph->getRenderingParameters().interpolateEdgesSizes();
       glGraph->getRenderingParameters().setInterpolateEdgesSizes(!edgeSizesInterpolation);
-      glDraw();
+      _glScene->requestDraw();
       return true;
     }
   } else if (keyStr == "F3") {
     if (glGraph) {
       bool edgeExtremities = glGraph->getRenderingParameters().displayEdgesExtremities();
       glGraph->getRenderingParameters().setDisplayEdgesExtremities(!edgeExtremities);
-      glDraw();
+      _glScene->requestDraw();
       return true;
     }
   } else if (keyStr == "F4") {
@@ -111,28 +111,28 @@ bool ZoomAndPanInteractor::keyboardCallback(const std::string &keyStr, const int
       glGraph->getRenderingParameters().setEdges3D(!edge3d);
       glGraph->getRenderingParameters().setBillboardedNodes(!edge3d);
       glGraph->getRenderingParameters().setBillboardedLabels(!edge3d);
-      glDraw();
+      _glScene->requestDraw();
       return true;
     }
   } else if (keyStr == "F5") {
     if (glGraph) {
       bool labelsScaled = glGraph->getRenderingParameters().labelsScaled();
       glGraph->getRenderingParameters().setLabelsScaled(!labelsScaled);
-      glDraw();
+      _glScene->requestDraw();
       return true;
     }
   } else if (keyStr == "F6") {
     if (glGraph) {
       bool labels = glGraph->getRenderingParameters().displayNodesLabels();
       glGraph->getRenderingParameters().setDisplayNodesLabels(!labels);
-      glDraw();
+      _glScene->requestDraw();
       return true;
     }
   } else if (keyStr == "F7") {
     if (glGraph) {
       bool edges = !glGraph->getRenderingParameters().displayEdges();
       glGraph->getRenderingParameters().setDisplayEdges(edges);
-      glDraw();
+      _glScene->requestDraw();
       return true;
     }
 }

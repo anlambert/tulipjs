@@ -15,11 +15,13 @@ static const int nbAnimStep = 50;
 static float animDuration = 1000;
 static bool animating = false;
 
-static void animate(int value) {
-  zoomAndPanAnimation->zoomAndPanAnimationStep(value);
-  glDraw();
-  if (value < nbAnimStep) {
-    timerFunc(animDuration/nbAnimStep, animate, value+1);
+static void animate(void *value) {
+  AnimateParams *animParams = reinterpret_cast<AnimateParams*>(value);
+  zoomAndPanAnimation->zoomAndPanAnimationStep(animParams->step);
+  animParams->scene->requestDraw();
+  if (animParams->step < nbAnimStep) {
+    animParams->step+=1;
+    timerFunc(animDuration/nbAnimStep, animate, animParams);
   } else {
     delete zoomAndPanAnimation;
     zoomAndPanAnimation = NULL;
@@ -30,6 +32,7 @@ static void animate(int value) {
 RectangleZoomInteractor::RectangleZoomInteractor(GlScene *glScene) :
   _firstX(-1), _firstY(-1), _curX(-1), _curY(-1), _dragStarted(false) {
   setScene(glScene);
+  _animParams.scene = glScene;
 }
 
 bool RectangleZoomInteractor::mouseCallback(const MouseButton &button, const MouseButtonState &state, int x, int y, const int & /*modifiers*/) {
@@ -56,7 +59,9 @@ bool RectangleZoomInteractor::mouseCallback(const MouseButton &button, const Mou
       if (zoomAndPanAnimation->canDoZoomAndPan()) {
         animDuration = baseAnimDuration * zoomAndPanAnimation->getDurationFactor();
         animating = true;
-        timerFunc(animDuration/nbAnimStep, animate, 0);
+        _animParams.step = 0;
+        _animParams.scene = _glScene;
+        timerFunc(animDuration/nbAnimStep, animate, &_animParams);
       } else {
         delete zoomAndPanAnimation;
         zoomAndPanAnimation = NULL;
@@ -64,7 +69,7 @@ bool RectangleZoomInteractor::mouseCallback(const MouseButton &button, const Mou
 
       _firstX = _curX = -1;
       _firstY = _curY = -1;
-      glDraw();
+      _glScene->requestDraw();
       return true;
     }
   }
@@ -78,7 +83,7 @@ bool RectangleZoomInteractor::mouseMoveCallback(int x, int y, const int & /*modi
   if (_mouseButton == LEFT_BUTTON && _dragStarted) {
     _curX = x;
     _curY = y;
-    glDraw();
+    _glScene->requestDraw();
     return true;
   }
   return false;
@@ -92,7 +97,9 @@ bool RectangleZoomInteractor::keyboardCallback(const std::string &keyStr, const 
     zoomAndPanAnimation = new ZoomAndPanAnimation(camera, camera->getSceneBoundingBox(), nbAnimStep);
     animDuration = baseAnimDuration * zoomAndPanAnimation->getDurationFactor();
     animating = true;
-    timerFunc(animDuration/nbAnimStep, animate, 0);
+    _animParams.step = 0;
+    _animParams.scene = _glScene;
+    timerFunc(animDuration/nbAnimStep, animate, &_animParams);
     return true;
   }
   return false;

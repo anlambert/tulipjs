@@ -5,6 +5,13 @@
 
 class GlScene;
 
+struct AnimateParams {
+
+  AnimateParams() : scene(NULL), step(0) {}
+  GlScene *scene;
+  int step;
+};
+
 class RectangleZoomInteractor : public GlSceneInteractor {
 
 public:
@@ -25,6 +32,7 @@ private:
     int _firstX, _firstY;
     int _curX, _curY;
     bool _dragStarted;
+    AnimateParams _animParams;
 };
 
 #endif // RECTANGLEZOOMINTERACTOR_H

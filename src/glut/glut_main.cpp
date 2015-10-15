@@ -76,12 +76,17 @@ static GlSceneInteractor *currentInteractor = &zoomAndPanInteractor;
 
 const std::string defaultGraphFilePath = "data/programming_language_network.tlp.gz";
 
-void glDraw() {
-  glutPostRedisplay();
+static void (*animFunc)(void *);
+static void *animFuncParam;
+
+static void animationFunc(int) {
+  animFunc(animFuncParam);
 }
 
-void timerFunc(unsigned int msecs, void (*func)(int value), int value) {
-  glutTimerFunc(msecs, func, value);
+void timerFunc(unsigned int msecs, void (*func)(void *value), void *value) {
+  animFunc = func;
+  animFuncParam = value;
+  glutTimerFunc(msecs, animationFunc, 0);
 }
 
 void activateNavigationInteractor() {
@@ -305,6 +310,24 @@ static void mouseMoveCallback(int x, int y) {
   currentInteractor->mouseMoveCallback(x, y, glutGetModifiers());
 }
 
+class GlDrawObserver : public tlp::Observable {
+
+public:
+
+  void treatEvent(const tlp::Event &event) {
+    const GlSceneEvent *glSceneEvent = dynamic_cast<const GlSceneEvent*>(&event);
+
+    if (glSceneEvent) {
+      if(glSceneEvent->getType() == GlSceneEvent::DRAW_REQUEST) {
+        glutPostRedisplay();
+      }
+    }
+  }
+
+};
+
+static GlDrawObserver glDrawObserver;
+
 //==============================================================
 int  main(int argc, char *argv[]) {
 
@@ -334,6 +357,7 @@ int  main(int argc, char *argv[]) {
   tlp::Vec4i viewport(0, 0, CURRENT_WIDTH, CURRENT_HEIGHT);
 
   glScene = new GlScene();
+  glScene->addListener(&glDrawObserver);
 
   glScene->getMainLayer()->getLight()->setDirectionnalLight(true);
   glScene->setViewport(viewport);

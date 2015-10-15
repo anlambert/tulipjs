@@ -79,6 +79,10 @@ void GlScene::initGlParameters(bool drawBackBufferBackup) {
   }
 }
 
+void GlScene::requestDraw() {
+  sendEvent(GlSceneEvent(GlSceneEvent::DRAW_REQUEST, this));
+}
+
 void GlScene::draw() {
 
   static BoundingBox lastSceneBoundingBox;

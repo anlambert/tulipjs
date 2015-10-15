@@ -29,11 +29,11 @@ bool NeighborhoodInteractor::mouseCallback(const MouseButton &button, const Mous
       _glGraph = selectedEntity.getGlGraph();
       _centralNode = selectedEntity.getNode();
       buildNeighborhoodSubgraph();
-      glDraw();
+      _glScene->requestDraw();
     } else {
       if (_neighborhoodSg) {
         destroyNeighborhoodSubgraph();
-        glDraw();
+        _glScene->requestDraw();
       }
     }
     return _znpInteractor->mouseCallback(button, state, x, y, modifiers);

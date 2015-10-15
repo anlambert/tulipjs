@@ -28,7 +28,7 @@ bool LassoSelectionInteractor::mouseCallback(const MouseButton &button, const Mo
     if (!_dragStarted) {
       _dragStarted = true;
       _polygon.push_back(screenCoord);
-      glDraw();
+      _glScene->requestDraw();
       return true;
     }
   } else if (button == LEFT_BUTTON && state == UP) {
@@ -37,7 +37,7 @@ bool LassoSelectionInteractor::mouseCallback(const MouseButton &button, const Mo
     Observable::unholdObservers();
     _dragStarted = false;
     _polygon.clear();
-    glDraw();
+    _glScene->requestDraw();
     return true;
   } else if (button == WHEEL) {
     return _znpInteractor->mouseCallback(button, state, x, y, modifiers);
@@ -51,7 +51,7 @@ bool LassoSelectionInteractor::mouseMoveCallback(int x, int y, const int & /* mo
   Coord screenCoord(x, viewport[3] - y);
   if (_dragStarted) {
     _polygon.push_back(screenCoord);
-    glDraw();
+    _glScene->requestDraw();
     return true;
   }
   return false;

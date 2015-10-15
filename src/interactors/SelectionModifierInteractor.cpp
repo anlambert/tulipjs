@@ -50,7 +50,7 @@ bool SelectionModifierInteractor::mouseCallback(const MouseButton &button, const
     _dragStarted = false;
     _selectionInteractor->mouseCallback(button, state, x, y, modifiers);
     hasSelection();
-    glDraw();
+    _glScene->requestDraw();
     return true;
   } else if (button == LEFT_BUTTON) {
     if (state == DOWN && _selectedGraph) {
@@ -78,7 +78,7 @@ bool SelectionModifierInteractor::mouseMoveCallback(int x, int y, const int &mod
     translateSelection(_selectedGraph, _lastX - x, y - _lastY);
     _lastX = x;
     _lastY = y;
-    glDraw();
+    _glScene->requestDraw();
     return true;
   }
   return false;

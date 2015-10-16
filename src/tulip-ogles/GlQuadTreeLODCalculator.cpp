@@ -59,10 +59,10 @@ void GlQuadTreeLODCalculator::setSceneBoundingBox(const tlp::BoundingBox &sceneB
 }
 
 void GlQuadTreeLODCalculator::addGlEntity(GlLayer *layer, GlEntity *glEntity) {
-  if (_glEntitiesQuadTree.find(layer) == _glEntitiesQuadTree.end()) {
+  if (_sceneBoundingBox.isValid() && _glEntitiesQuadTree.find(layer) == _glEntitiesQuadTree.end()) {
     _glEntitiesQuadTree[layer] = new QuadTreeNode<GlEntity*>(_sceneBoundingBox);
   }
-  if (_glEntitiesQuadTree[layer]->getCellForElement(glEntity) == NULL) {
+  if (_sceneBoundingBox.isValid() && _glEntitiesQuadTree[layer]->getCellForElement(glEntity) == NULL) {
     _glEntitiesQuadTree[layer]->insert(glEntity->getBoundingBox(), glEntity);
   }
   GlCPULODCalculator::addGlEntity(layer, glEntity);
@@ -133,13 +133,6 @@ void GlQuadTreeLODCalculator::computeFor3DCamera(const Coord &eye, const Matrix<
   cameraBoundingBox.expand(unprojectPoint(pSrc, invTransformMatrix, globalViewport));
   pSrc[1] = transformedViewport[1];
   cameraBoundingBox.expand(unprojectPoint(pSrc, invTransformMatrix, globalViewport));
-
-  int ratio;
-
-  if(currentViewport[2]>currentViewport[3])
-    ratio=currentViewport[2];
-  else
-    ratio=currentViewport[3];
 
   // Get result of quadtrees
 #ifdef _OPENMP

@@ -175,7 +175,7 @@ void trackObjectDeletion(tlp::Observable *observable) {
 
 void observeGraph(tlp::Graph *g) {
   if (!g || workerMode()) {
-      return;
+    return;
   }
   g->addListener(&tlpObjObs);
   std::string propName;
@@ -186,7 +186,7 @@ void observeGraph(tlp::Graph *g) {
 
 void unobserveGraph(tlp::Graph *g) {
   if (!g || workerMode()) {
-      return;
+    return;
   }
   g->removeListener(&tlpObjObs);
   std::string propName;
@@ -198,17 +198,17 @@ void unobserveGraph(tlp::Graph *g) {
 template <typename T>
 std::list<std::string> getTulipPluginsList() {
   if (typeid(T).name() == typeid(tlp::Algorithm).name()) {
-      std::list<std::string> algoList = tlp::PluginLister::instance()->availablePlugins<tlp::Algorithm>();
-      std::list<std::string> propAlgoList = tlp::PluginLister::instance()->availablePlugins<tlp::PropertyAlgorithm>();
-      std::list<std::string> realAlgoList;
-      for (std::list<std::string>::iterator it = algoList.begin() ; it != algoList.end() ; ++it) {
-          if (std::find(propAlgoList.begin(), propAlgoList.end(), *it) == propAlgoList.end()) {
-              realAlgoList.push_back(*it);
-          }
+    std::list<std::string> algoList = tlp::PluginLister::instance()->availablePlugins<tlp::Algorithm>();
+    std::list<std::string> propAlgoList = tlp::PluginLister::instance()->availablePlugins<tlp::PropertyAlgorithm>();
+    std::list<std::string> realAlgoList;
+    for (std::list<std::string>::iterator it = algoList.begin() ; it != algoList.end() ; ++it) {
+      if (std::find(propAlgoList.begin(), propAlgoList.end(), *it) == propAlgoList.end()) {
+        realAlgoList.push_back(*it);
       }
-      return realAlgoList;
+    }
+    return realAlgoList;
   } else {
-      return tlp::PluginLister::instance()->availablePlugins<T>();
+    return tlp::PluginLister::instance()->availablePlugins<T>();
   }
 }
 
@@ -791,7 +791,7 @@ bool EMSCRIPTEN_KEEPALIVE isPointerDeleted(unsigned long pointer) {
 }
 
 void EMSCRIPTEN_KEEPALIVE setPluginProgressGraphId(unsigned long graphId) {
-    progress.setGraphId(graphId);
+  progress.setGraphId(graphId);
 }
 
 const char * EMSCRIPTEN_KEEPALIVE getJSONGraph(tlp::Graph *graph) {
@@ -830,15 +830,15 @@ void EMSCRIPTEN_KEEPALIVE Graph_delete(tlp::Graph *graph) {
 }
 
 bool EMSCRIPTEN_KEEPALIVE Graph_applyAlgorithm(tlp::Graph *graph, const char *algorithm, const char *jsonParameters, bool notifyProgress=false) {
-    std::string errMsg;
-    tlp::Observable::holdObservers();
-    tlp::DataSet parameters = getAlgorithmParametersDataSet(algorithm, graph, jsonParameters);
-    bool ret = graph->applyAlgorithm(algorithm, errMsg, &parameters, notifyProgress ? &progress : NULL);
-    tlp::Observable::unholdObservers();
-    if (!ret && !errMsg.empty()) {
-      std::cerr << "Error when executing Tulip algorithm named '" << algorithm << "' : " << errMsg << std::endl;
-    }
-    return ret;
+  std::string errMsg;
+  tlp::Observable::holdObservers();
+  tlp::DataSet parameters = getAlgorithmParametersDataSet(algorithm, graph, jsonParameters);
+  bool ret = graph->applyAlgorithm(algorithm, errMsg, &parameters, notifyProgress ? &progress : NULL);
+  tlp::Observable::unholdObservers();
+  if (!ret && !errMsg.empty()) {
+    std::cerr << "Error when executing Tulip algorithm named '" << algorithm << "' : " << errMsg << std::endl;
+  }
+  return ret;
 }
 
 void EMSCRIPTEN_KEEPALIVE Graph_clear(tlp::Graph *graph) {
@@ -1328,15 +1328,15 @@ void EMSCRIPTEN_KEEPALIVE Graph_delLocalProperty(tlp::Graph *graph, const char *
 }
 
 bool EMSCRIPTEN_KEEPALIVE Graph_applyPropertyAlgorithm(tlp::Graph *graph, const char *algorithm, tlp::PropertyInterface *result, const char *jsonParameters, bool notifyProgress) {
-    std::string errMsg;
-    tlp::DataSet parameters = getAlgorithmParametersDataSet(algorithm, graph, jsonParameters);
-    tlp::Observable::holdObservers();
-    bool ret = graph->applyPropertyAlgorithm(algorithm, result, errMsg, notifyProgress ? &progress : NULL, &parameters);
-    tlp::Observable::unholdObservers();
-    if (!ret && !errMsg.empty()) {
-      std::cerr << "Error when executing Tulip " << result->getTypename() << " algorithm named '" << algorithm << "' : " << errMsg << std::endl;
-    }
-    return ret;
+  std::string errMsg;
+  tlp::DataSet parameters = getAlgorithmParametersDataSet(algorithm, graph, jsonParameters);
+  tlp::Observable::holdObservers();
+  bool ret = graph->applyPropertyAlgorithm(algorithm, result, errMsg, notifyProgress ? &progress : NULL, &parameters);
+  tlp::Observable::unholdObservers();
+  if (!ret && !errMsg.empty()) {
+    std::cerr << "Error when executing Tulip " << result->getTypename() << " algorithm named '" << algorithm << "' : " << errMsg << std::endl;
+  }
+  return ret;
 }
 
 void EMSCRIPTEN_KEEPALIVE Graph_push(tlp::Graph *graph) {

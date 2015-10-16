@@ -285,6 +285,9 @@
  var subgraph = null;
 
  function setGlobalVars(g) {
+   var end = new Date().getTime();
+   var time = (end - start) / 1000;
+   console.log('Time for loading graph: ' + time + 's');
    graph = g;
    viewLayout = graph.getLayoutProperty('viewLayout');
    viewSelection = graph.getBooleanProperty("viewSelection");
@@ -344,9 +347,6 @@
 
    setGlobalVars(g);
 
-   var end = new Date().getTime();
-   var time = (end - start) / 1000;
-   console.log('Time for loading graph: ' + time + 's');
    var sum = 0;
    graph.getNodes().forEach(function(node) {
      sum += graph.deg(node);

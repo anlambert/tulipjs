@@ -401,7 +401,7 @@ static void stretchSurfaceLinear(SDL_Surface* src, SDL_Surface* dest) {
   }
 }
 //===========================================================================================================
-int nearestPOT(int x) {
+unsigned int nearestPOT(unsigned int x) {
   return pow(2, ceil(log(x)/log(2)));
 }
 //===========================================================================================================

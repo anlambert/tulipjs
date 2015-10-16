@@ -56,7 +56,7 @@ bool isConvexPolygon(const std::vector<tlp::Vec2f> &vertices);
 
 bool convexPolygonsIntersect(const std::vector<tlp::Vec2f> &convexPolygonA, const std::vector<tlp::Vec2f> &convexPolygonB);
 
-int nearestPOT(int x);
+unsigned int nearestPOT(unsigned int x);
 
 SDL_Surface *createTextureSurfaceFromImage(const char *file);
 

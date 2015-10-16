@@ -367,7 +367,6 @@ std::string convertDataSetToJSON(const tlp::DataSet &dataSet) {
   std::pair<std::string, tlp::DataType*> dataSetEntry;
   std::ostringstream oss;
   forEach(dataSetEntry, dataSet.getValues()) {
-    tlp::PropertyInterface *prop = NULL;
     oss.str("");
     std::string entryName = dataSetEntry.first;
     tlp::DataType *dt = dataSetEntry.second;

@@ -6,9 +6,7 @@ int EMSCRIPTEN_KEEPALIVE main(int /* argc */, char ** /* argv */) {
 
   tlp::initTypeSerializers();
 
-  //emscripten_run_script("if (typeof window != 'undefined' && typeof window.tulip != 'undefined') { window.tulip.setLoaded(); }");
-
-  //emscripten_run_script("if (typeof window != 'undefined' && typeof window.tulip != 'undefined' && typeof window.tulip.onload == 'function') { window.tulip.onload(); }");
+  emscripten_run_script("if (typeof window != 'undefined' && typeof window.tulip != 'undefined') { window.tulip.mainCalled = true; }");
 
   return 0;
 }

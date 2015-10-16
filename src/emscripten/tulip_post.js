@@ -74,6 +74,11 @@ function createObject(ObjectType, caller) {
 
 var tulip = Module;
 
+tulip.mainCalled = false;
+if (nodejs) {
+  tulip.mainCalled = true;
+}
+
 tulip.debugChecks = tulip.debugChecks || true;
 if (workerMode) {
   tulip.debugChecks = false;
@@ -3833,11 +3838,11 @@ if (workerMode) {
 
   }
 
-  var _tulipLoaded = true;
+  var _tulipWorkerInit = true;
 
   if (!nodejs) {
 
-    _tulipLoaded = false;
+    _tulipWorkerInit = false;
 
     var _tulipWorker = new Worker(scriptPath + scriptName);
 
@@ -3855,7 +3860,7 @@ if (workerMode) {
       }
       switch (event.data.eventType) {
       case 'tulipWorkerInit':
-        _tulipLoaded = true;
+        _tulipWorkerInit = true;
         break;
       case 'print':
         console.log(event.data.text);
@@ -4536,12 +4541,9 @@ if (workerMode) {
 
   // ==================================================================================================================
 
-  tulip.setLoaded = function() {
-    _tulipLoaded = true;
-  }
 
   tulip.isLoaded = function() {
-    return _tulipLoaded;
+    return tulip.mainCalled && _tulipWorkerInit;
   }
 
   if (!nodejs) {

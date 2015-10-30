@@ -596,6 +596,7 @@ void GlGraph::endEdgesData() {
     const Color &edgeColor = _viewColor->getEdgeValue(e);
     const Color &srcColor = _viewColor->getNodeValue(_graph->source(e));
     const Color &tgtColor = _viewColor->getNodeValue(_graph->target(e));
+    const Color &selectionColor = uintToColor(_graph->numberOfNodes() + e.id + 1);
 
     vector<Coord> edgePoints;
     edgePoints.push_back(srcCoord);
@@ -608,7 +609,7 @@ void GlGraph::endEdgesData() {
     std::vector<unsigned int> lineIndices;
 
     for (size_t i = 0 ; i < edgePoints.size() ; ++i) {
-      unsigned int currentNbVertices = edgesLinesRenderingData.size() / 11;
+      unsigned int currentNbVertices = edgesLinesRenderingData.size() / 15;
       if (i != edgePoints.size() - 1) {
         lineIndices.push_back(currentNbVertices);
         lineIndices.push_back(currentNbVertices+1);
@@ -616,6 +617,7 @@ void GlGraph::endEdgesData() {
       addTlpVecToVecFloat(edgePoints[i], edgesLinesRenderingData);
       addColorToVecFloat(edgeColor, edgesLinesRenderingData);
       addColorToVecFloat(edgeColors[i], edgesLinesRenderingData);
+      addColorToVecFloat(selectionColor, edgesLinesRenderingData);
     }
     _edgeLineVerticesIndices[e] = lineIndices;
   }
@@ -1264,7 +1266,7 @@ void GlGraph::renderEdges(const Camera &camera, const std::vector<edge> &edges, 
       edgeShape = tlp::EdgeShape::Polyline;
     }
 
-    if (!lineMode || parametricCurveMode) {
+    if (!lineMode || parametricCurveMode || _viewSelection->getEdgeValue(e)) {
 
       string edgeTexture = _viewTexture->getEdgeValue(e);
       Size edgeSize = ::getEdgeSize(_graph, e, _viewSize, &_renderingParameters);
@@ -1386,11 +1388,13 @@ void GlGraph::renderEdges(const Camera &camera, const std::vector<edge> &edges, 
       _flatShader->setUniformBool("u_textureActivated", false);
       _flatShader->setUniformBool("u_globalColor", false);
       _flatShader->setUniformBool("u_pointsRendering", false);
-      _flatShader->setVertexAttribPointer("a_position", 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), BUFFER_OFFSET(0));
-      if (_renderingParameters.interpolateEdgesColors()) {
-        _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 11 * sizeof(float), BUFFER_OFFSET(7*sizeof(float)));
+      _flatShader->setVertexAttribPointer("a_position", 3, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(0));
+      if (_graphElementsPickingMode) {
+        _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(11*sizeof(float)));
+      } else if (_renderingParameters.interpolateEdgesColors()) {
+        _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(7*sizeof(float)));
       } else {
-        _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 11 * sizeof(float), BUFFER_OFFSET(3*sizeof(float)));
+        _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(3*sizeof(float)));
       }
       glLineWidth(2.0);
       glDrawElements(GL_LINES, edgesLinesRenderingIndices.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));

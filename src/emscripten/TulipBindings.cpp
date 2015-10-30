@@ -28,6 +28,27 @@ using namespace emscripten;
 
 // ==================================================================================================================
 
+static std::string replaceString(std::string subject, const std::string& search,
+                                 const std::string& replace) {
+  size_t pos = 0;
+  while ((pos = subject.find(search, pos)) != std::string::npos) {
+    subject.replace(pos, search.length(), replace);
+    pos += replace.length();
+  }
+  return subject;
+}
+
+static void replaceStringInPlace(std::string& subject, const std::string& search,
+                                 const std::string& replace) {
+  size_t pos = 0;
+  while ((pos = subject.find(search, pos)) != std::string::npos) {
+    subject.replace(pos, search.length(), replace);
+    pos += replace.length();
+  }
+}
+
+// ==================================================================================================================
+
 template <class StringContainer>
 static unsigned int getStringsNumberOfBytesFromContainer(const StringContainer &container, unsigned int *array) {
   typename StringContainer::const_iterator it = container.begin();
@@ -362,81 +383,54 @@ tlp::DataSet getAlgorithmParametersDataSet(const std::string &algoName, tlp::Gra
 }
 
 std::string convertDataSetToJSON(const tlp::DataSet &dataSet) {
-  std::string ret = "{";
+  static std::string ret;
   unsigned int i = 1;
   std::pair<std::string, tlp::DataType*> dataSetEntry;
   std::ostringstream oss;
+  oss << "{";
   forEach(dataSetEntry, dataSet.getValues()) {
-    oss.str("");
     std::string entryName = dataSetEntry.first;
     tlp::DataType *dt = dataSetEntry.second;
-    ret += ("\"" + entryName + "\" : ");
-    if (dt->getTypeName() == std::string(typeid(bool).name())) {
-      bool bval = false;
-      dataSet.get(entryName, bval);
-      if (bval) {
-        ret += "true";
-      } else {
-        ret += "false";
-      }
-    } else if (dt->getTypeName() == std::string(typeid(int).name())) {
-      int ival = 0;
-      dataSet.get(entryName, ival);
-      oss << ival;
-    } else if (dt->getTypeName() == std::string(typeid(unsigned int).name())) {
-      unsigned int uival = 0;
-      dataSet.get(entryName, uival);
-      oss << uival;
-    } else if (dt->getTypeName() == std::string(typeid(long).name())) {
-      long lval = 0;
-      dataSet.get(entryName, lval);
-      oss << lval;
-    } else if (dt->getTypeName() == std::string(typeid(unsigned long).name())) {
-      unsigned long ulval = 0;
-      dataSet.get(entryName, ulval);
-      oss << ulval;
-    } else if (dt->getTypeName() == std::string(typeid(float).name())) {
-      float fval = 0;
-      dataSet.get(entryName, fval);
-      oss << fval;
-    } else if (dt->getTypeName() == std::string(typeid(double).name())) {
-      double dval = 0;
-      dataSet.get(entryName, dval);
-      oss << dval;
-    } else if (dt->getTypeName() == std::string(typeid(std::string).name())) {
-      std::string sval;
-      dataSet.get(entryName, sval);
-      ret += ("\"" + sval + "\"");
-    } else if (dt->getTypeName() == std::string(typeid(tlp::StringCollection).name())) {
+    oss << "\"" << entryName << "\" : ";
+    tlp::DataTypeSerializer *serializer = tlp::DataSet::typenameToSerializer(dt->getTypeName());
+    if (dt->getTypeName() == std::string(typeid(tlp::StringCollection).name())) {
       tlp::StringCollection sc;
       dataSet.get(entryName, sc);
-      ret += ("\"" + sc.getCurrentString() + "\"");
+      oss << "\"" << sc.getCurrentString() << "\"";
     } else if (dt->getTypeName() == std::string(typeid(tlp::BooleanProperty*).name()) ||
                dt->getTypeName() == std::string(typeid(tlp::ColorProperty*).name()) ||
                dt->getTypeName() == std::string(typeid(tlp::DoubleProperty*).name()) ||
                dt->getTypeName() == std::string(typeid(tlp::IntegerProperty*).name()) ||
                dt->getTypeName() == std::string(typeid(tlp::LayoutProperty*).name()) ||
                dt->getTypeName() == std::string(typeid(tlp::SizeProperty*).name()) ||
-               dt->getTypeName() == std::string(typeid(tlp::StringProperty*).name())) {
+               dt->getTypeName() == std::string(typeid(tlp::StringProperty*).name()) ||
+               dt->getTypeName() == std::string(typeid(tlp::BooleanVectorProperty*).name()) ||
+               dt->getTypeName() == std::string(typeid(tlp::ColorVectorProperty*).name()) ||
+               dt->getTypeName() == std::string(typeid(tlp::DoubleProperty*).name()) ||
+               dt->getTypeName() == std::string(typeid(tlp::IntegerVectorProperty*).name()) ||
+               dt->getTypeName() == std::string(typeid(tlp::CoordVectorProperty*).name()) ||
+               dt->getTypeName() == std::string(typeid(tlp::SizeVectorProperty*).name()) ||
+               dt->getTypeName() == std::string(typeid(tlp::StringVectorProperty*).name())) {
       tlp::PropertyInterface *prop = NULL;
       dataSet.get(entryName, prop);
       if (prop) {
         oss << "{\"type\" : \"property\", \"name\" : \"" << prop->getName() << "\", \"pointer\" : " << reinterpret_cast<unsigned long>(prop) << "}";
       } else {
-        ret += "null";
+        oss << "null";
       }
+    } else if (serializer) {
+      oss << serializer->toString(dt);
     } else {
-      ret += "null";
+      oss << "null";
     }
-    if (oss.str() != "") {
-      ret += oss.str();
-    }
+
     if (i++ != dataSet.size()) {
-      ret += ",";
+      oss << ", ";
     }
   }
 
-  ret += "}";
+  oss << "}";
+  ret = oss.str();
   return ret;
 }
 
@@ -1354,33 +1348,93 @@ void EMSCRIPTEN_KEEPALIVE Graph_setEventsActivated(tlp::Graph *graph, bool event
   }
 }
 
-//const char* EMSCRIPTEN_KEEPALIVE Graph_getJSONPropertiesNodesValues(tlp::Graph *graph) {
-//  static std::ostringstream ret;
-//  ret.str("[");
-//  std::vector<std::string> propertiesNames;
-//  std::string propName;
-//  forEach(propName, graph->getProperties()) {
-//    propertiesNames.push_back(propName);
-//  }
-//  unsigned int k = 0;
-//  tlp::node n;
-//  forEach(n, graph->getNodes()) {
-//    ret << "{id: " << n.id << ", ";
-//    for (size_t i = 0 ; i < propertiesNames.size() ; ++i) {
-//      ret << propertiesNames[i] << ": " << graph->getProperty(propertiesNames[i])->getNodeStringValue(n);
-//      if (i != propertiesNames.size() - 1) {
-//        ret << ", ";
-//      }
-//    }
-//    ret << "}";
-//    if (++k != graph->numberOfNodes()) {
-//      ret << ",";
-//    }
-//  }
+const char* EMSCRIPTEN_KEEPALIVE Graph_getNodesPropertiesValuesJSON(tlp::Graph *graph) {
+ std::ostringstream oss;
+ static std::string ret;
+ oss.str("");
+ std::vector<std::string> propertiesNames;
+ std::string propName;
+ forEach(propName, graph->getProperties()) {
+   propertiesNames.push_back(propName);
+ }
+ oss << "[";
+ unsigned int k = 0;
+ tlp::node n;
 
-//  ret << "]";
-//  return ret.str().c_str();
-//}
+ forEach(n, graph->getNodes()) {
+   oss << "{\"id\": " << n.id << ", ";
+   for (size_t i = 0 ; i < propertiesNames.size() ; ++i) {
+     if (propertiesNames[i] == "viewMetaGraph") continue;
+     oss << "\"" << propertiesNames[i] << "\": ";
+     std::string strVal = graph->getProperty(propertiesNames[i])->getNodeStringValue(n);
+     if (graph->getProperty(propertiesNames[i])->getTypename() == "string") {
+       oss << "\"" << strVal << "\"";
+     } else {
+       replaceStringInPlace(strVal, "(", "[");
+       replaceStringInPlace(strVal, ")", "]");
+       oss << strVal;
+     }
+     if (i != propertiesNames.size() - 1) {
+       oss << ", ";
+     }
+   }
+   oss << "}";
+   if (++k != graph->numberOfNodes()) {
+     oss << ",";
+   }
+ }
+
+ oss << "]";
+ ret = oss.str();
+ return ret.c_str();
+}
+
+const char* EMSCRIPTEN_KEEPALIVE Graph_getEdgesPropertiesValuesJSON(tlp::Graph *graph) {
+ std::ostringstream oss;
+ static std::string ret;
+ oss.str("");
+ std::vector<std::string> propertiesNames;
+ std::string propName;
+ forEach(propName, graph->getProperties()) {
+   propertiesNames.push_back(propName);
+ }
+ oss << "[";
+ unsigned int k = 0;
+ tlp::edge e;
+
+ forEach(e, graph->getEdges()) {
+   oss << "{\"id\": " << e.id << ", ";
+   for (size_t i = 0 ; i < propertiesNames.size() ; ++i) {
+     if (propertiesNames[i] == "viewMetaGraph") continue;
+     oss << "\"" << propertiesNames[i] << "\": ";
+     std::string strVal = graph->getProperty(propertiesNames[i])->getEdgeStringValue(e);
+     if (graph->getProperty(propertiesNames[i])->getTypename() == "string") {
+       oss << "\"" << strVal << "\"";
+     } else {
+       replaceStringInPlace(strVal, "(", "[");
+       replaceStringInPlace(strVal, ")", "]");
+       oss << strVal;
+     }
+     if (i != propertiesNames.size() - 1) {
+       oss << ", ";
+     }
+   }
+   oss << "}";
+   if (++k != graph->numberOfEdges()) {
+     oss << ",";
+   }
+ }
+
+ oss << "]";
+ ret = oss.str();
+ return ret.c_str();
+}
+
+const char *EMSCRIPTEN_KEEPALIVE Graph_getAttributesJSON(tlp::Graph *graph) {
+  static std::string ret;
+  ret = convertDataSetToJSON(graph->getAttributes());
+  return ret.c_str();
+}
 
 // ==================================================================================================================
 

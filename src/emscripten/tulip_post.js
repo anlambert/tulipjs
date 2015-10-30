@@ -1822,7 +1822,9 @@ var _Graph_applyPropertyAlgorithm = Module.cwrap('Graph_applyPropertyAlgorithm',
 var _Graph_push = Module.cwrap('Graph_push', null, ['number']);
 var _Graph_pop = Module.cwrap('Graph_pop', null, ['number']);
 var _Graph_setEventsActivated = Module.cwrap('Graph_setEventsActivated', null, ['number', 'number']);
-//var _Graph_getJSONPropertiesNodesValues = Module.cwrap('Graph_getJSONPropertiesNodesValues', 'string', ['number']);
+var _Graph_getNodesPropertiesValuesJSON = Module.cwrap('Graph_getNodesPropertiesValuesJSON', 'string', ['number']);
+var _Graph_getEdgesPropertiesValuesJSON = Module.cwrap('Graph_getEdgesPropertiesValuesJSON', 'string', ['number']);
+var _Graph_getAttributesJSON = Module.cwrap('Graph_getAttributesJSON', 'string', ['number']);
 
 
 /**
@@ -1848,9 +1850,6 @@ tulip.Graph.prototype.destroy = function() {
   _Graph_delete(this.cppPointer);
   this.cppPointer = 0;
 };
-//tulip.Graph.getPropertiesNodesValues = function tulip_Graph_prototype_getNodesPropertiesValues() {
-//    return JSON.parse(_Graph_getJSONPropertiesNodesValues(this.cppPointer));
-//};
 tulip.Graph.prototype.applyAlgorithm = function tulip_Graph_prototype_applyAlgorithm(algorithmName, algoParameters, notifyProgress) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string", "object", "boolean"], 1);
@@ -2457,7 +2456,12 @@ tulip.Graph.prototype.toJSON = function tulip_Graph_prototype_toJSON() {
   checkWrappedCppPointer(this.cppPointer);
   return _getJSONGraph(this.cppPointer);
 };
-
+tulip.Graph.prototype.getNodesPropertiesValues = function tulip_Graph_prototype_getNodesPropertiesValues() {
+  return JSON.parse(_Graph_getNodesPropertiesValuesJSON(this.cppPointer));
+};
+tulip.Graph.prototype.getEdgesPropertiesValues = function tulip_Graph_prototype_getEdgesPropertiesValues() {
+  return JSON.parse(_Graph_getEdgesPropertiesValuesJSON(this.cppPointer));
+};
 tulip.Graph.prototype.applyPropertyAlgorithm = function tulip_Graph_prototype_applyPropertyAlgorithm(algorithmName, resultProperty, algoParameters, notifyProgress) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string", tulip.PropertyInterface, "object", "boolean"], 2);
@@ -2544,6 +2548,21 @@ tulip.Graph.prototype.setEventsActivated = function tulip_Graph_prototype_setEve
   checkWrappedCppPointer(this.cppPointer);
   _Graph_setEventsActivated(this.cppPointer, eventsActivated);
 };
+
+tulip.Graph.prototype.getAttributes = function tulip_Graph_prototype_getAttributes() {
+  checkWrappedCppPointer(this.cppPointer);
+  return JSON.parse(_Graph_getAttributesJSON(this.cppPointer));
+}
+
+tulip.Graph.prototype.getAttribute = function tulip_Graph_prototype_getAttribute(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  var attributes = this.getAttributes();
+  if (name in attributes) {
+    return attributes.name;
+  } else {
+    return undefined;
+  }
+}
 
 // ==================================================================================================================
 
@@ -4660,7 +4679,3 @@ if (workerMode) {
 
   // ==================================================================================================================
 }
-
-
-
-

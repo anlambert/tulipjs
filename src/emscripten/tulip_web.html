@@ -4,12 +4,12 @@
     <head>
      <meta charset="utf-8">
      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=yes">
-     <title>Tulip Web</title>
+     <title>Tulip Web demo</title>
      <link rel="icon" type="image/x-icon" href="favicon.ico" />
      <link rel="stylesheet" href="http://css-spinners.com/css/spinner/whirly.css" type="text/css">
-     <link rel="stylesheet" href="https://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+     <link rel="stylesheet" href="https://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css" />
      <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-     <script type="text/javascript" src="https://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+     <script type="text/javascript" src="https://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
 
      <style type="text/css">
         .ui-icon-interactor-navigation {
@@ -94,10 +94,6 @@
         <a id="neighborhood-highlighter-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-neighborhood" data-iconpos="notext">Highlight node neighborhood</a>
         <a id="selection-modifier-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-selection-modifier" data-iconpos="notext">Move rectangle selection</a>
 
-        <!--
-        <a id="js-interactor-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="" data-iconpos="notext">Javascript interactor</a>
-        -->
-
         </div>
 
       </div>
@@ -122,7 +118,23 @@
 
       <!-- Left panel -->
       <div data-role="panel" id="computepanel" data-position="left" data-theme="a" data-display="overlay">
+
+      <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
+      <h3> Graph datasets </h3>
+      <label><input id="load-in-worker" type="checkbox" name="checkbox-0" data-mini="true" checked=true> Load graphs in Web Worker (slower but with loading feeback) </label>
+
+      <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Programming Languages network" onclick ="loadGraphFromDataFolder('programming_language_network.tlp.gz')" > Programming Languages network </a>
+      <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="FIFA World Cup 2014 players network" onclick ="loadGraphFromDataFolder('world_cup_network.tlp.gz')" > FIFA World Cup 2014 players network </a>
+      <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Qt 5.4 Linux install" onclick ="loadGraphFromDataFolder('qt54_linux64_dist.tlp.gz')" > Qt 5.4 Linux install </a>
+      <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Graph with metanodes" onclick ="loadGraphFromDataFolder('metanodes.tlp.gz', 'groups')" > Graph with metaNodes </a>
+      <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Sample Tree" onclick ="loadGraphFromDataFolder('tree.tlp.gz')" > Sample Tree </a>
+      <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Debian Packages dependencies graph" onclick ="loadGraphFromDataFolder('debian_packages_dependencies.tlpb.gz')" > Debian Packages dependencies graph </a>
+      <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Npm Packages dependencies graph" onclick ="loadGraphFromDataFolder('npm_packages_dependencies.tlpb.gz')" > NPM Packages dependencies graph </a>
+      <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="PyPi Packages dependencies graph" onclick ="loadGraphFromDataFolder('pypi_packages_dependencies.tlpb.gz')" > PyPi Packages dependencies graph </a>
+      <div data-role="controlgroup">
       <input type="file" id="graph_file"/>
+      </div>
+      </div>
 
       <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
       <h3> Force directed layouts </h3>
@@ -286,6 +298,7 @@
  var subgraph = null;
 
  function setGlobalVars(g) {
+   console.log(g.getAttribute("file"));
    var end = new Date().getTime();
    var time = (end - start) / 1000;
    console.log('Time for loading graph: ' + time + 's');
@@ -344,10 +357,7 @@
    return tulip.Color(r, g, b);
  }
 
- function graphLoaded(g) {
-
-   setGlobalVars(g);
-
+ function computeGraphStats() {
    var sum = 0;
    graph.getNodes().forEach(function(node) {
      sum += graph.deg(node);
@@ -370,37 +380,9 @@
    });
    console.log("average node degree = ", sum / graph.numberOfNodes());
    console.log("average edge length = ", avgEdgeLength / graph.numberOfEdges());
+ }
 
-   //graph.executeScriptInWorker(graphScript, graphScriptEndedCallback);
-
-   //var setNodes = [];
-
-   //var randomNode = graph.getRandomNode();
-   //setNodes.push(randomNode);
-
-   //var reachableSubGraphsParams = {};
-   //reachableSubGraphsParams["edges direction"] = "all edges";
-   //reachableSubGraphsParams["distance"] = 3;
-
-   //viewSelection.setNodeValue(randomNode, true);
-   //graph.getInOutNodes(randomNode).forEach(function(n) {
-     //viewSelection.setNodeValue(n, true);
-     //setNodes.push(n);
-   //});
-
-
-   //graph.applyBooleanAlgorithm("Reachable Sub-Graph", viewSelection, reachableSubGraphsParams);
-   //graph.applyBooleanAlgorithm("Induced Sub-Graph", viewSelection);
-
-   //subgraph = graph.addSubGraph(viewSelection, "reachable");
-
-   //console.log(subgraph.numberOfNodes(), subgraph.numberOfEdges());
-
-   //tulipView.setGraph(subgraph);
-   //tulipView.centerScene();
-
-   //var sg = graph.inducedSubGraph(setNodes);
-
+ function setRandomGlyphsAndColors() {
    var iconNames = [];
    for (var key in tulip.FontAwesomeIcon) {
       if (tulip.FontAwesomeIcon.hasOwnProperty(key)) {
@@ -416,10 +398,6 @@
        viewFontAwesomeIcon.setNodeValue(n, iconNames[idx]);
        viewColor.setNodeValue(n, genRandomColor());
    });
-
-   //tulipView.setGraph(sg);
-   //tulipView.centerScene();
-
  }
 
  function handleFileSelect(evt) {
@@ -430,7 +408,7 @@
         reader.onload = (function(theFile) {
             return function(e) {
               start = new Date().getTime();
-              tulipView.loadGraphFromData(theFile.name, e.target.result, true, setGlobalVars);
+              tulipView.loadGraphFromData(theFile.name, e.target.result, $('#load-in-worker').prop('checked'), setGlobalVars);
             };
         })(files[0]);
         reader.readAsArrayBuffer(files[0]);
@@ -455,6 +433,23 @@
    };
  }
 
+ function setSubGraphToVisualize(sgName) {
+   return function(graph) {
+     var sg = graph.getDescendantGraph(sgName);
+     setGlobalVars(sg);
+     tulipView.setGraph(sg);
+   }
+ }
+
+ function loadGraphFromDataFolder(tlpFilename, sgToVisualize) {
+   start = new Date().getTime();
+   if (sgToVisualize) {
+     tulipView.loadGraphFromFile("data/" + tlpFilename, $('#load-in-worker').prop('checked'), setSubGraphToVisualize(sgToVisualize));
+   } else {
+     tulipView.loadGraphFromFile("data/" + tlpFilename, $('#load-in-worker').prop('checked'), setGlobalVars);
+   }
+ }
+
  function initTulipView() {
    if (typeof tulip == 'undefined' || !tulip.isLoaded()) {
      setTimeout(initTulipView, 1000);
@@ -465,21 +460,7 @@
      tulip.addListener("PropertyEvent", tulipPropertyEventHandler);
      var container = document.getElementById("tulip-view");
      tulipView = tulip.View(container, window.innerWidth-50, window.innerHeight-80);
-     start = new Date().getTime();
-     tulipView.loadGraphFromFile("data/programming_language_network.tlp.gz", true, graphLoaded);
-     //tulipView.canvas.addEventListener('mousedown', function(evt) {
-     //  if (!jsInteractor) return;
-     //  var mousePos = getMousePos(tulipView.canvas, evt);
-     //  var context = tulipView.getCanvas2dContext();
-     //  context.beginPath();
-     //  context.arc(mousePos.x, mousePos.y, 10, 0, 2 * Math.PI, false);
-     //  context.fillStyle = 'green';
-     //  context.fill();
-     //  context.lineWidth = 5;
-     //  context.strokeStyle = '#003300';
-     //  context.stroke();
-     //  tulipView.draw();
-     //}, false);
+     loadGraphFromDataFolder("programming_language_network.tlp.gz");
    }
  }
 

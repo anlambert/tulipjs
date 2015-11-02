@@ -2558,7 +2558,7 @@ tulip.Graph.prototype.getAttribute = function tulip_Graph_prototype_getAttribute
   checkWrappedCppPointer(this.cppPointer);
   var attributes = this.getAttributes();
   if (name in attributes) {
-    return attributes.name;
+    return attributes[name];
   } else {
     return undefined;
   }

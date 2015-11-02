@@ -643,6 +643,38 @@ bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_displayNodes(GlGraphRenderi
   return glgrp->displayNodes();
 }
 
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setBillboardedNodes(GlGraphRenderingParameters *glgrp, bool state) {
+  glgrp->setBillboardedNodes(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_billboardedNodes(GlGraphRenderingParameters *glgrp) {
+  return glgrp->billboardedNodes();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setDisplayNodesLabels(GlGraphRenderingParameters *glgrp, bool state) {
+  glgrp->setDisplayNodesLabels(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_displayNodesLabels(GlGraphRenderingParameters *glgrp) {
+  return glgrp->displayNodesLabels();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setLabelsScaled(GlGraphRenderingParameters *glgrp, bool state) {
+  glgrp->setLabelsScaled(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_labelsScaled(GlGraphRenderingParameters *glgrp) {
+  return glgrp->labelsScaled();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setBillboardedLabels(GlGraphRenderingParameters *glgrp, bool state) {
+  glgrp->setBillboardedLabels(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_billboardedLabels(GlGraphRenderingParameters *glgrp) {
+  return glgrp->billboardedLabels();
+}
+
 void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setDisplayEdges(GlGraphRenderingParameters *glgrp, bool state) {
   glgrp->setDisplayEdges(state);
 }
@@ -673,6 +705,14 @@ void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setDisplayEdgesExtremities(
 
 bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_displayEdgesExtremities(GlGraphRenderingParameters *glgrp) {
   return glgrp->displayEdgesExtremities();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setEdges3D(GlGraphRenderingParameters *glgrp, bool state) {
+  glgrp->setEdges3D(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_edges3D(GlGraphRenderingParameters *glgrp) {
+  return glgrp->edges3D();
 }
 
 //==============================================================

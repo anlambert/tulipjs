@@ -176,14 +176,22 @@
       <div data-role="panel" id="renderingparamspanel" data-position="right" data-theme="a" data-display="overlay">
       <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
       <h3> Nodes </h3>
-      <label><input id="display-nodes" type="checkbox" data-mini="true" checked=true> Display </label>
+      <label><input id="display-nodes" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Display </label>
+      <label><input id="billboard-nodes" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Billboard </label>
       </div>
       <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
       <h3> Edges </h3>
-      <label><input id="display-edges" type="checkbox" data-mini="true" checked=true> Display </label>
-      <label><input id="color-interpolation" type="checkbox" data-mini="true" checked=false> Color interpolation </label>
-      <label><input id="size-interpolation" type="checkbox" data-mini="true" checked=true> Size interpolation </label>
-      <label><input id="edge-extremities" type="checkbox" data-mini="true" checked=true>  Display extremities </label>
+      <label><input id="display-edges" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Display </label>
+      <label><input id="color-interpolation" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="false"> Color interpolation </label>
+      <label><input id="size-interpolation" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Size interpolation </label>
+      <label><input id="edge-extremities" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true">  Display extremities </label>
+      <label><input id="edges-3d" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="false">  3D mode </label>
+      </div>
+      <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
+      <h3> Nodes Labels </h3>
+      <label><input id="display-nodes-labels" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Display </label>
+      <label><input id="scale-nodes-labels" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="false"> Scale to Nodes Sizes </label>
+      <label><input id="billboard-nodes-labels" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="false"> Billboard </label>
       </div>
       </div>
 
@@ -217,11 +225,6 @@
 
  $('#neighborhood-highlighter-button').button().bind('click', activateInteractor('Neighborhood'));
 
- $("#color-interpolation, #size-interpolation, \
-   #edge-extremities, #display-edges, #display-nodes").change(function(){
-   applyRenderingParameters();
- });
-
  var start = null;
  var graph = null;
  var subgraph = null;
@@ -229,10 +232,15 @@
  function applyRenderingParameters() {
    tulip.holdObservers();
    renderingParameters.setDisplayNodes($('#display-nodes').prop('checked'));
+   renderingParameters.setBillboardedNodes($('#billboard-nodes').prop('checked'));
+   renderingParameters.setDisplayNodesLabels($('#display-nodes-labels').prop('checked'));
+   renderingParameters.setLabelsScaled($('#scale-nodes-labels').prop('checked'));
+   renderingParameters.setBillboardedLabels($('#billboard-nodes-labels').prop('checked'));
    renderingParameters.setDisplayEdges($('#display-edges').prop('checked'));
    renderingParameters.setInterpolateEdgesColors($('#color-interpolation').prop('checked'));
    renderingParameters.setInterpolateEdgesSizes($('#size-interpolation').prop('checked'));
    renderingParameters.setDisplayEdgesExtremities($('#edge-extremities').prop('checked'));
+   renderingParameters.setEdges3D($('#edges-3d').prop('checked'));
    tulip.unholdObservers();
  }
 
@@ -364,14 +372,6 @@
    console.log("Received event : ", event.eventType, " for graph property ", event.property.getName());
  }
 
- function getMousePos(canvas, evt) {
-   var rect = canvas.getBoundingClientRect();
-   return {
-     x: (evt.clientX - rect.left) | 0,
-     y: (evt.clientY - rect.top) | 0,
-   };
- }
-
  function setSubGraphToVisualize(sgName) {
    return function(graph) {
      var sg = graph.getDescendantGraph(sgName);
@@ -428,6 +428,22 @@ $( document ).ready(function() {
   $('#tulip-view').width(window.innerWidth-50);
   $('#tulip-view').height(window.innerHeight-80);
   window.addEventListener('resize', resize, false);
+
+  $('#display-nodes').prop('checked', true).checkboxradio('refresh');
+  $('#display-nodes-labels').prop('checked', true).checkboxradio('refresh');
+  $('#display-edges').prop('checked', true).checkboxradio('refresh');
+  $('#edge-extremities').prop('checked', true).checkboxradio('refresh');
+  $('#size-interpolation').prop('checked', true).checkboxradio('refresh');
+
+  $('#edges-3d').prop('checked', false).checkboxradio('refresh');
+  $('#color-interpolation').prop('checked', false).checkboxradio('refresh');
+  $('#scale-nodes-labels').prop('checked', false).checkboxradio('refresh');
+  $('#billboard-nodes').prop('checked', false).checkboxradio('refresh');
+  $('#billboard-nodes-labels').prop('checked', false).checkboxradio('refresh');
+
+  $(".rendering-params-modifier").change(function(){
+    applyRenderingParameters();
+  });
 
   importScript("tulip.js",
     function() {

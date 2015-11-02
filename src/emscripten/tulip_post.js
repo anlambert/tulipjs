@@ -4290,6 +4290,14 @@ if (workerMode) {
 
     var _GlGraphRenderingParameters_setDisplayNodes = Module.cwrap('GlGraphRenderingParameters_setDisplayNodes', null, ['number', 'number']);
     var _GlGraphRenderingParameters_displayNodes = Module.cwrap('GlGraphRenderingParameters_displayNodes', 'number', ['number']);
+    var _GlGraphRenderingParameters_setBillboardedNodes = Module.cwrap('GlGraphRenderingParameters_setBillboardedNodes', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_billboardedNodes = Module.cwrap('GlGraphRenderingParameters_billboardedNodes', 'number', ['number']);
+    var _GlGraphRenderingParameters_setDisplayNodesLabels = Module.cwrap('GlGraphRenderingParameters_setDisplayNodesLabels', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_displayNodesLabels = Module.cwrap('GlGraphRenderingParameters_displayNodesLabels', 'number', ['number']);
+    var _GlGraphRenderingParameters_setLabelsScaled = Module.cwrap('GlGraphRenderingParameters_setLabelsScaled', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_labelsScaled = Module.cwrap('GlGraphRenderingParameters_labelsScaled', 'number', ['number']);
+    var _GlGraphRenderingParameters_setBillboardedLabels = Module.cwrap('GlGraphRenderingParameters_setBillboardedLabels', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_billboardedLabels = Module.cwrap('GlGraphRenderingParameters_billboardedLabels', 'number', ['number']);
     var _GlGraphRenderingParameters_setDisplayEdges = Module.cwrap('GlGraphRenderingParameters_setDisplayEdges', null, ['number', 'number']);
     var _GlGraphRenderingParameters_displayEdges = Module.cwrap('GlGraphRenderingParameters_displayEdges', 'number', ['number']);
     var _GlGraphRenderingParameters_setInterpolateEdgesColors = Module.cwrap('GlGraphRenderingParameters_setInterpolateEdgesColors', null, ['number', 'number']);
@@ -4298,6 +4306,8 @@ if (workerMode) {
     var _GlGraphRenderingParameters_interpolateEdgesSizes = Module.cwrap('GlGraphRenderingParameters_interpolateEdgesSizes', 'number', ['number']);
     var _GlGraphRenderingParameters_setDisplayEdgesExtremities = Module.cwrap('GlGraphRenderingParameters_setDisplayEdgesExtremities', null, ['number', 'number']);
     var _GlGraphRenderingParameters_displayEdgesExtremities = Module.cwrap('GlGraphRenderingParameters_displayEdgesExtremities', 'number', ['number']);
+    var _GlGraphRenderingParameters_setEdges3D = Module.cwrap('GlGraphRenderingParameters_setEdges3D', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_edges3D = Module.cwrap('GlGraphRenderingParameters_edges3D', 'number', ['number']);
 
     tulip.GlGraphRenderingParameters = function tulip_GlGraphRenderingParameters(cppPointer) {
       var newObject = createObject(tulip.GlGraphRenderingParameters, this);
@@ -4309,47 +4319,92 @@ if (workerMode) {
     tulip.GlGraphRenderingParameters.prototype.setDisplayNodes = function tulip_GlGraphRenderingParameters_prototype_setDisplayNodes(state) {
       checkArgumentsTypes(arguments, ["boolean"], 1);
       _GlGraphRenderingParameters_setDisplayNodes(this.cppPointer, state);
-    }
+    };
 
     tulip.GlGraphRenderingParameters.prototype.displayNodes = function tulip_GlGraphRenderingParameters_prototype_displayNodes() {
       return _GlGraphRenderingParameters_displayNodes(this.cppPointer) > 0;
-    }
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.setBillboardedNodes = function tulip_GlGraphRenderingParameters_prototype_setBillboardedNodes(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setBillboardedNodes(this.cppPointer, state);
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.billboardedNodes = function tulip_GlGraphRenderingParameters_prototype_billboardedNodes() {
+      return _GlGraphRenderingParameters_billboardedNodes(this.cppPointer) > 0;
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.setDisplayNodesLabels = function tulip_GlGraphRenderingParameters_prototype_setDisplayNodesLabels(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setDisplayNodesLabels(this.cppPointer, state);
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.displayNodesLabels = function tulip_GlGraphRenderingParameters_prototype_displayNodesLabels() {
+      return _GlGraphRenderingParameters_displayNodesLabels(this.cppPointer) > 0;
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.setLabelsScaled = function tulip_GlGraphRenderingParameters_prototype_setLabelsScaled(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setLabelsScaled(this.cppPointer, state);
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.labelsScaled = function tulip_GlGraphRenderingParameters_prototype_labelsScaled() {
+      return _GlGraphRenderingParameters_labelsScaled(this.cppPointer) > 0;
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.setBillboardedLabels = function tulip_GlGraphRenderingParameters_prototype_setBillboardedLabels(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setBillboardedLabels(this.cppPointer, state);
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.billboardedLabels = function tulip_GlGraphRenderingParameters_prototype_billboardedLabels() {
+      return _GlGraphRenderingParameters_billboardedLabels(this.cppPointer) > 0;
+    };
 
     tulip.GlGraphRenderingParameters.prototype.setDisplayEdges = function tulip_GlGraphRenderingParameters_prototype_setDisplayEdges(state) {
       checkArgumentsTypes(arguments, ["boolean"], 1);
       _GlGraphRenderingParameters_setDisplayEdges(this.cppPointer, state);
-    }
+    };
 
     tulip.GlGraphRenderingParameters.prototype.displayEdges = function tulip_GlGraphRenderingParameters_prototype_displayEdges() {
       return _GlGraphRenderingParameters_displayEdges(this.cppPointer) > 0;
-    }
+    };
 
     tulip.GlGraphRenderingParameters.prototype.setInterpolateEdgesColors = function tulip_GlGraphRenderingParameters_prototype_setInterpolateEdgesColors(state) {
       checkArgumentsTypes(arguments, ["boolean"], 1);
       _GlGraphRenderingParameters_setInterpolateEdgesColors(this.cppPointer, state);
-    }
+    };
 
     tulip.GlGraphRenderingParameters.prototype.interpolateEdgesColors = function tulip_GlGraphRenderingParameters_prototype_interpolateEdgesColors() {
       return _GlGraphRenderingParameters_interpolateEdgesColors(this.cppPointer) > 0;
-    }
+    };
 
     tulip.GlGraphRenderingParameters.prototype.setInterpolateEdgesSizes = function tulip_GlGraphRenderingParameters_prototype_setInterpolateEdgesSizes(state) {
       checkArgumentsTypes(arguments, ["boolean"], 1);
       _GlGraphRenderingParameters_setInterpolateEdgesSizes(this.cppPointer, state);
-    }
+    };
 
     tulip.GlGraphRenderingParameters.prototype.interpolateEdgesSizes = function tulip_GlGraphRenderingParameters_prototype_interpolateEdgesSizes() {
       return _GlGraphRenderingParameters_interpolateEdgesSizes(this.cppPointer) > 0;
-    }
+    };
 
     tulip.GlGraphRenderingParameters.prototype.setDisplayEdgesExtremities = function tulip_GlGraphRenderingParameters_prototype_setDisplayEdgesExtremities(state) {
       checkArgumentsTypes(arguments, ["boolean"], 1);
       _GlGraphRenderingParameters_setDisplayEdgesExtremities(this.cppPointer, state);
-    }
+    };
 
     tulip.GlGraphRenderingParameters.prototype.displayEdgesExtremities = function tulip_GlGraphRenderingParameters_prototype_displayEdgesExtremities() {
       return _GlGraphRenderingParameters_displayEdgesExtremities(this.cppPointer) > 0;
-    }
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.setEdges3D = function tulip_GlGraphRenderingParameters_prototype_setEdges3D(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setEdges3D(this.cppPointer, state);
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.edges3D = function tulip_GlGraphRenderingParameters_prototype_edges3D() {
+      return _GlGraphRenderingParameters_edges3D(this.cppPointer) > 0;
+    };
 
     tulip.Graph.prototype.getTlpFileBlob = function(gzip) {
       var filename = "/graph.tlp";

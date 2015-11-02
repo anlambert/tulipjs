@@ -250,14 +250,20 @@ tlp::NumericProperty* GlGraphRenderingParameters::elementsOrderingProperty() con
 }
 //====================================================
 void GlGraphRenderingParameters::setBillboardedNodes(bool billboardedNodes) {
-  _billboardedNodes = billboardedNodes;
+  if (billboardedNodes != _billboardedNodes) {
+    _billboardedNodes = billboardedNodes;
+    sendEvent(GlGraphRenderingParametersEvent(this, GlGraphRenderingParametersEvent::RENDERING_PARAMETERS_MODIFIED));
+  }
 }
 bool GlGraphRenderingParameters::billboardedNodes() const {
   return _billboardedNodes;
 }
 //====================================================
 void GlGraphRenderingParameters::setBillboardedLabels(bool billboarded) {
-  _billboardedLabels=billboarded;
+  if (billboarded != _billboardedLabels) {
+    _billboardedLabels=billboarded;
+    sendEvent(GlGraphRenderingParametersEvent(this, GlGraphRenderingParametersEvent::RENDERING_PARAMETERS_MODIFIED));
+  }
 }
 bool GlGraphRenderingParameters::billboardedLabels() const {
   return _billboardedLabels;

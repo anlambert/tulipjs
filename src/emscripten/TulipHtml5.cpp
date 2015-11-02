@@ -75,6 +75,19 @@ static SelectionModifierInteractor selectionModifierInteractor;
 static NeighborhoodInteractor neighborhoodInteractor;
 static LassoSelectionInteractor lassoSelectionInteractor;
 
+static std::map<std::string, GlSceneInteractor *> initInteractorsMap() {
+  std::map<std::string, GlSceneInteractor *> ret;
+  ret["ZoomAndPan"] = &zoomAndPanInteractor;
+  ret["RectangleZoom"] = &rectangleZoomInteractor;
+  ret["Selection"] = &selectionInteractor;
+  ret["SelectionModifier"] = &selectionModifierInteractor;
+  ret["Neighborhood"] = &neighborhoodInteractor;
+  ret["LassoSelection"] = &lassoSelectionInteractor;
+  return ret;
+}
+
+static std::map<std::string, GlSceneInteractor *> interactorsMap = initInteractorsMap();
+
 static std::string currentCanvasId;
 
 extern "C" {
@@ -380,31 +393,15 @@ static GlDrawObserver glDrawObserver;
 
 extern "C" {
 
-void EMSCRIPTEN_KEEPALIVE activateNavigationInteractor(const char *canvasId) {
-  currentCanvasInteractor[canvasId] = &zoomAndPanInteractor;
+void EMSCRIPTEN_KEEPALIVE activateInteractor(const char *canvasId, const char *interactorName) {
+  if (interactorsMap.find(interactorName) == interactorsMap.end()) {
+    std::cerr << "Error : no interactor named \"" << interactorName << "\"" << std::endl;
+  } else {
+    currentCanvasInteractor[canvasId] = interactorsMap[interactorName];
+  }
 }
 
-void EMSCRIPTEN_KEEPALIVE activateZoomInteractor(const char *canvasId) {
-  currentCanvasInteractor[canvasId] = &rectangleZoomInteractor;
-}
-
-void EMSCRIPTEN_KEEPALIVE activateSelectionInteractor(const char *canvasId) {
-  currentCanvasInteractor[canvasId] = &selectionInteractor;
-}
-
-void EMSCRIPTEN_KEEPALIVE activateSelectionModifierInteractor(const char *canvasId) {
-  currentCanvasInteractor[canvasId] = &selectionModifierInteractor;
-}
-
-void EMSCRIPTEN_KEEPALIVE activateLassoSelectionInteractor(const char *canvasId) {
-  currentCanvasInteractor[canvasId] = &lassoSelectionInteractor;
-}
-
-void EMSCRIPTEN_KEEPALIVE activateNeighborhoodInteractor(const char *canvasId) {
-  currentCanvasInteractor[canvasId] = &neighborhoodInteractor;
-}
-
-void EMSCRIPTEN_KEEPALIVE activateJsInteractor(const char *canvasId) {
+void EMSCRIPTEN_KEEPALIVE desactivateInteractor(const char *canvasId) {
   currentCanvasInteractor[canvasId] = NULL;
 }
 
@@ -483,7 +480,7 @@ void EMSCRIPTEN_KEEPALIVE initCanvas(const char *canvasId, int width, int height
     progressLayer->addGlEntity(glProgressBar[currentCanvasId], "progress bar");
     glProgressBar[currentCanvasId]->setVisible(false);
 
-    activateNavigationInteractor(currentCanvasId.c_str());
+    activateInteractor(currentCanvasId.c_str(), "ZoomAndPan");
 
     draw();
 

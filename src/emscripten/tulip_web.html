@@ -12,53 +12,36 @@
      <script type="text/javascript" src="https://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
 
      <style type="text/css">
+         .ui-icon-interactor-navigation,
+         .ui-icon-interactor-zoom,
+         .ui-icon-interactor-selection,
+         .ui-icon-interactor-selection-modifier,
+         .ui-icon-interactor-lasso-selection,
+         .ui-icon-interactor-neighborhood
+         {
+              background-color: transparent;
+              box-shadow: none;
+              -moz-border-radius: 0px;
+              -webkit-border-radius:0px;
+              border-radius:0px;
+         }
         .ui-icon-interactor-navigation {
              background-image: url("images/i_navigation.png");
-             background-color: transparent;
-             box-shadow: none;
-             -moz-border-radius: 0px;
-             -webkit-border-radius:0px;
-             border-radius:0px;
-        }
+         }
         .ui-icon-interactor-zoom {
              background-image: url("images/i_zoom.png");
-             background-color: transparent;
-             box-shadow: none;
-             -moz-border-radius: 0px;
-             -webkit-border-radius:0px;
-             border-radius:0px;
         }
         .ui-icon-interactor-selection {
              background-image: url("images/i_selection.png");
-             background-color: transparent;
-             box-shadow: none;
-             -moz-border-radius: 0px;
-             -webkit-border-radius:0px;
-             border-radius:0px;
         }
         .ui-icon-interactor-selection-modifier {
              background-image: url("images/i_move.png");
-             background-color: transparent;
-             box-shadow: none;
-             -moz-border-radius: 0px;
-             -webkit-border-radius:0px;
-             border-radius:0px;
         }
         .ui-icon-interactor-lasso-selection {
              background-image: url("images/i_lasso.png");
-             background-color: transparent;
-             box-shadow: none;
-             -moz-border-radius: 0px;
-             -webkit-border-radius:0px;
-             border-radius:0px;
         }
         .ui-icon-interactor-neighborhood {
              background-image: url("images/i_neighborhood_highlighter.png");
-             /*background-color: transparent;*/
-             box-shadow: none;
-             -moz-border-radius: 0px;
-             -webkit-border-radius:0px;
-             border-radius:0px;
         }
         .ui-focus,
         .ui-btn:focus {
@@ -87,12 +70,12 @@
         <a href="#computepanel" class="ui-btn-left">Menu</a>
         <div data-role="controlgroup" data-type="horizontal" style="display: inline-block;">
 
-        <a id="navigation-button" href=# class="ui-icon-nodisc ui-btn-active" data-role="button" data-icon="interactor-navigation" data-iconpos="notext">Navigate in graph</a>
-        <a id="zoom-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-zoom" data-iconpos="notext">Zoom on rectangle</a>
-        <a id="selection-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-selection" data-iconpos="notext">Select nodes/edges in a rectangle</a>
-        <a id="lasso-selection-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-lasso-selection" data-iconpos="notext">Select nodes in a freehand drawn region</a>
-        <a id="neighborhood-highlighter-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-neighborhood" data-iconpos="notext">Highlight node neighborhood</a>
-        <a id="selection-modifier-button" href=# class="ui-icon-nodisc" data-role="button" data-icon="interactor-selection-modifier" data-iconpos="notext">Move rectangle selection</a>
+        <a id="navigation-button" href=# class="ui-icon-nodisc ui-btn-active interactor-button" data-role="button" data-icon="interactor-navigation" data-iconpos="notext">Navigate in graph</a>
+        <a id="zoom-button" href=# class="ui-icon-nodisc interactor-button" data-role="button" data-icon="interactor-zoom" data-iconpos="notext">Zoom on rectangle</a>
+        <a id="selection-button" href=# class="ui-icon-nodisc interactor-button" data-role="button" data-icon="interactor-selection" data-iconpos="notext">Select nodes/edges in a rectangle</a>
+        <a id="lasso-selection-button" href=# class="ui-icon-nodisc interactor-button" data-role="button" data-icon="interactor-lasso-selection" data-iconpos="notext">Select nodes in a freehand drawn region</a>
+        <a id="neighborhood-highlighter-button" href=# class="ui-icon-nodisc interactor-button" data-role="button" data-icon="interactor-neighborhood" data-iconpos="notext">Highlight node neighborhood</a>
+        <a id="selection-modifier-button" href=# class="ui-icon-nodisc interactor-button" data-role="button" data-icon="interactor-selection-modifier" data-iconpos="notext">Move rectangle selection</a>
 
         </div>
 
@@ -211,85 +194,27 @@
 <script type='text/javascript'>
 
  var tulipView = null;
- var jsInteractor = false;
 
- $('#navigation-button').button().bind('click', function(){
-    jsInteractor = false;
-    $(this).addClass('ui-btn-active');
-    $('#zoom-button').removeClass('ui-btn-active');
-    $('#selection-button').removeClass('ui-btn-active');
-    $('#selection-modifier-button').removeClass('ui-btn-active');
-    $('#lasso-selection-button').removeClass('ui-btn-active');
-    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    tulipView.activateNavigationInteractor();
-    tulipView.clearCanvas2d();
-    tulipView.draw();
- });
+ function activateInteractor(interactorName) {
+   return function() {
+     $('.interactor-button').removeClass('ui-btn-active');
+     $(this).addClass('ui-btn-active');
+     tulipView.activateInteractor(interactorName);
+     tulipView.draw();
+   }
+ }
 
- $('#zoom-button').button().bind('click', function(){
-    jsInteractor = false;
-    $(this).addClass('ui-btn-active');
-    $('#navigation-button').removeClass('ui-btn-active')
-    $('#selection-button').removeClass('ui-btn-active');
-    $('#selection-modifier-button').removeClass('ui-btn-active');
-    $('#lasso-selection-button').removeClass('ui-btn-active');
-    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    tulipView.activateZoomInteractor();
-    tulipView.clearCanvas2d();
-    tulipView.draw();
- });
+ $('#navigation-button').button().bind('click', activateInteractor('ZoomAndPan'));
 
- $('#selection-button').button().bind('click', function(){
-    jsInteractor = false;
-    $(this).addClass('ui-btn-active');
-    $('#navigation-button').removeClass('ui-btn-active');
-    $('#zoom-button').removeClass('ui-btn-active');
-    $('#selection-modifier-button').removeClass('ui-btn-active');
-    $('#lasso-selection-button').removeClass('ui-btn-active');
-    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    tulipView.activateSelectionInteractor();
-    tulipView.clearCanvas2d();
-    tulipView.draw();
- });
+ $('#zoom-button').button().bind('click', activateInteractor('RectangleZoom'));
 
- $('#selection-modifier-button').button().bind('click', function(){
-    jsInteractor = false;
-    $(this).addClass('ui-btn-active');
-    $('#navigation-button').removeClass('ui-btn-active');
-    $('#selection-button').removeClass('ui-btn-active');
-    $('#zoom-button').removeClass('ui-btn-active');
-    $('#lasso-selection-button').removeClass('ui-btn-active');
-    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    tulipView.activateSelectionModifierInteractor();
-    tulipView.clearCanvas2d();
-    tulipView.draw();
- });
+ $('#selection-button').button().bind('click', activateInteractor('Selection'));
 
- $('#lasso-selection-button').button().bind('click', function(){
-    jsInteractor = false;
-    $(this).addClass('ui-btn-active');
-    $('#navigation-button').removeClass('ui-btn-active');
-    $('#selection-button').removeClass('ui-btn-active');
-    $('#selection-modifier-button').removeClass('ui-btn-active');
-    $('#zoom-button').removeClass('ui-btn-active');
-    $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    tulipView.activateLassoSelectionInteractor();
-    tulipView.clearCanvas2d();
-    tulipView.draw();
- });
+ $('#selection-modifier-button').button().bind('click', activateInteractor('SelectionModifier'));
 
- $('#neighborhood-highlighter-button').button().bind('click', function(){
-    jsInteractor = false;
-    $(this).addClass('ui-btn-active');
-    $('#navigation-button').removeClass('ui-btn-active');
-    $('#selection-button').removeClass('ui-btn-active');
-    $('#selection-modifier-button').removeClass('ui-btn-active');
-    $('#zoom-button').removeClass('ui-btn-active');
-    $('#lasso-selection-button').removeClass('ui-btn-active');
-    tulipView.activateNeighborhoodInteractor();
-    tulipView.clearCanvas2d();
-    tulipView.draw();
- });
+ $('#lasso-selection-button').button().bind('click', activateInteractor('LassoSelection'));
+
+ $('#neighborhood-highlighter-button').button().bind('click', activateInteractor('Neighborhood'));
 
  $("#color-interpolation, #size-interpolation, \
    #edge-extremities, #display-edges, #display-nodes").change(function(){

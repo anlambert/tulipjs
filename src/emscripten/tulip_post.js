@@ -3800,13 +3800,8 @@ if (workerMode) {
     var _endGraphViewUpdate = Module.cwrap('endGraphViewUpdate', null, ['string']);
     var _setGraphRenderingDataReady = Module.cwrap('setGraphRenderingDataReady', null, ['string', 'number']);
 
-    var _activateNavigationInteractor = Module.cwrap('activateNavigationInteractor', null, ['string']);
-    var _activateZoomInteractor = Module.cwrap('activateZoomInteractor', null, ['string']);
-    var _activateSelectionInteractor = Module.cwrap('activateSelectionInteractor', null, ['string']);
-    var _activateSelectionModifierInteractor = Module.cwrap('activateSelectionModifierInteractor', null, ['string']);
-    var _activateLassoSelectionInteractor = Module.cwrap('activateLassoSelectionInteractor', null, ['string']);
-    var _activateNeighborhoodInteractor = Module.cwrap('activateNeighborhoodInteractor', null, ['string']);
-    var _activateJsInteractor = Module.cwrap('activateJsInteractor', null, ['string']);
+    var _activateInteractor = Module.cwrap('activateInteractor', null, ['string', 'string']);
+    var _desactivateInteractor = Module.cwrap('desactivateInteractor', null, ['string']);
 
     var _setProgressBarPercent = Module.cwrap('setProgressBarPercent', null, ['string', 'number']);
     var _setProgressBarComment = Module.cwrap('setProgressBarComment', null, ['string', 'string']);
@@ -4146,32 +4141,12 @@ if (workerMode) {
       _setCurrentCanvas(this.canvasId);
     };
 
-    tulip.View.prototype.activateNavigationInteractor = function() {
-      _activateNavigationInteractor(this.canvasId);
+    tulip.View.prototype.activateInteractor = function(interactorName) {
+      _activateInteractor(this.canvasId, interactorName);
     };
 
-    tulip.View.prototype.activateZoomInteractor = function() {
-      _activateZoomInteractor(this.canvasId);
-    };
-
-    tulip.View.prototype.activateSelectionInteractor = function() {
-      _activateSelectionInteractor(this.canvasId);
-    };
-
-    tulip.View.prototype.activateSelectionModifierInteractor = function() {
-      _activateSelectionModifierInteractor(this.canvasId);
-    };
-
-    tulip.View.prototype.activateLassoSelectionInteractor = function() {
-      _activateLassoSelectionInteractor(this.canvasId);
-    };
-
-    tulip.View.prototype.activateNeighborhoodInteractor = function() {
-      _activateNeighborhoodInteractor(this.canvasId);
-    };
-
-    tulip.View.prototype.activateJsInteractor = function() {
-      _activateJsInteractor(this.canvasId);
+    tulip.View.prototype.desactivateInteractor = function() {
+      _desactivateInteractor(this.canvasId);
     };
 
     tulip.View.prototype.centerScene = function() {

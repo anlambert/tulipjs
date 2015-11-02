@@ -49,6 +49,7 @@
 #include "GlShaderProgram.h"
 #include "glyphs/GlyphsRenderer.h"
 #include "GlProgressBar.h"
+#include "GlGraphRenderingParameters.h"
 
 #include <sys/stat.h>
 #include <emscripten/emscripten.h>
@@ -633,6 +634,52 @@ void EMSCRIPTEN_KEEPALIVE endGraphViewUpdate(const char *canvasId) {
 
 //==============================================================
 
+GlGraphRenderingParameters* EMSCRIPTEN_KEEPALIVE getViewRenderingParameters(const char *canvasId) {
+  return &(glGraph[canvasId]->getRenderingParameters());
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setDisplayNodes(GlGraphRenderingParameters *glgrp, bool state) {
+  glgrp->setDisplayNodes(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_displayNodes(GlGraphRenderingParameters *glgrp) {
+  return glgrp->displayNodes();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setDisplayEdges(GlGraphRenderingParameters *glgrp, bool state) {
+  glgrp->setDisplayEdges(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_displayEdges(GlGraphRenderingParameters *glgrp) {
+  return glgrp->displayEdges();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setInterpolateEdgesColors(GlGraphRenderingParameters *glgrp, bool state) {
+  glgrp->setInterpolateEdgesColors(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_interpolateEdgesColors(GlGraphRenderingParameters *glgrp) {
+  return glgrp->interpolateEdgesColors();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setInterpolateEdgesSizes(GlGraphRenderingParameters *glgrp, bool state) {
+  glgrp->setInterpolateEdgesSizes(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_interpolateEdgesSizes(GlGraphRenderingParameters *glgrp) {
+  return glgrp->interpolateEdgesSizes();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setDisplayEdgesExtremities(GlGraphRenderingParameters *glgrp, bool state) {
+  glgrp->setDisplayEdgesExtremities(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_displayEdgesExtremities(GlGraphRenderingParameters *glgrp) {
+  return glgrp->displayEdgesExtremities();
+}
+
+//==============================================================
+
 void EMSCRIPTEN_KEEPALIVE setProgressBarPercent(const char *canvasId, int percent) {
   glProgressBar[canvasId]->setPercent(percent);
 }
@@ -653,5 +700,3 @@ void EMSCRIPTEN_KEEPALIVE fullScreen(const char *canvasId) {
 }
 
 //==============================================================
-
-

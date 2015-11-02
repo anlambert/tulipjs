@@ -4036,6 +4036,7 @@ if (workerMode) {
   if (!tulip.coreBuild) {
 
     var _setCanvasGraph = Module.cwrap('setCanvasGraph', null, ['string', 'number']);
+    var _getViewRenderingParameters = Module.cwrap('getViewRenderingParameters', 'number', ['string']);
 
     tulip.getViewForCanvasId = function(canvasId) {
       if (canvasId in _canvasIdToView) {
@@ -4122,7 +4123,6 @@ if (workerMode) {
       this.strokeStyle = context.strokeStyle;
 
       this.stroke = function() {
-        console.log('coucou');
         _setCanvas2dModified(canvasId);
         context.stroke();
       }
@@ -4306,6 +4306,77 @@ if (workerMode) {
       return {nodes: selectedNodes, edges: selectedEdges};
 
     };
+
+    tulip.View.prototype.getRenderingParameters = function() {
+      return tulip.GlGraphRenderingParameters(_getViewRenderingParameters(this.canvasId));
+    }
+
+    // ==================================================================================================
+
+    var _GlGraphRenderingParameters_setDisplayNodes = Module.cwrap('GlGraphRenderingParameters_setDisplayNodes', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_displayNodes = Module.cwrap('GlGraphRenderingParameters_displayNodes', 'number', ['number']);
+    var _GlGraphRenderingParameters_setDisplayEdges = Module.cwrap('GlGraphRenderingParameters_setDisplayEdges', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_displayEdges = Module.cwrap('GlGraphRenderingParameters_displayEdges', 'number', ['number']);
+    var _GlGraphRenderingParameters_setInterpolateEdgesColors = Module.cwrap('GlGraphRenderingParameters_setInterpolateEdgesColors', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_interpolateEdgesColors = Module.cwrap('GlGraphRenderingParameters_interpolateEdgesColors', 'number', ['number']);
+    var _GlGraphRenderingParameters_setInterpolateEdgesSizes = Module.cwrap('GlGraphRenderingParameters_setInterpolateEdgesSizes', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_interpolateEdgesSizes = Module.cwrap('GlGraphRenderingParameters_interpolateEdgesSizes', 'number', ['number']);
+    var _GlGraphRenderingParameters_setDisplayEdgesExtremities = Module.cwrap('GlGraphRenderingParameters_setDisplayEdgesExtremities', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_displayEdgesExtremities = Module.cwrap('GlGraphRenderingParameters_displayEdgesExtremities', 'number', ['number']);
+
+    tulip.GlGraphRenderingParameters = function tulip_GlGraphRenderingParameters(cppPointer) {
+      var newObject = createObject(tulip.GlGraphRenderingParameters, this);
+      tulip.CppObjectWrapper.call(newObject, cppPointer, "GlGraphRenderingParameters");
+      return newObject;
+    };
+    tulip.GlGraphRenderingParameters.inheritsFrom(tulip.CppObjectWrapper);
+
+    tulip.GlGraphRenderingParameters.prototype.setDisplayNodes = function tulip_GlGraphRenderingParameters_prototype_setDisplayNodes(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setDisplayNodes(this.cppPointer, state);
+    }
+
+    tulip.GlGraphRenderingParameters.prototype.displayNodes = function tulip_GlGraphRenderingParameters_prototype_displayNodes() {
+      return _GlGraphRenderingParameters_displayNodes(this.cppPointer) > 0;
+    }
+
+    tulip.GlGraphRenderingParameters.prototype.setDisplayEdges = function tulip_GlGraphRenderingParameters_prototype_setDisplayEdges(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setDisplayEdges(this.cppPointer, state);
+    }
+
+    tulip.GlGraphRenderingParameters.prototype.displayEdges = function tulip_GlGraphRenderingParameters_prototype_displayEdges() {
+      return _GlGraphRenderingParameters_displayEdges(this.cppPointer) > 0;
+    }
+
+    tulip.GlGraphRenderingParameters.prototype.setInterpolateEdgesColors = function tulip_GlGraphRenderingParameters_prototype_setInterpolateEdgesColors(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setInterpolateEdgesColors(this.cppPointer, state);
+    }
+
+    tulip.GlGraphRenderingParameters.prototype.interpolateEdgesColors = function tulip_GlGraphRenderingParameters_prototype_interpolateEdgesColors() {
+      return _GlGraphRenderingParameters_interpolateEdgesColors(this.cppPointer) > 0;
+    }
+
+    tulip.GlGraphRenderingParameters.prototype.setInterpolateEdgesSizes = function tulip_GlGraphRenderingParameters_prototype_setInterpolateEdgesSizes(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setInterpolateEdgesSizes(this.cppPointer, state);
+    }
+
+    tulip.GlGraphRenderingParameters.prototype.interpolateEdgesSizes = function tulip_GlGraphRenderingParameters_prototype_interpolateEdgesSizes() {
+      return _GlGraphRenderingParameters_interpolateEdgesSizes(this.cppPointer) > 0;
+    }
+
+    tulip.GlGraphRenderingParameters.prototype.setDisplayEdgesExtremities = function tulip_GlGraphRenderingParameters_prototype_setDisplayEdgesExtremities(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setDisplayEdgesExtremities(this.cppPointer, state);
+    }
+
+    tulip.GlGraphRenderingParameters.prototype.displayEdgesExtremities = function tulip_GlGraphRenderingParameters_prototype_displayEdgesExtremities() {
+      return _GlGraphRenderingParameters_displayEdgesExtremities(this.cppPointer) > 0;
+    }
+
+    // ==================================================================================================
 
     /* FileSaver.js
          * A saveAs() FileSaver implementation.

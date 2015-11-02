@@ -96,6 +96,8 @@
 
         </div>
 
+        <a href="#renderingparamspanel" class="ui-btn-right">Rendering parameters</a>
+
       </div>
       <!-- content -->
       <div id ="main-content" data-role="content" data-theme="a" style='min-height:60px'>
@@ -181,12 +183,26 @@
 
       <a data-role = "button" data-icon = "star" data-mini = "true" onclick ="graph.downloadTlpFile();">Save graph to TLP format</a>
       <a data-role = "button" data-icon = "refresh" data-mini = "true" onclick ="tulipView.centerScene();">Center</a>
-      <!-- <a data-role="button" data-icon="grid" data-mini = "true" onclick="tulipView.resize(tulipView.getWidth() + 0.1 * tulipView.getWidth(), tulipView.getHeight() + 0.1 * tulipView.getHeight());">Increase canvas size</a> -->
-      <!-- <a data-role="button" data-icon="grid" data-mini = "true" onclick="tulipView.resize(tulipView.getWidth() - 0.1 * tulipView.getWidth(), tulipView.getHeight() - 0.1 * tulipView.getHeight());">Decrease canvas size</a> -->
       <a data-role="button" data-icon="grid" data-mini = "true" onclick="tulipView.fullScreen();">Fullscreen</a>
       <a data-role = "button" data-icon = "close" data-mini = "true" data-rel="close">Close panel</a>
 
       </div><!-- /panel left-->
+
+      <!-- /panel right-->
+      <div data-role="panel" id="renderingparamspanel" data-position="right" data-theme="a" data-display="overlay">
+      <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
+      <h3> Nodes </h3>
+      <label><input id="display-nodes" type="checkbox" data-mini="true" checked=true> Display </label>
+      </div>
+      <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
+      <h3> Edges </h3>
+      <label><input id="display-edges" type="checkbox" data-mini="true" checked=true> Display </label>
+      <label><input id="color-interpolation" type="checkbox" data-mini="true" checked=false> Color interpolation </label>
+      <label><input id="size-interpolation" type="checkbox" data-mini="true" checked=true> Size interpolation </label>
+      <label><input id="edge-extremities" type="checkbox" data-mini="true" checked=true>  Display extremities </label>
+      </div>
+      </div>
+
     </div> <!-- /page one -->
 
 
@@ -205,7 +221,6 @@
     $('#selection-modifier-button').removeClass('ui-btn-active');
     $('#lasso-selection-button').removeClass('ui-btn-active');
     $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateNavigationInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
@@ -219,7 +234,6 @@
     $('#selection-modifier-button').removeClass('ui-btn-active');
     $('#lasso-selection-button').removeClass('ui-btn-active');
     $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateZoomInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
@@ -233,7 +247,6 @@
     $('#selection-modifier-button').removeClass('ui-btn-active');
     $('#lasso-selection-button').removeClass('ui-btn-active');
     $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateSelectionInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
@@ -247,7 +260,6 @@
     $('#zoom-button').removeClass('ui-btn-active');
     $('#lasso-selection-button').removeClass('ui-btn-active');
     $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateSelectionModifierInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
@@ -261,7 +273,6 @@
     $('#selection-modifier-button').removeClass('ui-btn-active');
     $('#zoom-button').removeClass('ui-btn-active');
     $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
-    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateLassoSelectionInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
@@ -275,27 +286,29 @@
     $('#selection-modifier-button').removeClass('ui-btn-active');
     $('#zoom-button').removeClass('ui-btn-active');
     $('#lasso-selection-button').removeClass('ui-btn-active');
-    //$('#js-interactor-button').removeClass('ui-btn-active');
     tulipView.activateNeighborhoodInteractor();
     tulipView.clearCanvas2d();
     tulipView.draw();
  });
 
- //$('#js-interactor-button').button().bind('click', function(){
- //   jsInteractor = true;
- //   $(this).addClass('ui-btn-active');
- //   $('#navigation-button').removeClass('ui-btn-active');
- //   $('#selection-button').removeClass('ui-btn-active');
- //   $('#selection-modifier-button').removeClass('ui-btn-active');
- //   $('#zoom-button').removeClass('ui-btn-active');
- //   $('#lasso-selection-button').removeClass('ui-btn-active');
- //   $('#neighborhood-highlighter-button').removeClass('ui-btn-active');
- //   tulipView.activateJsInteractor();
- //});
+ $("#color-interpolation, #size-interpolation, \
+   #edge-extremities, #display-edges, #display-nodes").change(function(){
+   applyRenderingParameters();
+ });
 
  var start = null;
  var graph = null;
  var subgraph = null;
+
+ function applyRenderingParameters() {
+   tulip.holdObservers();
+   renderingParameters.setDisplayNodes($('#display-nodes').prop('checked'));
+   renderingParameters.setDisplayEdges($('#display-edges').prop('checked'));
+   renderingParameters.setInterpolateEdgesColors($('#color-interpolation').prop('checked'));
+   renderingParameters.setInterpolateEdgesSizes($('#size-interpolation').prop('checked'));
+   renderingParameters.setDisplayEdgesExtremities($('#edge-extremities').prop('checked'));
+   tulip.unholdObservers();
+ }
 
  function setGlobalVars(g) {
    console.log(g.getAttribute("file"));
@@ -460,6 +473,8 @@
      tulip.addListener("PropertyEvent", tulipPropertyEventHandler);
      var container = document.getElementById("tulip-view");
      tulipView = tulip.View(container, window.innerWidth-50, window.innerHeight-80);
+     renderingParameters = tulipView.getRenderingParameters();
+     applyRenderingParameters();
      loadGraphFromDataFolder("programming_language_network.tlp.gz");
    }
  }

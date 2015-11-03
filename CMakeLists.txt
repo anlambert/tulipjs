@@ -36,6 +36,9 @@ FIND_PACKAGE(GLEW REQUIRED)
 FIND_PACKAGE(Freetype REQUIRED)
 FIND_PACKAGE(ZLIB REQUIRED)
 
+EXEC_PROGRAM(uname OUTPUT_VARIABLE UNAME_OUT)
+STRING(COMPARE EQUAL "${UNAME_OUT}" "Linux" LINUX)
+
 IF(LINUX)
   ADD_SUBDIRECTORY(thirdparty)
 ELSE(LINUX)
@@ -98,7 +101,7 @@ ENDIF(ENABLE_OPENMP)
 ENDIF(NOT EMSCRIPTEN)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
 
 SET(GRAPH_RENDERER_SRCS
     src/tulip-ogles/GlEntity.cpp
@@ -130,6 +133,7 @@ SET(GRAPH_RENDERER_SRCS
     src/interactors/SelectionModifierInteractor.cpp
     src/interactors/NeighborhoodInteractor.cpp
     src/interactors/LassoSelectionInteractor.cpp
+    src/interactors/FisheyeInteractor.cpp
     src/tulip-ogles/glyphs/Glyph.cpp
     src/tulip-ogles/glyphs/SquareGlyph.cpp
     src/tulip-ogles/glyphs/TriangleGlyph.cpp

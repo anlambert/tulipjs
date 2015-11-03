@@ -7,6 +7,7 @@
 #include "SelectionModifierInteractor.h"
 #include "NeighborhoodInteractor.h"
 #include "LassoSelectionInteractor.h"
+#include "FisheyeInteractor.h"
 
 static ZoomAndPanInteractor zoomAndPanInteractor;
 static RectangleZoomInteractor rectangleZoomInteractor;
@@ -14,6 +15,7 @@ static SelectionInteractor selectionInteractor;
 static SelectionModifierInteractor selectionModifierInteractor;
 static NeighborhoodInteractor neighborhoodInteractor;
 static LassoSelectionInteractor lassoSelectionInteractor;
+static FisheyeInteractor fisheyeInteractor;
 
 static std::map<std::string, GlSceneInteractor *> initInteractorsMap() {
   std::map<std::string, GlSceneInteractor *> ret;
@@ -23,6 +25,7 @@ static std::map<std::string, GlSceneInteractor *> initInteractorsMap() {
   ret["SelectionModifier"] = &selectionModifierInteractor;
   ret["Neighborhood"] = &neighborhoodInteractor;
   ret["LassoSelection"] = &lassoSelectionInteractor;
+  ret["Fisheye"] = &fisheyeInteractor;
   return ret;
 }
 

@@ -18,7 +18,8 @@
          .ui-icon-interactor-selection,
          .ui-icon-interactor-selection-modifier,
          .ui-icon-interactor-lasso-selection,
-         .ui-icon-interactor-neighborhood
+         .ui-icon-interactor-neighborhood,
+         .ui-icon-interactor-fisheye
          {
               background-color: transparent;
               box-shadow: none;
@@ -43,6 +44,9 @@
         }
         .ui-icon-interactor-neighborhood {
              background-image: url("images/i_neighborhood_highlighter.png");
+        }
+        .ui-icon-interactor-fisheye {
+             background-image: url("images/i_fisheye.png");
         }
         .ui-focus,
         .ui-btn:focus {
@@ -76,6 +80,7 @@
         <a id="selection-button" href=# class="ui-icon-nodisc interactor-button" data-role="button" data-icon="interactor-selection" data-iconpos="notext">Select nodes/edges in a rectangle</a>
         <a id="lasso-selection-button" href=# class="ui-icon-nodisc interactor-button" data-role="button" data-icon="interactor-lasso-selection" data-iconpos="notext">Select nodes in a freehand drawn region</a>
         <a id="neighborhood-highlighter-button" href=# class="ui-icon-nodisc interactor-button" data-role="button" data-icon="interactor-neighborhood" data-iconpos="notext">Highlight node neighborhood</a>
+        <a id="fisheye-button" href=# class="ui-icon-nodisc interactor-button" data-role="button" data-icon="interactor-fisheye" data-iconpos="notext">Fisheye lens</a>
         <a id="selection-modifier-button" href=# class="ui-icon-nodisc interactor-button" data-role="button" data-icon="interactor-selection-modifier" data-iconpos="notext">Move rectangle selection</a>
 
         </div>
@@ -224,6 +229,8 @@
  $('#lasso-selection-button').button().bind('click', activateInteractor('LassoSelection'));
 
  $('#neighborhood-highlighter-button').button().bind('click', activateInteractor('Neighborhood'));
+
+ $('#fisheye-button').button().bind('click', activateInteractor('Fisheye'));
 
  var start = null;
  var graph = null;

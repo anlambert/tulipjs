@@ -169,6 +169,9 @@ static void keyboardCallback(const unsigned char key, const int , const int ) {
   } else if (key == '6') {
     activateInteractor("SelectionModifier");
     glutPostRedisplay();
+  } else if (key == '7') {
+    activateInteractor("Fisheye");
+    glutPostRedisplay();
   }
   else if (key == 'o') {
     QString graphFile = QFileDialog::getOpenFileName(0, "open graph file", ".", "Tulip graph (*.tlp *.tlp.gz)");

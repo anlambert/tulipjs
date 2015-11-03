@@ -112,7 +112,6 @@ void LassoSelectionInteractor::selectGraphElementsUnderPolygon() {
   vector<SelectedEntity> selectedEntities;
 
   if (!polygonScrBB.isValid()) {
-    std::cout << xStart << " " << yStart << " " << (xEnd - xStart) << " " << (yEnd - yStart) << std::endl;
     return;
   }
 

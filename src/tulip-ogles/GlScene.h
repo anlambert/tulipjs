@@ -144,6 +144,14 @@ public:
 
   void setBackupBackBuffer(bool backup) {_backupBackBuffer = backup;}
 
+  unsigned int getBackBufferTexture() const {
+    return _backBufferTexture;
+  }
+
+  std::string getBackBufferTextureName() const {
+    return _backBufferTextureName;
+  }
+
 protected:
 
   void treatEvent(const tlp::Event &message);
@@ -161,10 +169,12 @@ private:
   bool _clearBufferAtDraw;
   bool _sceneNeedRedraw;
   unsigned int _backBufferTexture;
+  std::string _backBufferTextureName;
   unsigned char *_backBufferBackup;
 
   bool _pickingMode;
   bool _backupBackBuffer;
+
 
 };
 

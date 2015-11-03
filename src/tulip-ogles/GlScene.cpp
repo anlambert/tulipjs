@@ -21,7 +21,7 @@ using namespace std;
 using namespace tlp;
 
 GlScene::GlScene() : _backgroundColor(255, 255, 255, 255), _clearBufferAtDraw(true), _sceneNeedRedraw(true),
-  _backBufferTexture(0), _backBufferBackup(NULL), _pickingMode(false), _backupBackBuffer(true) {
+  _backBufferTexture(0), _backBufferTextureName("backBufferTexture"), _backBufferBackup(NULL), _pickingMode(false), _backupBackBuffer(true) {
   _lodCalculator = new GlQuadTreeLODCalculator();
   _lodCalculator->setRenderingEntitiesFlag(RenderingGlEntities);
   _mainLayer = new GlLayer("Main");
@@ -148,7 +148,6 @@ void GlScene::draw() {
 }
 
 void GlScene::backupBackBuffer() {
-#ifdef __EMSCRIPTEN__
   if (_backBufferTexture == 0) {
     glGenTextures(1, &_backBufferTexture);
     glBindTexture(GL_TEXTURE_2D, _backBufferTexture);
@@ -157,40 +156,31 @@ void GlScene::backupBackBuffer() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
-    TextureManager::instance()->addExternalTexture("backBufferTexture", _backBufferTexture);
+    TextureManager::instance()->addExternalTexture(_backBufferTextureName, _backBufferTexture);
   }
-
   glBindTexture(GL_TEXTURE_2D, _backBufferTexture);
+#ifdef __EMSCRIPTEN__
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _viewport[0], _viewport[1], _viewport[2], _viewport[3], 0);
-  glBindTexture(GL_TEXTURE_2D, 0);
 #else
+  // On desktop OpenGL, glCopyTexImage2D does not preserve antialiasing so we grab the back buffer content
+  // and create a texture fro
   glReadBuffer(GL_BACK);
   glReadPixels(_viewport[0], _viewport[1], _viewport[2], _viewport[3], GL_RGBA, GL_UNSIGNED_BYTE, _backBufferBackup);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _viewport[2], _viewport[3], 0, GL_RGBA, GL_UNSIGNED_BYTE, _backBufferBackup);
 #endif
+  glBindTexture(GL_TEXTURE_2D, 0);
   checkOpenGLError();
 }
 
 void GlScene::drawBackBufferBackup() {
-#ifdef __EMSCRIPTEN__
   Camera camera2d(false);
   camera2d.setViewport(_viewport);
   camera2d.initGl();
   Vec2f bl(0, 0);
   Vec2f tr(_viewport[2], _viewport[3]);
   GlRect2D rect(bl, tr, 0, Color::White);
-  rect.setTexture("backBufferTexture");
+  rect.setTexture(_backBufferTextureName);
   rect.draw(camera2d);
-#else
-  if (GlShaderProgram::getCurrentActiveShader()) {
-    GlShaderProgram::getCurrentActiveShader()->desactivate();
-  }
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_STENCIL_TEST);
-  glDrawBuffer(GL_BACK);
-  glWindowPos2i(_viewport[0], _viewport[1]);
-  glDrawPixels(_viewport[2], _viewport[3], GL_RGBA, GL_UNSIGNED_BYTE, _backBufferBackup);
-#endif
-
 }
 
 GlLayer *GlScene::createLayer(const string &name, bool is3d) {

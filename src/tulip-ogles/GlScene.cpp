@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <climits>
 #include <cstdio>
+#include <sstream>
 
 #include "GlScene.h"
 #include "GlLayer.h"
@@ -21,11 +22,15 @@ using namespace std;
 using namespace tlp;
 
 GlScene::GlScene() : _backgroundColor(255, 255, 255, 255), _clearBufferAtDraw(true), _sceneNeedRedraw(true),
-  _backBufferTexture(0), _backBufferTextureName("backBufferTexture"), _backBufferBackup(NULL), _pickingMode(false), _backupBackBuffer(true) {
+  _backBufferTexture(0), _backBufferBackup(NULL), _pickingMode(false), _backupBackBuffer(true) {
   _lodCalculator = new GlQuadTreeLODCalculator();
   _lodCalculator->setRenderingEntitiesFlag(RenderingGlEntities);
   _mainLayer = new GlLayer("Main");
   addExistingLayer(_mainLayer);
+  ostringstream oss;
+  oss << "backBufferTexture" << reinterpret_cast<unsigned long>(this);
+  _backBufferTextureName = oss.str();
+
 }
 
 GlScene::~GlScene() {

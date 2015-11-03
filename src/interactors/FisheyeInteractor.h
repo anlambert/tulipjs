@@ -9,6 +9,7 @@
 class ZoomAndPanInteractor;
 class GlShaderProgram;
 class GlBuffer;
+class GlFrameBufferObject;
 
 class FisheyeInteractor : public GlSceneInteractor {
 
@@ -39,6 +40,10 @@ private:
     GlShaderProgram *_fisheyeShader;
     GlBuffer *_buffer;
     GlBuffer *_indicesBuffer;
+    GlFrameBufferObject *_fbo;
+
+    float _fisheyeRadius;
+    float _fisheyeHeight;
 
 };
 

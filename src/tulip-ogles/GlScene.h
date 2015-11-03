@@ -140,6 +140,10 @@ public:
 
   void forceRedraw() { _sceneNeedRedraw = true;}
 
+  void setSceneNeedRedraw(bool sceneNeedRedraw) {
+    _sceneNeedRedraw = sceneNeedRedraw;
+  }
+
   void initGlParameters(bool drawBackBufferBackup=false);
 
   void setBackupBackBuffer(bool backup) {_backupBackBuffer = backup;}

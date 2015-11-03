@@ -2,6 +2,8 @@
 
 #include "GlFrameBufferObject.h"
 
+bool GlFrameBufferObject::_bufferBound = false;
+
 GlFrameBufferObject::GlFrameBufferObject(int width, int height, Attachment attachement,
                                          GLint textureMagFilter, GLint textureMinFilter,
                                          GLint textureWrap, bool generateMipmap) :
@@ -65,9 +67,11 @@ GlFrameBufferObject::~GlFrameBufferObject() {
 
 void GlFrameBufferObject::bind() {
   glBindFramebuffer(GL_FRAMEBUFFER, _fboHandle);
+  _bufferBound = true;
 }
 
 
 void GlFrameBufferObject::release() {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  _bufferBound = false;
 }

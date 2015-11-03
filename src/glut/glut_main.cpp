@@ -332,6 +332,7 @@ int  main(int argc, char *argv[]) {
   glutMouseFunc(mouseCallback);
   glutKeyboardFunc(keyboardCallback);
   glutMotionFunc(mouseMoveCallback);
+  glutPassiveMotionFunc(mouseMoveCallback);
 
   glewInit();
 

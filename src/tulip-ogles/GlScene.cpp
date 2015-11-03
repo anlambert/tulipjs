@@ -140,7 +140,7 @@ void GlScene::draw() {
     glDisable(GL_BLEND);
     glDisable(GL_SCISSOR_TEST);
 
-    if (!_pickingMode && _backupBackBuffer) {
+    if (!_pickingMode && _backupBackBuffer && !GlFrameBufferObject::bufferBound()) {
       backupBackBuffer();
     }
 

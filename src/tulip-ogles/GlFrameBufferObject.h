@@ -40,7 +40,13 @@ public:
     return _texture;
   }
 
+  static bool bufferBound() {
+    return _bufferBound;
+  }
+
 private:
+
+  static bool _bufferBound;
 
   int _width, _height;
   GLuint _fboHandle;

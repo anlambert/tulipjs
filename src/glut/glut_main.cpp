@@ -33,12 +33,7 @@
 #include "Light.h"
 #include "GlRect2D.h"
 
-#include "ZoomAndPanInteractor.h"
-#include "RectangleZoomInteractor.h"
-#include "SelectionInteractor.h"
-#include "SelectionModifierInteractor.h"
-#include "NeighborhoodInteractor.h"
-#include "LassoSelectionInteractor.h"
+#include "Interactors.h"
 
 #include "Utils.h"
 #include "TextureManager.h"
@@ -66,13 +61,7 @@ static GlGraph * glGraph;
 static GlLayer * hullsLayer;
 static tlp::Graph * graph;
 
-static ZoomAndPanInteractor zoomAndPanInteractor;
-static RectangleZoomInteractor rectangleZoomInteractor;
-static SelectionInteractor selectionInteractor;
-static SelectionModifierInteractor selectionModifierInteractor;
-static NeighborhoodInteractor neighborhoodInteractor;
-static LassoSelectionInteractor lassoSelectionInteractor;
-static GlSceneInteractor *currentInteractor = &zoomAndPanInteractor;
+static GlSceneInteractor *currentInteractor = NULL;
 
 const std::string defaultGraphFilePath = "data/programming_language_network.tlp.gz";
 
@@ -89,28 +78,17 @@ void timerFunc(unsigned int msecs, void (*func)(void *value), void *value) {
   glutTimerFunc(msecs, animationFunc, 0);
 }
 
-void activateNavigationInteractor() {
-  currentInteractor = &zoomAndPanInteractor;
-}
-
-void activateZoomInteractor() {
-  currentInteractor = &rectangleZoomInteractor;
-}
-
-void activateSelectionInteractor() {
-  currentInteractor = &selectionInteractor;
-}
-
-void activateSelectionModifierInteractor() {
-  currentInteractor = &selectionModifierInteractor;
-}
-
-void activateLassoSelectionInteractor() {
-  currentInteractor = &lassoSelectionInteractor;
-}
-
-void activateNeighborhoodInteractor() {
-  currentInteractor = &neighborhoodInteractor;
+void activateInteractor(const std::string &interactorName) {
+  if (interactorsMap.find(interactorName) == interactorsMap.end()) {
+    std::cerr << "Error : no interactor named \"" << interactorName << "\"" << std::endl;
+  } else {
+    if (currentInteractor) {
+      currentInteractor->desactivate();
+    }
+    currentInteractor = interactorsMap[interactorName];
+    currentInteractor->setScene(glScene);
+    currentInteractor->activate();
+  }
 }
 
 static void glutReshapeCallback(int width, int height) {
@@ -174,22 +152,22 @@ static tlp::Graph* loadGraph(const char *filename) {
 
 static void keyboardCallback(const unsigned char key, const int , const int ) {
   if (key == '1') {
-    activateNavigationInteractor();
+    activateInteractor("ZoomAndPan");
     glutPostRedisplay();
   } else if (key == '2') {
-    activateZoomInteractor();
+    activateInteractor("RectangleZoom");
     glutPostRedisplay();
   } else if (key == '3') {
-    activateSelectionInteractor();
+    activateInteractor("Selection");
     glutPostRedisplay();
   } else if (key == '4') {
-    activateLassoSelectionInteractor();
+    activateInteractor("LassoSelection");
     glutPostRedisplay();
   } else if (key == '5') {
-    activateNeighborhoodInteractor();
+    activateInteractor("Neighborhood");
     glutPostRedisplay();
   } else if (key == '6') {
-    activateSelectionModifierInteractor();
+    activateInteractor("SelectionModifier");
     glutPostRedisplay();
   }
   else if (key == 'o') {
@@ -367,12 +345,7 @@ int  main(int argc, char *argv[]) {
 
   hullsLayer = glScene->createLayerAfter("hulls", "Main");
 
-  zoomAndPanInteractor.setScene(glScene);
-  selectionInteractor.setScene(glScene);
-  rectangleZoomInteractor.setScene(glScene);
-  selectionModifierInteractor.setScene(glScene);
-  neighborhoodInteractor.setScene(glScene);
-  lassoSelectionInteractor.setScene(glScene);
+  activateInteractor("ZoomAndPan");
 
   if (argc > 1) {
     graph = loadGraph(argv[1]);

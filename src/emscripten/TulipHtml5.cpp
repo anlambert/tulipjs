@@ -31,12 +31,6 @@
 #include "Camera.h"
 #include "Light.h"
 #include "GlRect2D.h"
-#include "ZoomAndPanInteractor.h"
-#include "RectangleZoomInteractor.h"
-#include "SelectionInteractor.h"
-#include "SelectionModifierInteractor.h"
-#include "NeighborhoodInteractor.h"
-#include "LassoSelectionInteractor.h"
 #include "Utils.h"
 #include "TextureManager.h"
 #include "LabelsRenderer.h"
@@ -50,6 +44,7 @@
 #include "glyphs/GlyphsRenderer.h"
 #include "GlProgressBar.h"
 #include "GlGraphRenderingParameters.h"
+#include "Interactors.h"
 
 #include <sys/stat.h>
 #include <emscripten/emscripten.h>
@@ -66,27 +61,6 @@ static std::map<tlp::Graph *, std::string> graphToCanvas;
 static std::map<std::string, GlSceneInteractor*> currentCanvasInteractor;
 static std::map<std::string, unsigned int> canvas2dTexture;
 static std::map<std::string, bool> canvas2dModified;
-
-
-static ZoomAndPanInteractor zoomAndPanInteractor;
-static RectangleZoomInteractor rectangleZoomInteractor;
-static SelectionInteractor selectionInteractor;
-static SelectionModifierInteractor selectionModifierInteractor;
-static NeighborhoodInteractor neighborhoodInteractor;
-static LassoSelectionInteractor lassoSelectionInteractor;
-
-static std::map<std::string, GlSceneInteractor *> initInteractorsMap() {
-  std::map<std::string, GlSceneInteractor *> ret;
-  ret["ZoomAndPan"] = &zoomAndPanInteractor;
-  ret["RectangleZoom"] = &rectangleZoomInteractor;
-  ret["Selection"] = &selectionInteractor;
-  ret["SelectionModifier"] = &selectionModifierInteractor;
-  ret["Neighborhood"] = &neighborhoodInteractor;
-  ret["LassoSelection"] = &lassoSelectionInteractor;
-  return ret;
-}
-
-static std::map<std::string, GlSceneInteractor *> interactorsMap = initInteractorsMap();
 
 static std::string currentCanvasId;
 
@@ -397,11 +371,19 @@ void EMSCRIPTEN_KEEPALIVE activateInteractor(const char *canvasId, const char *i
   if (interactorsMap.find(interactorName) == interactorsMap.end()) {
     std::cerr << "Error : no interactor named \"" << interactorName << "\"" << std::endl;
   } else {
+    if (currentCanvasInteractor[canvasId]) {
+      currentCanvasInteractor[canvasId]->desactivate();
+    }
     currentCanvasInteractor[canvasId] = interactorsMap[interactorName];
+    currentCanvasInteractor[canvasId]->setScene(glScene[canvasId]);
+    currentCanvasInteractor[canvasId]->activate();
   }
 }
 
 void EMSCRIPTEN_KEEPALIVE desactivateInteractor(const char *canvasId) {
+  if (currentCanvasInteractor[canvasId]) {
+    currentCanvasInteractor[canvasId]->desactivate();
+  }
   currentCanvasInteractor[canvasId] = NULL;
 }
 
@@ -496,12 +478,9 @@ void EMSCRIPTEN_KEEPALIVE setCurrentCanvas(const char *canvasId) {
     TextureManager::setCurrentCanvasId(canvasId);
     LabelsRenderer::setCurrentCanvasId(canvasId);
     GlyphsRenderer::setCurrentCanvasId(canvasId);
-    zoomAndPanInteractor.setScene(glScene[canvasId]);
-    selectionInteractor.setScene(glScene[canvasId]);
-    rectangleZoomInteractor.setScene(glScene[canvasId]);
-    selectionModifierInteractor.setScene(glScene[canvasId]);
-    neighborhoodInteractor.setScene(glScene[canvasId]);
-    lassoSelectionInteractor.setScene(glScene[canvasId]);
+    if (currentCanvasInteractor[canvasId]) {
+      currentCanvasInteractor[canvasId]->setScene(glScene[canvasId]);
+    }
   }
   std::ostringstream oss;
   for (size_t i = 0 ; i < canvasIds.size() ; ++i) {

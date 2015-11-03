@@ -34,6 +34,10 @@ class GlSceneInteractor {
 
 public:
 
+    virtual void activate() {}
+
+    virtual void desactivate() {}
+
     virtual bool mouseCallback(const MouseButton & /*button*/, const MouseButtonState & /*state*/, int /*x*/, int /*y*/, const int & /*modifiers*/) {return false;}
 
     virtual bool mouseMoveCallback(int /*x*/, int /*y*/, const int & /*modifiers*/) {return false;}

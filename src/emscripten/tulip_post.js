@@ -1057,24 +1057,28 @@ tulip.ColorProperty.prototype.setAllEdgeValue = function tulip_ColorProperty_pro
 
 // ==================================================================================================================
 
-tulip.Coord = function tulip_Coord(x, y, z) {
+tulip.Vec3f = function tulip_Vec3f(x, y, z) {
   checkArgumentsTypes(arguments, ["number", "number", "number"])
-  var newObject = createObject(tulip.Coord, this);
+  var newObject = createObject(tulip.Vec3f, this);
   newObject.x = 0;
   newObject.y = 0;
   newObject.z = 0;
-  if (arguments.length >= 1)
+  if (arguments.length == 1) {
+    newObject.x = newObject.y = newObject.z = x;
+  } else if (arguments.length == 2) {
     newObject.x = x;
-  if (arguments.length >= 2)
     newObject.y = y;
-  if (arguments.length == 3)
+  } else if (arguments.length == 3) {
+    newObject.x = x;
+    newObject.y = y;
     newObject.z = z;
+  }
   return newObject;
 };
-tulip.Coord.prototype.add = function tulip_Coord_prototype_add() {
+tulip.Vec3f.prototype.add = function tulip_Vec3f_prototype_add() {
   var types = [];
   for (var i = 0 ; i < arguments.length ; ++i) {
-    types.push(['number', tulip.Coord]);
+    types.push(['number', tulip.Vec3f]);
   }
   checkArgumentsTypes(arguments, types, 1);
   for (var i = 0 ; i < arguments.length ; ++i) {
@@ -1090,11 +1094,11 @@ tulip.Coord.prototype.add = function tulip_Coord_prototype_add() {
   }
   return this;
 };
-tulip.Coord.add = function tulip_Coord_add() {
+tulip.Vec3f.add = function tulip_Vec3f_add() {
   var types = [];
-  types.push(tulip.Coord);
+  types.push(tulip.Vec3f);
   for (var i = 1 ; i < arguments.length ; ++i) {
-    types.push(['number', tulip.Coord]);
+    types.push(['number', tulip.Vec3f]);
   }
   checkArgumentsTypes(arguments, types, 2);
   var p = arguments[0];
@@ -1111,10 +1115,10 @@ tulip.Coord.add = function tulip_Coord_add() {
   }
   return p;
 };
-tulip.Coord.prototype.sub = function tulip_Coord_prototype_sub() {
+tulip.Vec3f.prototype.sub = function tulip_Vec3f_prototype_sub() {
   var types = [];
   for (var i = 0 ; i < arguments.length ; ++i) {
-    types.push(['number', tulip.Coord]);
+    types.push(['number', tulip.Vec3f]);
   }
   checkArgumentsTypes(arguments, types, 1);
   for (var i = 0 ; i < arguments.length ; ++i) {
@@ -1124,11 +1128,11 @@ tulip.Coord.prototype.sub = function tulip_Coord_prototype_sub() {
   }
   return this;
 };
-tulip.Coord.sub = function tulip_Coord_sub() {
+tulip.Vec3f.sub = function tulip_Vec3f_sub() {
   var types = [];
-  types.push(tulip.Coord);
+  types.push(tulip.Vec3f);
   for (var i = 1 ; i < arguments.length ; ++i) {
-    types.push(['number', tulip.Coord]);
+    types.push(['number', tulip.Vec3f]);
   }
   checkArgumentsTypes(arguments, types, 2);
   var p = arguments[0];
@@ -1145,10 +1149,10 @@ tulip.Coord.sub = function tulip_Coord_sub() {
   }
   return p;
 };
-tulip.Coord.prototype.mul = function tulip_Coord_prototype_mul() {
+tulip.Vec3f.prototype.mul = function tulip_Vec3f_prototype_mul() {
   var types = [];
   for (var i = 0 ; i < arguments.length ; ++i) {
-    types.push(['number', tulip.Coord]);
+    types.push(['number', tulip.Vec3f]);
   }
   checkArgumentsTypes(arguments, types, 1);
   for (var i = 0 ; i < arguments.length ; ++i) {
@@ -1164,11 +1168,11 @@ tulip.Coord.prototype.mul = function tulip_Coord_prototype_mul() {
   }
   return this;
 };
-tulip.Coord.mul = function tulip_Coord_mul() {
+tulip.Vec3f.mul = function tulip_Vec3f_mul() {
   var types = [];
-  types.push(tulip.Coord);
+  types.push(tulip.Vec3f);
   for (var i = 1 ; i < arguments.length ; ++i) {
-    types.push(['number', tulip.Coord]);
+    types.push(['number', tulip.Vec3f]);
   }
   checkArgumentsTypes(arguments, types, 2);
   var p = arguments[0];
@@ -1185,10 +1189,10 @@ tulip.Coord.mul = function tulip_Coord_mul() {
   }
   return p;
 };
-tulip.Coord.prototype.div = function tulip_Coord_prototype_div() {
+tulip.Vec3f.prototype.div = function tulip_Vec3f_prototype_div() {
   var types = [];
   for (var i = 0 ; i < arguments.length ; ++i) {
-    types.push(['number', tulip.Coord]);
+    types.push(['number', tulip.Vec3f]);
   }
   checkArgumentsTypes(arguments, types, 1);
   for (var i = 0 ; i < arguments.length ; ++i) {
@@ -1204,11 +1208,11 @@ tulip.Coord.prototype.div = function tulip_Coord_prototype_div() {
   }
   return this;
 };
-tulip.Coord.div = function tulip_Coord_div() {
+tulip.Vec3f.div = function tulip_Vec3f_div() {
   var types = [];
-  types.push(tulip.Coord);
+  types.push(tulip.Vec3f);
   for (var i = 1 ; i < arguments.length ; ++i) {
-    types.push(['number', tulip.Coord]);
+    types.push(['number', tulip.Vec3f]);
   }
   checkArgumentsTypes(arguments, types, 2);
   var p = arguments[0];
@@ -1219,21 +1223,27 @@ tulip.Coord.div = function tulip_Coord_div() {
   }
   return p;
 };
-tulip.Coord.prototype.norm = function tulip_Coord_prototype_norm() {
+tulip.Vec3f.prototype.norm = function tulip_Vec3f_prototype_norm() {
   return Math.sqrt(this.x*this.x+this.y*this.y+this.z*this.z);
 };
-tulip.Coord.prototype.dist = function tulip_Coord_prototype_dist(c) {
-  checkArgumentsTypes(arguments, [tulip.Coord]);
-  return tulip.Coord.dist(this, c);
+tulip.Vec3f.prototype.normalize = function tulip_Vec3f_prototype_normalize() {
+  var n = this.norm();
+  if (n != 0) {
+    this.div(n);
+  }
 };
-tulip.Coord.dist = function tulip_Coord_dist(c1, c2) {
-  checkArgumentsTypes(arguments, [tulip.Coord, tulip.Coord]);
-  return tulip.Coord.sub(c1, c2).norm();
+tulip.Vec3f.prototype.dist = function tulip_Vec3f_prototype_dist(c) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f]);
+  return tulip.Vec3f.dist(this, c);
 };
-tulip.Coord.min = function tulip_Coord_min() {
+tulip.Vec3f.dist = function tulip_Vec3f_dist(c1, c2) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f, tulip.Vec3f]);
+  return tulip.Vec3f.sub(c1, c2).norm();
+};
+tulip.Vec3f.min = function tulip_Vec3f_min() {
   var types = [];
   for (var i = 0 ; i < arguments.length ; ++i) {
-    types.push(tulip.Coord);
+    types.push(tulip.Vec3f);
   }
   checkArgumentsTypes(arguments, types, 2);
   var ret = arguments[0];
@@ -1244,10 +1254,10 @@ tulip.Coord.min = function tulip_Coord_min() {
   }
   return ret;
 };
-tulip.Coord.max = function tulip_Coord_max() {
+tulip.Vec3f.max = function tulip_Vec3f_max() {
   var types = [];
   for (var i = 0 ; i < arguments.length ; ++i) {
-    types.push(tulip.Coord);
+    types.push(tulip.Vec3f);
   }
   checkArgumentsTypes(arguments, types, 2);
   var ret = arguments[0];
@@ -1258,6 +1268,104 @@ tulip.Coord.max = function tulip_Coord_max() {
   }
   return ret;
 };
+tulip.Vec3f.lt = function tulip_Vec3f_lt(v1, v2) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f, tulip.Vec3f], 2);
+  return v1.x < v2.x && v1.y < v2.y && v1.z < v2.z;
+};
+tulip.Vec3f.prototype.lt = function tulip_Vec3f_prototype_lt(v) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f], 1);
+  return tulip.Vec3f.lt(this, v);
+};
+tulip.Vec3f.leq = function tulip_Vec3f_leq(v1, v2) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f, tulip.Vec3f], 2);
+  return v1.x <= v2.x && v1.y <= v2.y && v1.z <= v2.z;
+};
+tulip.Vec3f.prototype.leq = function tulip_Vec3f_prototype_leq(v) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f], 1);
+  return tulip.Vec3f.leq(this, v);
+};
+tulip.Vec3f.gt = function tulip_Vec3f_gt(v1, v2) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f, tulip.Vec3f], 2);
+  return v1.x > v2.x && v1.y > v2.y && v1.z > v2.z;
+};
+tulip.Vec3f.prototype.gt = function tulip_Vec3f_prototype_gt(v) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f], 1);
+  return tulip.Vec3f.gt(this, v);
+};
+tulip.Vec3f.geq = function tulip_Vec3f_geq(v1, v2) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f, tulip.Vec3f], 2);
+  return v1.x >= v2.x && v1.y >= v2.y && v1.z >= v2.z;
+};
+tulip.Vec3f.prototype.geq = function tulip_Vec3f_prototype_geq(v) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f], 1);
+  return tulip.Vec3f.geq(this, v);
+};
+tulip.Vec3f.dot = function tulip_Vec3f_dot(v1, v2) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f], 2);
+  return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+};
+tulip.Vec3f.prototype.dot = function tulip_Vec3f_prototype_dot(v) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f], 1);
+  return tulip.Vec3f.dot(this, v);
+};
+tulip.Vec3f.cross = function tulip_Vec3f_cross(v1, v2) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f], 2);
+  var x = v1.y * v2.z - v1.z * v2.y;
+  var y = v1.z * v2.x - v1.x * v2.z;
+  var z = v1.x * v2.y - v1.y * v2.x;
+  return tulip.Vec3f(x, y, z);
+};
+tulip.Vec3f.prototype.cross = function tulip_Vec3f_prototype_cross(v) {
+  checkArgumentsTypes(arguments, [tulip.Vec3f], 1);
+  return tulip.Vec3f.cross(this, v);
+};
+tulip.Vec3f.prototype.getX = function tulip_Vec3f_prototype_getX() {
+  return this.x;
+};
+tulip.Vec3f.prototype.getY = function tulip_Vec3f_prototype_getY() {
+  return this.y;
+};
+tulip.Vec3f.prototype.getZ = function tulip_Vec3f_prototype_getZ() {
+  return this.z;
+};
+tulip.Vec3f.prototype.setX = function tulip_Vec3f_prototype_setX(x) {
+  checkArgumentsTypes(arguments, ["number"], 1);
+  this.x = x;
+};
+tulip.Vec3f.prototype.setY = function tulip_Vec3f_prototype_setY(y) {
+  checkArgumentsTypes(arguments, ["number"], 1);
+  this.y = y;
+};
+tulip.Vec3f.prototype.setZ = function tulip_Vec3f_prototype_setZ(z) {
+  checkArgumentsTypes(arguments, ["number"], 1);
+  this.z = z;
+};
+tulip.Vec3f.prototype.getWidth = function tulip_Vec3f_prototype_getWidth() {
+  return this.x;
+};
+tulip.Vec3f.prototype.getHeight = function tulip_Vec3f_prototype_getHeight() {
+  return this.y;
+};
+tulip.Vec3f.prototype.getDepth = function tulip_Vec3f_prototype_getDepth() {
+  return this.z;
+};
+tulip.Vec3f.prototype.setWidth = function tulip_Vec3f_prototype_setWidth(w) {
+  checkArgumentsTypes(arguments, ["number"], 1);
+  this.x = w;
+};
+tulip.Vec3f.prototype.setHeight = function tulip_Vec3f_prototype_setHeight(h) {
+  checkArgumentsTypes(arguments, ["number"], 1);
+  this.y = h;
+};
+tulip.Vec3f.prototype.setDepth = function tulip_Vec3f_prototype_setDepth(d) {
+  checkArgumentsTypes(arguments, ["number"], 1);
+  this.z = d;
+};
+
+
+tulip.Coord = tulip.Vec3f;
+tulip.Size = tulip.Vec3f;
+
 // ==================================================================================================================
 
 var _createLayoutProperty = Module.cwrap('createLayoutProperty', 'number', ['number', 'string']);
@@ -1374,28 +1482,6 @@ tulip.LayoutProperty.prototype.setAllEdgeValue = function tulip_LayoutProperty_p
 
 // ==================================================================================================================
 
-tulip.Size = function tulip_Size(w, h, d) {
-  checkWrappedCppPointer(this.cppPointer);
-  checkArgumentsTypes(arguments, ["number", "number", "number"]);
-  var newObject = createObject(tulip.Size, this);
-  if (arguments.length == 0) {
-    newObject.w = newObject.h = newObject.d = 0;
-  } else if (arguments.length == 1) {
-    newObject.w = newObject.h = newObject.d = w;
-  } else if (arguments.length == 2) {
-    newObject.w = w;
-    newObject.h = h;
-    newObject.d = 0;
-  } else {
-    newObject.w = w;
-    newObject.h = h;
-    newObject.d = d;
-  }
-  return newObject;
-};
-
-// ==================================================================================================================
-
 var _createSizeProperty = Module.cwrap('createSizeProperty', 'number', ['number', 'string']);
 var _SizeProperty_setNodeValue = Module.cwrap('SizeProperty_setNodeValue', null, ['number', 'number', 'number', 'number', 'number']);
 var _SizeProperty_setAllNodeValue = Module.cwrap('SizeProperty_setAllNodeValue', null, ['number', 'number', 'number', 'number']);
@@ -1449,12 +1535,12 @@ tulip.SizeProperty.prototype.getNodeValue = function tulip_SizeProperty_prototyp
 tulip.SizeProperty.prototype.setNodeValue = function tulip_SizeProperty_prototype_setNodeValue(node, size) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Node, tulip.Size]);
-  _SizeProperty_setNodeValue(this.cppPointer, node.id, size.w, size.h, size.d);
+  _SizeProperty_setNodeValue(this.cppPointer, node.id, size.getWidth(), size.getHeight(), size.getDepth());
 };
 tulip.SizeProperty.prototype.setAllNodeValue = function tulip_SizeProperty_prototype_setAllNodeValue(size) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Size]);
-  _SizeProperty_setAllNodeValue(this.cppPointer, size.w, size.h, size.d);
+  _SizeProperty_setAllNodeValue(this.cppPointer, size.getWidth(), size.getHeight(), size.getDepth());
 };
 tulip.SizeProperty.prototype.getEdgeDefaultValue = function tulip_SizeProperty_prototype_getEdgeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
@@ -1476,19 +1562,19 @@ tulip.SizeProperty.prototype.getEdgeValue = function tulip_SizeProperty_prototyp
 tulip.SizeProperty.prototype.setEdgeValue = function tulip_SizeProperty_prototype_setEdgeValue(edge, size) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge, tulip.Size]);
-  _SizeProperty_setEdgeValue(this.cppPointer, edge.id, size.w, size.h, size.d);
+  _SizeProperty_setEdgeValue(this.cppPointer, edge.id, size.getWidth(), size.getHeight(), size.getDepth());
 };
 tulip.SizeProperty.prototype.setAllEdgeValue = function tulip_SizeProperty_prototype_setAllEdgeValue(size) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Size]);
-  _SizeProperty_setAllEdgeValue(this.cppPointer, size.w, size.h, size.d);
+  _SizeProperty_setAllEdgeValue(this.cppPointer, size.getWidth(), size.getHeight(), size.getDepth());
 };
 tulip.SizeProperty.prototype.scale = function tulip_SizeProperty_prototype_scale(sizeFactor, subgraph) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Size, tulip.Graph], 1);
   var sgPointer = 0;
   if (arguments.length > 1) sgPointer = subgraph.cppPointer;
-  _SizeProperty_scale(this.cppPointer, sizeFactor.w, sizeFactor.h, sizeFactor.d, sgPointer);
+  _SizeProperty_scale(this.cppPointer, sizeFactor.getWidth(), sizeFactor.getHeight(), sizeFactor.getDepth(), sgPointer);
 };
 tulip.SizeProperty.prototype.getMin = function tulip_SizeProperty_prototype_getMin(subgraph) {
   checkWrappedCppPointer(this.cppPointer);

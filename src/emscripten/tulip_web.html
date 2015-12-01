@@ -257,32 +257,23 @@
    var time = (end - start) / 1000;
    console.log('Time for loading graph: ' + time + 's');
    graph = g;
-   viewLayout = graph.getLayoutProperty('viewLayout');
-   viewSelection = graph.getBooleanProperty("viewSelection");
-   viewRotation = graph.getDoubleProperty("viewRotation");
-   viewShape = graph.getIntegerProperty("viewShape");
-   viewFontAwesomeIcon = graph.getStringProperty("viewFontAwesomeIcon");
-   viewColor = graph.getColorProperty("viewColor");
-   viewBorderWidth = graph.getDoubleProperty("viewBorderWidth")
-   viewBorderColor = graph.getColorProperty("viewBorderColor")
-   viewSize = graph.getSizeProperty("viewSize")
-   viewMetric = graph.getDoubleProperty("viewMetric")
-   viewSrcAnchorShape = graph.getIntegerProperty("viewSrcAnchorShape")
-   viewTgtAnchorShape = graph.getIntegerProperty("viewTgtAnchorShape")
-   viewTexture = graph.getStringProperty("viewTexture")
+   graphProperties = {};
+   graph.getProperties().forEach(function(propName) {
+     graphProperties[propName] = graph.getProperty(propName);
+   });
  }
 
  function computeEdgeBundling() {
-   viewShape.setAllEdgeValue(tulip.EdgeShape.BezierCurve);
+   graphProperties.viewShape.setAllEdgeValue(tulip.EdgeShape.BezierCurve);
    graph.applyAlgorithmInWorker('Edge bundling');
  }
 
  function computeLayout(layoutAlgoName) {
-   graph.applyLayoutAlgorithmInWorker(layoutAlgoName, viewLayout);
+   graph.applyLayoutAlgorithmInWorker(layoutAlgoName, graphProperties.viewLayout);
  }
 
  function computeAutoSizing() {
-   graph.applySizeAlgorithmInWorker('Auto Sizing', viewSize);
+   graph.applySizeAlgorithmInWorker('Auto Sizing', graphProperties.viewSize);
  }
 
  function graphScript(graph) {
@@ -319,9 +310,9 @@
 
    var avgEdgeLength = 0;
    graph.getEdges().forEach(function(edge) {
-    var srcCoord = viewLayout.getNodeValue(graph.source(edge));
-    var tgtCoord = viewLayout.getNodeValue(graph.target(edge));
-    var bends = viewLayout.getEdgeValue(edge);
+    var srcCoord = graphProperties.viewLayout.getNodeValue(graph.source(edge));
+    var tgtCoord = graphProperties.viewLayout.getNodeValue(graph.target(edge));
+    var bends = graphProperties.viewLayout.getEdgeValue(edge);
     if (bends.length == 0) {
       avgEdgeLength += srcCoord.dist(tgtCoord);
     } else {
@@ -344,13 +335,13 @@
       }
    }
 
-   viewRotation.setAllNodeValue(0);
+   graphProperties.viewRotation.setAllNodeValue(0);
 
-   viewShape.setAllNodeValue(tulip.NodeShape.FontAwesomeIcon);
+   graphProperties.viewShape.setAllNodeValue(tulip.NodeShape.FontAwesomeIcon);
    graph.getNodes().forEach(function(n) {
        var idx = (Math.random() * iconNames.length) | 0;
-       viewFontAwesomeIcon.setNodeValue(n, iconNames[idx]);
-       viewColor.setNodeValue(n, genRandomColor());
+       graphProperties.viewFontAwesomeIcon.setNodeValue(n, iconNames[idx]);
+       graphProperties.viewColor.setNodeValue(n, genRandomColor());
    });
  }
 

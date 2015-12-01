@@ -1791,6 +1791,22 @@ void EMSCRIPTEN_KEEPALIVE SizeProperty_setEdgeValue(tlp::SizeProperty *sizePrope
   sizeProperty->setEdgeValue(tlp::edge(e), tlp::Size(w, h, d));
 }
 
+void EMSCRIPTEN_KEEPALIVE SizeProperty_scale(tlp::SizeProperty *sizeProperty, float wf, float hf, float df, tlp::Graph *sg) {
+  sizeProperty->scale(tlp::Vec3f(wf, hf, df), sg);
+}
+
+void EMSCRIPTEN_KEEPALIVE SizeProperty_getMin(tlp::SizeProperty *sizeProperty, tlp::Graph *sg, float *min) {
+  tlp::Size minSize = sizeProperty->getMin(sg);
+  for (unsigned int i = 0 ; i < 3 ; ++i)
+    min[i] = minSize[i];
+}
+
+void EMSCRIPTEN_KEEPALIVE SizeProperty_getMax(tlp::SizeProperty *sizeProperty, tlp::Graph *sg, float *max) {
+  tlp::Size maxSize = sizeProperty->getMax(sg);
+  for (unsigned int i = 0 ; i < 3 ; ++i)
+    max[i] = maxSize[i];
+}
+
 // ==================================================================================================================
 
 tlp::IntegerProperty* EMSCRIPTEN_KEEPALIVE createIntegerProperty(tlp::Graph *graph, const char *name) {

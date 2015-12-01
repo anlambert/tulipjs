@@ -1376,13 +1376,19 @@ tulip.LayoutProperty.prototype.setAllEdgeValue = function tulip_LayoutProperty_p
 
 tulip.Size = function tulip_Size(w, h, d) {
   checkWrappedCppPointer(this.cppPointer);
-  checkArgumentsTypes(arguments, ["number", "number", "number"])
+  checkArgumentsTypes(arguments, ["number", "number", "number"]);
   var newObject = createObject(tulip.Size, this);
-  newObject.w = w;
-  newObject.h = h;
-  if (arguments.length < 3) {
+  if (arguments.length == 0) {
+    newObject.w = newObject.h = newObject.d = 0;
+  } else if (arguments.length == 1) {
+    newObject.w = newObject.h = newObject.d = w;
+  } else if (arguments.length == 2) {
+    newObject.w = w;
+    newObject.h = h;
     newObject.d = 0;
   } else {
+    newObject.w = w;
+    newObject.h = h;
     newObject.d = d;
   }
   return newObject;
@@ -1399,6 +1405,9 @@ var _SizeProperty_getEdgeDefaultValue = Module.cwrap('SizeProperty_getEdgeDefaul
 var _SizeProperty_getEdgeValue = Module.cwrap('SizeProperty_getEdgeValue', null, ['number', 'number', 'number']);
 var _SizeProperty_setEdgeValue = Module.cwrap('SizeProperty_setAllEdgeValue', null, ['number', 'number', 'number', 'number', 'number']);
 var _SizeProperty_setAllEdgeValue = Module.cwrap('SizeProperty_setAllEdgeValue', null, ['number', 'number', 'number', 'number']);
+var _SizeProperty_scale = Module.cwrap('SizeProperty_scale', null, ['number', 'number', 'number', 'number', 'number']);
+var _SizeProperty_getMin = Module.cwrap('SizeProperty_getMin', null, ['number', 'number', 'number']);
+var _SizeProperty_getMax = Module.cwrap('SizeProperty_getMax', null, ['number', 'number', 'number']);
 
 tulip.SizeProperty = function() {
   var newObject = createObject(tulip.SizeProperty, this);
@@ -1473,6 +1482,39 @@ tulip.SizeProperty.prototype.setAllEdgeValue = function tulip_SizeProperty_proto
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Size]);
   _SizeProperty_setAllEdgeValue(this.cppPointer, size.w, size.h, size.d);
+};
+tulip.SizeProperty.prototype.scale = function tulip_SizeProperty_prototype_scale(sizeFactor, subgraph) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Size, tulip.Graph], 1);
+  var sgPointer = 0;
+  if (arguments.length > 1) sgPointer = subgraph.cppPointer;
+  _SizeProperty_scale(this.cppPointer, sizeFactor.w, sizeFactor.h, sizeFactor.d, sgPointer);
+};
+tulip.SizeProperty.prototype.getMin = function tulip_SizeProperty_prototype_getMin(subgraph) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Graph]);
+  var sgPointer= 0;
+  if (arguments.length == 1) {
+    sgPointer = subgraph.cppPointer;
+  }
+  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  _SizeProperty_getMin(this.cppPointer, sgPointer, floatArray.byteOffset);
+  var ret = tulip.Size(floatArray[0], floatArray[1], floatArray[2]);
+  _freeArrayInEmHeap(floatArray);
+  return ret;
+};
+tulip.SizeProperty.prototype.getMax = function tulip_SizeProperty_prototype_getMax(subgraph) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Graph]);
+  var sgPointer= 0;
+  if (arguments.length == 1) {
+    sgPointer = subgraph.cppPointer;
+  }
+  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  _SizeProperty_getMax(this.cppPointer, sgPointer, floatArray.byteOffset);
+  var ret = tulip.Size(floatArray[0], floatArray[1], floatArray[2]);
+  _freeArrayInEmHeap(floatArray);
+  return ret;
 };
 
 // ==================================================================================================================

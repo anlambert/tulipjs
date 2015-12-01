@@ -12,26 +12,32 @@ class SelectionInteractor : public GlSceneInteractor {
 
 public:
 
-    SelectionInteractor(GlScene *scene = NULL);
+  SelectionInteractor(GlScene *scene = NULL);
 
-    void setScene(GlScene *glScene);
+  void setScene(GlScene *glScene);
 
-    virtual bool mouseCallback(const MouseButton &button, const MouseButtonState &state, int x, int y, const int &modifiers);
+  virtual bool mouseCallback(const MouseButton &button, const MouseButtonState &state, int x, int y, const int &modifiers);
 
-    virtual bool mouseMoveCallback(int x, int y, const int &modifiers);
+  virtual bool mouseMoveCallback(int x, int y, const int &modifiers);
 
-    virtual void draw();
+  virtual void draw();
+
+  void setSelectOnlyEdgesConnectedToSelectedNodes(bool state) {
+    _selectOnlyEdgesConnectedToSelectedNodes = state;
+  }
 
 private:
 
-    MouseButton _mouseButton;
-    int _firstX, _firstY;
-    int _curX, _curY;
-    bool _dragStarted;
+  MouseButton _mouseButton;
+  int _firstX, _firstY;
+  int _curX, _curY;
+  bool _dragStarted;
 
-    ZoomAndPanInteractor *_znpInteractor;
-    SelectedEntity _selectedEntity;
-    std::vector<SelectedEntity> _selectedEntities;
+  ZoomAndPanInteractor *_znpInteractor;
+  SelectedEntity _selectedEntity;
+  std::vector<SelectedEntity> _selectedEntities;
+
+  bool _selectOnlyEdgesConnectedToSelectedNodes;
 
 };
 

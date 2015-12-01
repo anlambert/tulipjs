@@ -19,7 +19,8 @@ using namespace std;
 using namespace tlp;
 
 SelectionInteractor::SelectionInteractor(GlScene *scene) :
-  _firstX(-1), _firstY(-1), _curX(-1), _curY(-1), _dragStarted(false), _znpInteractor(NULL) {
+  _firstX(-1), _firstY(-1), _curX(-1), _curY(-1), _dragStarted(false),
+  _znpInteractor(NULL), _selectOnlyEdgesConnectedToSelectedNodes(false) {
   _glScene = scene;
   _znpInteractor = new ZoomAndPanInteractor(scene);
 }
@@ -63,7 +64,14 @@ bool SelectionInteractor::mouseCallback(const MouseButton &button, const MouseBu
           if (modifiers & ACTIVE_SHIFT) {
             viewSelection->setNodeValue(_selectedEntity.getNode(), false);
           } else {
+            Graph *graph = _selectedEntity.getGlGraph()->graph();
             viewSelection->setNodeValue(_selectedEntity.getNode(), true);
+            if (_selectOnlyEdgesConnectedToSelectedNodes) {
+              tlp::edge e;
+              forEach(e, graph->getInOutEdges(_selectedEntity.getNode())) {
+                viewSelection->setEdgeValue(e, true);
+              }
+            }
           }
         }
         if (_selectedEntity.getEntityType() == SelectedEntity::EDGE_SELECTED) {
@@ -89,12 +97,22 @@ bool SelectionInteractor::mouseCallback(const MouseButton &button, const MouseBu
               viewSelection->setNodeValue(_selectedEntities[i].getNode(), true);
             }
           }
+        }
+        for (size_t i = 0 ; i < _selectedEntities.size() ; ++i) {
           if (_selectedEntities[i].getEntityType() == SelectedEntity::EDGE_SELECTED) {
             BooleanProperty *viewSelection = _selectedEntities[i].getGlGraph()->graph()->getProperty<BooleanProperty>("viewSelection");
             if (modifiers & ACTIVE_SHIFT) {
               viewSelection->setEdgeValue(_selectedEntities[i].getEdge(), false);
             } else {
-              viewSelection->setEdgeValue(_selectedEntities[i].getEdge(), true);
+              Graph *graph = _selectedEntities[i].getGlGraph()->graph();
+              if (_selectOnlyEdgesConnectedToSelectedNodes) {
+                if (viewSelection->getNodeValue(graph->source(_selectedEntities[i].getEdge())) ||
+                    viewSelection->getNodeValue(graph->target(_selectedEntities[i].getEdge()))) {
+                  viewSelection->setEdgeValue(_selectedEntities[i].getEdge(), true);
+                }
+              } else {
+                viewSelection->setEdgeValue(_selectedEntities[i].getEdge(), true);
+              }
             }
           }
         }

@@ -21,6 +21,7 @@ SelectionModifierInteractor::SelectionModifierInteractor(GlScene *glScene) :
   _selectedGraph(NULL) {
   _glScene = glScene;
   _selectionInteractor = new SelectionInteractor(glScene);
+  _selectionInteractor->setSelectOnlyEdgesConnectedToSelectedNodes(true);
 }
 
 void SelectionModifierInteractor::setScene(GlScene *glScene) {

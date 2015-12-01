@@ -1738,6 +1738,54 @@ void EMSCRIPTEN_KEEPALIVE LayoutProperty_setEdgeValue(tlp::LayoutProperty *layou
   layoutProperty->setEdgeValue(tlp::edge(e), vc);
 }
 
+void EMSCRIPTEN_KEEPALIVE LayoutProperty_getMin(tlp::LayoutProperty *layoutProperty, tlp::Graph *sg, float *min) {
+  tlp::Coord minPos = layoutProperty->getMin(sg);
+  for (unsigned int i = 0 ; i < 3 ; ++i)
+    min[i] = minPos[i];
+}
+
+void EMSCRIPTEN_KEEPALIVE LayoutProperty_getMax(tlp::LayoutProperty *layoutProperty, tlp::Graph *sg, float *max) {
+  tlp::Coord maxPos = layoutProperty->getMax(sg);
+  for (unsigned int i = 0 ; i < 3 ; ++i)
+    max[i] = maxPos[i];
+}
+
+void EMSCRIPTEN_KEEPALIVE LayoutProperty_translate(tlp::LayoutProperty *layoutProperty, float dx, float dy, float dz, tlp::Graph *sg) {
+  layoutProperty->translate(tlp::Vec3f(dx, dy, dz), sg);
+}
+
+void EMSCRIPTEN_KEEPALIVE LayoutProperty_scale(tlp::LayoutProperty *layoutProperty, float sx, float sy, float sz, tlp::Graph *sg) {
+  layoutProperty->scale(tlp::Vec3f(sx, sy, sz), sg);
+}
+
+void EMSCRIPTEN_KEEPALIVE LayoutProperty_rotateX(tlp::LayoutProperty *layoutProperty, double alpha, tlp::Graph *sg) {
+  layoutProperty->rotateX(alpha, sg);
+}
+
+void EMSCRIPTEN_KEEPALIVE LayoutProperty_rotateY(tlp::LayoutProperty *layoutProperty, double alpha, tlp::Graph *sg) {
+  layoutProperty->rotateY(alpha, sg);
+}
+
+void EMSCRIPTEN_KEEPALIVE LayoutProperty_rotateZ(tlp::LayoutProperty *layoutProperty, double alpha, tlp::Graph *sg) {
+  layoutProperty->rotateZ(alpha, sg);
+}
+
+void EMSCRIPTEN_KEEPALIVE LayoutProperty_center(tlp::LayoutProperty *layoutProperty, tlp::Graph *sg) {
+  layoutProperty->center(sg);
+}
+
+void EMSCRIPTEN_KEEPALIVE LayoutProperty_center2(tlp::LayoutProperty *layoutProperty, float cx, float cy, float cz, tlp::Graph *sg) {
+  layoutProperty->center(tlp::Vec3f(cx, cy, cz), sg);
+}
+
+void EMSCRIPTEN_KEEPALIVE LayoutProperty_normalize(tlp::LayoutProperty *layoutProperty, tlp::Graph *sg) {
+  layoutProperty->normalize(sg);
+}
+
+void EMSCRIPTEN_KEEPALIVE LayoutProperty_perfectAspectRatio(tlp::LayoutProperty *layoutProperty) {
+  layoutProperty->perfectAspectRatio();
+}
+
 // ==================================================================================================================
 
 tlp::SizeProperty* EMSCRIPTEN_KEEPALIVE createSizeProperty(tlp::Graph *graph, const char *name) {

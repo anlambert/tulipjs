@@ -1379,6 +1379,17 @@ var _LayoutProperty_getEdgeNumberOfBends = Module.cwrap('LayoutProperty_getEdgeN
 var _LayoutProperty_getEdgeValue = Module.cwrap('LayoutProperty_getEdgeValue', null, ['number', 'number', 'number']);
 var _LayoutProperty_setEdgeValue = Module.cwrap('LayoutProperty_setAllEdgeValue', null, ['number', 'number', 'number', 'number']);
 var _LayoutProperty_setAllEdgeValue = Module.cwrap('LayoutProperty_setAllEdgeValue', null, ['number', 'number', 'number']);
+var _LayoutProperty_getMin = Module.cwrap('LayoutProperty_getMin', null, ['number', 'number', 'number']);
+var _LayoutProperty_getMax = Module.cwrap('LayoutProperty_getMax', null, ['number', 'number', 'number']);
+var _LayoutProperty_translate = Module.cwrap('LayoutProperty_translate', null, ['number', 'number', 'number', 'number', 'number']);
+var _LayoutProperty_scale = Module.cwrap('LayoutProperty_scale', null, ['number', 'number', 'number', 'number', 'number']);
+var _LayoutProperty_rotateX = Module.cwrap('LayoutProperty_rotateX', null, ['number', 'number', 'number']);
+var _LayoutProperty_rotateY = Module.cwrap('LayoutProperty_rotateY', null, ['number', 'number', 'number']);
+var _LayoutProperty_rotateZ = Module.cwrap('LayoutProperty_rotateZ', null, ['number', 'number', 'number']);
+var _LayoutProperty_center = Module.cwrap('LayoutProperty_center', null, ['number', 'number']);
+var _LayoutProperty_center2 = Module.cwrap('LayoutProperty_center2', null, ['number', 'number', 'number', 'number', 'number']);
+var _LayoutProperty_normalize = Module.cwrap('LayoutProperty_normalize', null, ['number', 'number']);
+var _LayoutProperty_perfectAspectRatio = Module.cwrap('LayoutProperty_perfectAspectRatio', null, ['number']);
 
 tulip.LayoutProperty = function tulip_LayoutProperty() {
   var newObject = createObject(tulip.LayoutProperty, this);
@@ -1479,7 +1490,106 @@ tulip.LayoutProperty.prototype.setAllEdgeValue = function tulip_LayoutProperty_p
   _LayoutProperty_setAllEdgeValue(this.cppPointer, floatArray.byteOffset, bends.length);
   _freeArrayInEmHeap(floatArray);
 };
-
+tulip.LayoutProperty.prototype.getMin = function tulip_LayoutProperty_prototype_getMin(subgraph) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Graph]);
+  var sgPointer = 0;
+  if (arguments.length == 1) {
+    sgPointer = subgraph.cppPointer;
+  }
+  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  _LayoutProperty_getMin(this.cppPointer, sgPointer, floatArray.byteOffset);
+  var ret = tulip.Coord(floatArray[0], floatArray[1], floatArray[2]);
+  _freeArrayInEmHeap(floatArray);
+  return ret;
+};
+tulip.LayoutProperty.prototype.getMax = function tulip_LayoutProperty_prototype_getMax(subgraph) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Graph]);
+  var sgPointer = 0;
+  if (arguments.length == 1) {
+    sgPointer = subgraph.cppPointer;
+  }
+  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  _LayoutProperty_getMax(this.cppPointer, sgPointer, floatArray.byteOffset);
+  var ret = tulip.Coord(floatArray[0], floatArray[1], floatArray[2]);
+  _freeArrayInEmHeap(floatArray);
+  return ret;
+};
+tulip.LayoutProperty.prototype.translate = function tulip_LayoutProperty_prototype_translate(move, subgraph) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Coord, tulip.Graph], 1);
+  var sgPointer = 0;
+  if (arguments.length == 2) {
+    sgPointer = subgraph.cppPointer;
+  }
+  _LayoutProperty_translate(this.cppPointer, move.x, move.y, move.z, sgPointer);
+};
+tulip.LayoutProperty.prototype.scale = function tulip_LayoutProperty_prototype_scale(scaleFactors, subgraph) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Coord, tulip.Graph], 1);
+  var sgPointer = 0;
+  if (arguments.length == 2) {
+    sgPointer = subgraph.cppPointer;
+  }
+  _LayoutProperty_scale(this.cppPointer, scaleFactors.x, scaleFactors.y, scaleFactors.z, sgPointer);
+};
+tulip.LayoutProperty.prototype.rotateX = function tulip_LayoutProperty_prototype_rotateX(alpha, subgraph) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["number", tulip.Graph], 1);
+  var sgPointer = 0;
+  if (arguments.length == 2) {
+    sgPointer = subgraph.cppPointer;
+  }
+  _LayoutProperty_rotateX(this.cppPointer, alpha, sgPointer);
+};
+tulip.LayoutProperty.prototype.rotateY = function tulip_LayoutProperty_prototype_rotateY(alpha, subgraph) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["number", tulip.Graph], 1);
+  var sgPointer = 0;
+  if (arguments.length == 2) {
+    sgPointer = subgraph.cppPointer;
+  }
+  _LayoutProperty_rotateY(this.cppPointer, alpha, sgPointer);
+};
+tulip.LayoutProperty.prototype.rotateZ = function tulip_LayoutProperty_prototype_rotateZ(alpha, subgraph) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["number", tulip.Graph], 1);
+  var sgPointer = 0;
+  if (arguments.length == 2) {
+    sgPointer = subgraph.cppPointer;
+  }
+  _LayoutProperty_rotateZ(this.cppPointer, alpha, sgPointer);
+};
+tulip.LayoutProperty.prototype.center = function tulip_LayoutProperty_prototype_center() {
+  checkWrappedCppPointer(this.cppPointer);
+  if (arguments.length == 0) {
+    _LayoutProperty_center(this.cppPointer, 0);
+  } else if (arguments.length == 1) {
+    checkArgumentsTypes(arguments, [[tulip.Coord, tulip.Graph]]);
+    if (arguments[0] instanceof tulip.Coord) {
+      _LayoutProperty_center2(this.cppPointer, arguments[0].x, arguments[0].y, arguments[0].z, 0);
+    } else {
+      _LayoutProperty_center(this.cppPointer, arguments[0].cppPointer);
+    }
+  } else {
+    checkArgumentsTypes(arguments, [tulip.Coord, tulip.Graph], 2);
+    _LayoutProperty_center2(this.cppPointer, arguments[0].x, arguments[0].y, arguments[0].z, arguments[1].cppPointer);
+  }
+};
+tulip.LayoutProperty.prototype.normalize = function tulip_LayoutProperty_prototype_normalize(subgraph) {
+  checkWrappedCppPointer(this.cppPointer);
+  var sgPointer = 0;
+  checkArgumentsTypes(arguments, [tulip.Graph]);
+  if (arguments.length == 1) {
+    sgPointer = subgraph.cppPointer;
+  }
+  _LayoutProperty_normalize(this.cppPointer, sgPointer);
+};
+tulip.LayoutProperty.prototype.perfectAspectRatio = function tulip_LayoutProperty_prototype_perfectAspectRatio() {
+  checkWrappedCppPointer(this.cppPointer);
+  _LayoutProperty_perfectAspectRatio(this.cppPointer);
+};
 // ==================================================================================================================
 
 var _createSizeProperty = Module.cwrap('createSizeProperty', 'number', ['number', 'string']);

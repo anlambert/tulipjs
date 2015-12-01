@@ -334,6 +334,26 @@ const unsigned int nbCurveInterpolationPoints = 200;
 const unsigned int bSplineDegree = 3;
 const float alpha = 0.5f;
 
+struct NodesLabelsSorting {
+
+  NodesLabelsSorting(BooleanProperty *selection) : _selection(selection) {}
+
+  bool operator()(const tlp::node &n1, const tlp::node &n2) const {
+    if (_selection->getNodeValue(n1) && !_selection->getNodeValue(n2)) {
+      return true;
+    } else if (!_selection->getNodeValue(n1) && _selection->getNodeValue(n2)) {
+      return false;
+    } else {
+      return n1.id < n2.id;
+    }
+  }
+
+private:
+
+  BooleanProperty *_selection;
+
+};
+
 GlShaderProgram *GlGraph::getEdgeShader(int edgeShape) {
   if (_edgesShaders.find(edgeShape) == _edgesShaders.end()) {
     string preproDefine =
@@ -834,7 +854,7 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
   if (!_graphElementsPickingMode && _renderingParameters.displayNodesLabels()) {
     _labelsRenderer->setLabelsScaled(_renderingParameters.labelsScaled());
     _labelsRenderer->setMinMaxSizes(_renderingParameters.minSizeOfLabels(), _renderingParameters.maxSizeOfLabels());
-    std::sort(nodesLabelsToRender.begin(), nodesLabelsToRender.end());
+    std::sort(nodesLabelsToRender.begin(), nodesLabelsToRender.end(), NodesLabelsSorting(_viewSelection));
     _labelsRenderer->setGraphNodesLabelsToRender(_graph, nodesLabelsToRender);
     _labelsRenderer->renderGraphNodesLabels(_graph, camera, _renderingParameters.selectionColor(), _renderingParameters.billboardedLabels());
   }

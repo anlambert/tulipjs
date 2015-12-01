@@ -1725,6 +1725,9 @@ void GlGraph::treatEvent(const tlp::Event &message) {
       forEach(n, _graph->getNodes()) {
         _nodesToUpdate.insert(n);
       }
+      forEach(e, _graph->getEdges()) {
+        _edgesToUpdate.insert(e);
+      }
     }
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_EDGE_VALUE && pEvt->getProperty() == _viewLayout) {
       _edgesToUpdate.insert(pEvt->getEdge());

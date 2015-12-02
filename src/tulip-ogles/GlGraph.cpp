@@ -1719,7 +1719,7 @@ void GlGraph::treatEvent(const tlp::Event &message) {
         _nodesToUpdate.insert(nodes[i]);
       }
     } else if (gEvt->getType() == GraphEvent::TLP_DEL_NODE) {
-      _labelsRenderer->removeNodeLabel(_graph, pEvt->getNode());
+      _labelsRenderer->removeNodeLabel(_graph, gEvt->getNode());
       _updateQuadTree = true;
     } else if (gEvt->getType() == GraphEvent::TLP_ADD_EDGE ||
                gEvt->getType() == GraphEvent::TLP_AFTER_SET_ENDS ||

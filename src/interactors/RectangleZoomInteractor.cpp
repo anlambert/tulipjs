@@ -6,23 +6,29 @@
 #include "GlRect2D.h"
 #include "GlScene.h"
 #include "GlLayer.h"
+#include "TimeMeasurer.h"
 
 #include "RectangleZoomInteractor.h"
 
 static ZoomAndPanAnimation *zoomAndPanAnimation = NULL;
-static const float baseAnimDuration = 500;
-static const int nbAnimStep = 50;
-static float animDuration = 1000;
+static const unsigned int baseAnimDuration = 1000;
 static bool animating = false;
+static double animDuration = 0;
+static TimeMeasurer tm;
+static const unsigned int delay = 40;
 
 static void animate(void *value) {
   AnimateParams *animParams = reinterpret_cast<AnimateParams*>(value);
-  zoomAndPanAnimation->zoomAndPanAnimationStep(animParams->step);
-  animParams->scene->requestDraw();
-  if (animParams->step < nbAnimStep) {
-    animParams->step+=1;
-    timerFunc(animDuration/nbAnimStep, animate, animParams);
+  double t = tm.getElapsedTime() / animDuration;
+  if (t < 1.0) {
+    zoomAndPanAnimation->zoomAndPanAnimationStep(t);
+    animParams->scene->setBackupBackBuffer(false);
+    animParams->scene->requestDraw();
+    timerFunc(delay, animate, animParams);
   } else {
+    zoomAndPanAnimation->zoomAndPanAnimationStep(1.0);
+    animParams->scene->setBackupBackBuffer(true);
+    animParams->scene->requestDraw();
     delete zoomAndPanAnimation;
     zoomAndPanAnimation = NULL;
     animating = false;
@@ -55,13 +61,13 @@ bool RectangleZoomInteractor::mouseCallback(const MouseButton &button, const Mou
       bb.expand(bbMin);
       bb.expand(bbMax);
 
-      zoomAndPanAnimation = new ZoomAndPanAnimation(camera, bb, nbAnimStep);
+      zoomAndPanAnimation = new ZoomAndPanAnimation(camera, bb, baseAnimDuration);
       if (zoomAndPanAnimation->canDoZoomAndPan()) {
-        animDuration = baseAnimDuration * zoomAndPanAnimation->getDurationFactor();
+        animDuration = zoomAndPanAnimation->getAnimationDuration();
         animating = true;
-        _animParams.step = 0;
         _animParams.scene = _glScene;
-        timerFunc(animDuration/nbAnimStep, animate, &_animParams);
+        tm.reset();
+        timerFunc(delay, animate, &_animParams);
       } else {
         delete zoomAndPanAnimation;
         zoomAndPanAnimation = NULL;
@@ -94,12 +100,12 @@ bool RectangleZoomInteractor::keyboardCallback(const std::string &keyStr, const 
 
   if (keyStr == "c") {
     Camera *camera = _glScene->getMainLayer()->getCamera();
-    zoomAndPanAnimation = new ZoomAndPanAnimation(camera, camera->getSceneBoundingBox(), nbAnimStep);
-    animDuration = baseAnimDuration * zoomAndPanAnimation->getDurationFactor();
+    zoomAndPanAnimation = new ZoomAndPanAnimation(camera, camera->getSceneBoundingBox(), baseAnimDuration);
+    animDuration = zoomAndPanAnimation->getAnimationDuration();
     animating = true;
-    _animParams.step = 0;
     _animParams.scene = _glScene;
-    timerFunc(animDuration/nbAnimStep, animate, &_animParams);
+    tm.reset();
+    timerFunc(delay, animate, &_animParams);
     return true;
   }
   return false;

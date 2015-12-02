@@ -1,36 +1,37 @@
 #include "TimeMeasurer.h"
 
 #ifndef __EMSCRIPTEN__
-#include <omp.h>
+#include <chrono>
+using namespace std::chrono;
 #else
 #include <emscripten.h>
 #endif
 
-TimeMeasurer::TimeMeasurer() : _startTime(0), _endTime(0), _stopped(true) {}
+TimeMeasurer::TimeMeasurer() : _startTime(0), _endTime(0) {
+  reset();
+}
 
-void TimeMeasurer::start() {
+void TimeMeasurer::reset() {
 #ifndef __EMSCRIPTEN__
-  _startTime = omp_get_wtime();
+  _startTime = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count();
 #else
   _startTime = emscripten_get_now();
 #endif
-  _stopped = false;
 }
 
-void TimeMeasurer::stop() {
+unsigned int TimeMeasurer::getElapsedTime() {
 #ifndef __EMSCRIPTEN__
-  _endTime = omp_get_wtime();
+  _endTime = duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count();
 #else
   _endTime = emscripten_get_now();
 #endif
-  _stopped = true;
+  return (_endTime - _startTime);
 }
 
-double TimeMeasurer::getElapsedTimeInSeconds() {
-  if (!_stopped) stop();
+unsigned int TimeMeasurer::getCurrentTime() {
 #ifndef __EMSCRIPTEN__
-  return (_endTime - _startTime);
+  return duration_cast<milliseconds>(high_resolution_clock::now().time_since_epoch()).count();
 #else
-  return (_endTime - _startTime) / 1000;
+  return emscripten_get_now();
 #endif
 }

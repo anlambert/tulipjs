@@ -7,16 +7,14 @@ public:
 
   TimeMeasurer();
 
-  void start();
+  void reset();
 
-  void stop();
+  unsigned int getElapsedTime();
 
-  double getElapsedTimeInSeconds();
-
+  static unsigned int getCurrentTime();
 
 private:
 
-  bool _stopped;
   double _startTime, _endTime;
 
 };

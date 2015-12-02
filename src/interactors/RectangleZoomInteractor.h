@@ -7,9 +7,8 @@ class GlScene;
 
 struct AnimateParams {
 
-  AnimateParams() : scene(NULL), step(0) {}
+  AnimateParams() : scene(NULL) {}
   GlScene *scene;
-  int step;
 };
 
 class RectangleZoomInteractor : public GlSceneInteractor {

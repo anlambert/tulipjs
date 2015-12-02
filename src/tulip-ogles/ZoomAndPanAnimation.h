@@ -1,21 +1,3 @@
-/*
- *
- * This file is part of Tulip (www.tulip-software.org)
- *
- * Authors: David Auber and the Tulip development Team
- * from LaBRI, University of Bordeaux 1 and Inria Bordeaux - Sud Ouest
- *
- * Tulip is free software; you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License
- * as published by the Free Software Foundation, either version 3
- * of the License, or (at your option) any later version.
- *
- * Tulip is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- */
 #ifndef ZoomAndPanAnimation_H_
 #define ZoomAndPanAnimation_H_
 
@@ -29,40 +11,32 @@ class ZoomAndPanAnimation  {
 
 public :
 
-  ZoomAndPanAnimation(Camera *camera, const tlp::BoundingBox &boundingBox, const int nbAnimationSteps = 50, const float velocity = 1.1, const bool optimalPath = true, const double p = sqrt(1.6));
+  ZoomAndPanAnimation(Camera *_camera, const tlp::BoundingBox &boundingBox, const unsigned int _animationDuration = 1000, const bool _optimalPath = true, const float velocity = 1.1f, const double _p = sqrt(1.6));
 
   virtual ~ZoomAndPanAnimation() {}
 
-  inline int getNbAnimationsStep() const {
-    return nbAnimationSteps;
+  float getAnimationDuration() const {
+    return _animationDuration;
   }
 
-  inline void setNbAnimationSteps(const int nbAnimationSteps) {
-    this->nbAnimationSteps = nbAnimationSteps;
-  }
-
-  void zoomAndPanAnimationStep(int animationStep);
-
-  float getDurationFactor() const {
-      return durationFactor;
-  }
+  void zoomAndPanAnimationStep(double t);
 
   bool canDoZoomAndPan() const {
-      return doZoomAndPan;
+    return _doZoomAndPan;
   }
 
 protected :
 
-  Camera *camera;
-  tlp::Vec4i viewport;
-  int nbAnimationSteps;
-  bool optimalPath;
-  double p;
-  tlp::Coord camCenterStart, camCenterEnd;
-  double w0, w1, u0, u1, b0, b1, r0, r1, S, sA, sB, wm;
-  float zoomAreaWidth, zoomAreaHeight;
-  bool doZoomAndPan;
-  float durationFactor;
+  Camera *_camera;
+  tlp::Vec4i _viewport;
+  unsigned int _animationDuration;
+  bool _optimalPath;
+  double _p;
+  tlp::Coord _camCenterStart, _camCenterEnd;
+  double _w0, _w1, _u0, _u1, _b0, _b1, _r0, _r1, _S, _sA, _sB, _wm;
+  float _zoomAreaWidth, _zoomAreaHeight;
+  bool _doZoomAndPan;
+
 
 };
 

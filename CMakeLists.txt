@@ -157,6 +157,7 @@ SET(GRAPH_RENDERER_SRCS
     src/tulip-ogles/TextureManager.cpp
     src/tulip-ogles/GlGraphRenderingParameters.cpp
     src/tulip-ogles/GlProgressBar.cpp
+    src/utils/TimeMeasurer.cpp
     thirdparty/freetype-gl++/TextureAtlas.cpp
     thirdparty/freetype-gl++/TextureFont.cpp
     thirdparty/freetype-gl++/FTLibrary.cpp

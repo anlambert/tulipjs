@@ -465,6 +465,10 @@ void GlGraph::setGraph(tlp::Graph *graph) {
     return;
   }
 
+  if (_graph) {
+    clearObservers();
+  }
+
   _graph = graph;
 
   initGraphProperties();

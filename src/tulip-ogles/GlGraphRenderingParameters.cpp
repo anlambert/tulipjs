@@ -232,14 +232,20 @@ float GlGraphRenderingParameters::minSizeOfLabels() const {
   return _labelsMinSize;
 }
 void GlGraphRenderingParameters::setMinSizeOfLabels(float size) {
-  _labelsMinSize=size;
+  if (_labelsMinSize != size) {
+    _labelsMinSize=size;
+    sendEvent(GlGraphRenderingParametersEvent(this, GlGraphRenderingParametersEvent::RENDERING_PARAMETERS_MODIFIED));
+  }
 }
 //====================================================
 float GlGraphRenderingParameters::maxSizeOfLabels() const {
   return _labelsMaxSize;
 }
 void GlGraphRenderingParameters::setMaxSizeOfLabels(float size) {
-  _labelsMaxSize=size;
+  if (_labelsMaxSize != size) {
+    _labelsMaxSize=size;
+    sendEvent(GlGraphRenderingParametersEvent(this, GlGraphRenderingParametersEvent::RENDERING_PARAMETERS_MODIFIED));
+  }
 }
 //====================================================
 void GlGraphRenderingParameters::setElementsOrderingProperty(tlp::NumericProperty* property) {

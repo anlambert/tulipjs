@@ -4546,6 +4546,10 @@ if (workerMode) {
     var _GlGraphRenderingParameters_displayEdgesExtremities = Module.cwrap('GlGraphRenderingParameters_displayEdgesExtremities', 'number', ['number']);
     var _GlGraphRenderingParameters_setEdges3D = Module.cwrap('GlGraphRenderingParameters_setEdges3D', null, ['number', 'number']);
     var _GlGraphRenderingParameters_edges3D = Module.cwrap('GlGraphRenderingParameters_edges3D', 'number', ['number']);
+    var _GlGraphRenderingParameters_setMinSizeOfLabels = Module.cwrap('GlGraphRenderingParameters_setMinSizeOfLabels', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_minSizeOfLabels = Module.cwrap('GlGraphRenderingParameters_minSizeOfLabels', 'number', ['number']);
+    var _GlGraphRenderingParameters_setMaxSizeOfLabels = Module.cwrap('GlGraphRenderingParameters_setMaxSizeOfLabels', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_maxSizeOfLabels = Module.cwrap('GlGraphRenderingParameters_maxSizeOfLabels', 'number', ['number']);
 
     tulip.GlGraphRenderingParameters = function tulip_GlGraphRenderingParameters(cppPointer) {
       var newObject = createObject(tulip.GlGraphRenderingParameters, this);
@@ -4642,6 +4646,24 @@ if (workerMode) {
 
     tulip.GlGraphRenderingParameters.prototype.edges3D = function tulip_GlGraphRenderingParameters_prototype_edges3D() {
       return _GlGraphRenderingParameters_edges3D(this.cppPointer) > 0;
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.setMinSizeOfLabels = function tulip_GlGraphRenderingParameters_prototype_setMinSizeOfLabels(minSize) {
+      checkArgumentsTypes(arguments, ["number"], 1);
+      _GlGraphRenderingParameters_setMinSizeOfLabels(this.cppPointer, minSize);
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.minSizeOfLabels = function tulip_GlGraphRenderingParameters_prototype_minSizeOfLabels() {
+      return _GlGraphRenderingParameters_minSizeOfLabels(this.cppPointer);
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.setMaxSizeOfLabels = function tulip_GlGraphRenderingParameters_prototype_setMaxSizeOfLabels(maxSize) {
+      checkArgumentsTypes(arguments, ["number"], 1);
+      _GlGraphRenderingParameters_setMaxSizeOfLabels(this.cppPointer, maxSize);
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.maxSizeOfLabels = function tulip_GlGraphRenderingParameters_prototype_maxSizeOfLabels() {
+      return _GlGraphRenderingParameters_maxSizeOfLabels(this.cppPointer);
     };
 
     tulip.Graph.prototype.getTlpFileBlob = function(gzip) {

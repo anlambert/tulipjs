@@ -694,6 +694,22 @@ bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_edges3D(GlGraphRenderingPar
   return glgrp->edges3D();
 }
 
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setMinSizeOfLabels(GlGraphRenderingParameters *glgrp, float minLabelsSize) {
+  glgrp->setMinSizeOfLabels(minLabelsSize);
+}
+
+float EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_minSizeOfLabels(GlGraphRenderingParameters *glgrp) {
+  return glgrp->minSizeOfLabels();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setMaxSizeOfLabels(GlGraphRenderingParameters *glgrp, float maxLabelsSize) {
+  glgrp->setMaxSizeOfLabels(maxLabelsSize);
+}
+
+float EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_maxSizeOfLabels(GlGraphRenderingParameters *glgrp) {
+  return glgrp->maxSizeOfLabels();
+}
+
 //==============================================================
 
 void EMSCRIPTEN_KEEPALIVE setProgressBarPercent(const char *canvasId, int percent) {

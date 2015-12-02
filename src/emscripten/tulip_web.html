@@ -197,6 +197,12 @@
       <label><input id="display-nodes-labels" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Display </label>
       <label><input id="scale-nodes-labels" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="false"> Scale to Nodes Sizes </label>
       <label><input id="billboard-nodes-labels" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="false"> Billboard </label>
+      <div data-role="rangeslider">
+        <label for="range-1a">Sizes range:</label>
+        <input name="range-1a" id="labels-min-size" class="rendering-params-modifier" min="0" max="100" value="12" type="range" />
+        <label for="range-1b">Rangeslider:</label>
+        <input name="range-1b" id="labels-max-size" class="rendering-params-modifier" min="0" max="100" value="72" type="range" />
+      </div>
       </div>
       </div>
 
@@ -248,6 +254,8 @@
    renderingParameters.setInterpolateEdgesSizes($('#size-interpolation').prop('checked'));
    renderingParameters.setDisplayEdgesExtremities($('#edge-extremities').prop('checked'));
    renderingParameters.setEdges3D($('#edges-3d').prop('checked'));
+   renderingParameters.setMinSizeOfLabels(parseInt($('#labels-min-size').prop('value')));
+   renderingParameters.setMaxSizeOfLabels(parseInt($('#labels-max-size').prop('value')));
    tulip.unholdObservers();
  }
 

@@ -42,7 +42,7 @@ RectangleZoomInteractor::RectangleZoomInteractor(GlScene *glScene) :
 }
 
 bool RectangleZoomInteractor::mouseCallback(const MouseButton &button, const MouseButtonState &state, int x, int y, const int & /*modifiers*/) {
-  if (!_glScene) return false;
+  if (!_glScene || animating) return false;
   Camera *camera = _glScene->getMainLayer()->getCamera();
   tlp::Vec4i viewport = camera->getViewport();
   if (x < viewport[0] || x > viewport[2] || y < viewport[1] || y > viewport[3] || animating) return false;
@@ -51,7 +51,13 @@ bool RectangleZoomInteractor::mouseCallback(const MouseButton &button, const Mou
     if (state == DOWN) {
       _firstX = _curX = x;
       _firstY = _curY = y;
-      _dragStarted = true;
+      // double click
+      if (tm.getElapsedTime() < 150) {
+        keyboardCallback("c", 0);
+      } else {
+        _dragStarted = true;
+      }
+      tm.reset();
       return true;
     } else if (state == UP && _dragStarted) {
       _dragStarted = false;
@@ -83,7 +89,7 @@ bool RectangleZoomInteractor::mouseCallback(const MouseButton &button, const Mou
 }
 
 bool RectangleZoomInteractor::mouseMoveCallback(int x, int y, const int & /*modifiers*/) {
-  if (!_glScene) return false;
+  if (!_glScene || animating) return false;
   tlp::Vec4i viewport = _glScene->getMainLayer()->getCamera()->getViewport();
   if (x < viewport[0] || x > viewport[2] || y < viewport[1] || y > viewport[3] || animating) return false;
   if (_mouseButton == LEFT_BUTTON && _dragStarted) {

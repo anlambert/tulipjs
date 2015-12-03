@@ -52,9 +52,6 @@ void NeighborhoodInteractor::buildNeighborhoodSubgraph() {
       _neighborhoodSg->addEdge(_glGraph->graph()->existEdge(_centralNode, neigh, false));
     }
     _glNeighborhoodGraph = new GlGraph(_neighborhoodSg, new GlCPULODCalculator);
-#ifdef __EMSCRIPTEN__
-    _glNeighborhoodGraph->prepareNodesLabelsData();
-#endif
   }
 }
 

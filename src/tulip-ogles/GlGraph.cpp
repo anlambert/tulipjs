@@ -1725,6 +1725,7 @@ void GlGraph::treatEvent(const tlp::Event &message) {
     } else if (gEvt->getType() == GraphEvent::TLP_DEL_NODE) {
       _labelsRenderer->removeNodeLabel(_graph, gEvt->getNode());
       _updateQuadTree = true;
+      notifyModified();
     } else if (gEvt->getType() == GraphEvent::TLP_ADD_EDGE ||
                gEvt->getType() == GraphEvent::TLP_AFTER_SET_ENDS ||
                gEvt->getType() == GraphEvent::TLP_REVERSE_EDGE) {
@@ -1736,10 +1737,11 @@ void GlGraph::treatEvent(const tlp::Event &message) {
       }
     } else if (gEvt->getType() == GraphEvent::TLP_DEL_EDGE) {
       _updateQuadTree = true;
+      notifyModified();
     }
   }
   else if (pEvt && (pEvt->getProperty() == _viewLayout || pEvt->getProperty() == _viewSize)) {
-    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE) {
+    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE && _graph->isElement(pEvt->getNode())) {
       _nodesToUpdate.insert(pEvt->getNode());
       forEach(e, _graph->getInOutEdges(pEvt->getNode())) {
         _edgesToUpdate.insert(e);
@@ -1753,17 +1755,18 @@ void GlGraph::treatEvent(const tlp::Event &message) {
         _edgesToUpdate.insert(e);
       }
     }
-    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_EDGE_VALUE && pEvt->getProperty() == _viewLayout) {
+    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_EDGE_VALUE && pEvt->getProperty() == _viewLayout && _graph->isElement(pEvt->getEdge())) {
       _edgesToUpdate.insert(pEvt->getEdge());
     }
-    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_EDGE_VALUE && pEvt->getProperty() == _viewLayout) {
+    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_EDGE_VALUE && pEvt->getProperty() == _viewLayout && _graph->isElement(pEvt->getEdge())) {
       forEach(e, _graph->getEdges()) {
         _edgesToUpdate.insert(e);
       }
     }
   } else if (pEvt && pEvt->getProperty() == _viewLabel) {
-    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE) {
+    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE && _graph->isElement(pEvt->getNode())) {
       _labelsRenderer->addOrUpdateNodeLabel(_graph, pEvt->getNode());
+      notifyModified();
     }
   } else if (pEvt && pEvt->getProperty() == _viewShape) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_EDGE_VALUE) {
@@ -1771,7 +1774,7 @@ void GlGraph::treatEvent(const tlp::Event &message) {
         _edgesToUpdate.insert(e);
       }
     }
-    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_EDGE_VALUE) {
+    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_EDGE_VALUE && _graph->isElement(pEvt->getEdge())) {
       _edgesToUpdate.insert(pEvt->getEdge());
     }
   } else if (rpEvt && (rpEvt->getType() == GlGraphRenderingParametersEvent::DISPLAY_EDGES_EXTREMITIES_TOGGLED)) {
@@ -1786,6 +1789,11 @@ void GlGraph::treatEvent(const tlp::Event &message) {
 void GlGraph::treatEvents(const std::vector<tlp::Event> &) {
 
   if (!_edgesToUpdate.empty() || !_nodesToUpdate.empty()) {
+
+    set<node>::iterator itN;
+    for (itN = _nodesToUpdate.begin() ; itN != _nodesToUpdate.end() ; ++itN) {
+      prepareNodeLabelData(*itN);
+    }
 
     set<edge>::iterator itE;
     for (itE = _edgesToUpdate.begin() ; itE != _edgesToUpdate.end() ; ++itE) {
@@ -1802,9 +1810,9 @@ void GlGraph::treatEvents(const std::vector<tlp::Event> &) {
 
     _updateQuadTree = true;
 
-  }
+    notifyModified();
 
-  notifyModified();
+  }
 
 }
 

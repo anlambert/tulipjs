@@ -1714,6 +1714,10 @@ void GlGraph::prepareEdgeData(tlp::edge e) {
 }
 
 void GlGraph::treatEvent(const tlp::Event &message) {
+  if (message.type() == Event::TLP_DELETE && dynamic_cast<tlp::Graph *>(message.sender())) {
+    _graph = NULL;
+    return;
+  }
   if (message.type() != Event::TLP_MODIFICATION) return;
   node n;
   edge e;

@@ -178,6 +178,7 @@ void GlScene::backupBackBuffer() {
 }
 
 void GlScene::drawBackBufferBackup() {
+  glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   Camera camera2d(false);
   camera2d.setViewport(_viewport);
   camera2d.initGl();

@@ -196,6 +196,7 @@ void FisheyeInteractor::draw() {
   TextureManager::instance()->bindTexture("fisheyeTexture", 1);
   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, BUFFER_OFFSET(0));
   TextureManager::instance()->unbindTexture(_glScene->getBackBufferTextureName());
+  TextureManager::instance()->unbindTexture("fisheyeTexture");
   _fisheyeShader->desactivate();
   _indicesBuffer->release();
   _buffer->release();

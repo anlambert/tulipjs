@@ -933,8 +933,14 @@ void GlGraph::renderMetaNodes(const std::vector<tlp::node> &metaNodes, const Cam
     subScene.draw();
     glDepthRange(0, 1);
   }
-  if (getLayer())
+  if (getLayer()) {
     getLayer()->getScene()->initGlParameters();
+  } else {
+    tlp::Vec4i viewport = camera.getViewport();
+    subScene.setViewport(viewport);
+    subScene.initGlParameters();
+  }
+
 }
 
 void GlGraph::renderNodes(const Camera &camera, const Light &light) {

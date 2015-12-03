@@ -6,6 +6,7 @@
 #include <tulip/BoundingBox.h>
 
 #include <map>
+#include <set>
 
 class GlScene;
 class GlGraph;
@@ -33,6 +34,10 @@ public:
 
   virtual void draw();
 
+  void activate();
+
+  void desactivate();
+
 private:
 
   bool hasSelection();
@@ -43,6 +48,8 @@ private:
   int _lastX, _lastY;
 
   std::map<tlp::Graph*, tlp::Graph*> _selectionSg;
+  std::map<tlp::Graph*, tlp::Graph*> _displayGraph;
+  std::map<tlp::Graph*, GlGraph*> _displayGlGraph;
   std::map<tlp::Graph*, tlp::BoundingBox> _selectionBoundingBox;
   SelectionInteractor *_selectionInteractor;
 
@@ -53,6 +60,7 @@ private:
 
   bool _dragStarted;
   tlp::Graph *_selectedGraph;
+  std::set<tlp::node> _previousSelection;
 
 };
 

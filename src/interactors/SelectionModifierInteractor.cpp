@@ -5,6 +5,7 @@
 #include "SelectionInteractor.h"
 #include "GlRect2D.h"
 #include "GlLayer.h"
+#include "GlCPULODCalculator.h"
 
 #include <tulip/Graph.h>
 #include <tulip/BooleanProperty.h>
@@ -88,11 +89,17 @@ bool SelectionModifierInteractor::mouseMoveCallback(int x, int y, const int &mod
 void SelectionModifierInteractor::draw() {
   if (!_glScene) return;
   Camera *camera = _glScene->getMainLayer()->getCamera();
+  Light *light = _glScene->getMainLayer()->getLight();
   _selectionInteractor->draw();
   updateSelectionBoundingBox();
   camera->initGl();
+  glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  std::map<tlp::Graph*, GlGraph *>::iterator itG = _displayGlGraph.begin();
+  for(; itG != _displayGlGraph.end() ; ++itG) {
+    itG->second->draw(*camera, *light);
+  }
   std::map<tlp::Graph*, tlp::BoundingBox>::iterator it = _selectionBoundingBox.begin();
   for (; it != _selectionBoundingBox.end() ;++it) {
     BoundingBox selectionBoundingBox = it->second;
@@ -105,12 +112,13 @@ void SelectionModifierInteractor::draw() {
 }
 
 bool SelectionModifierInteractor::hasSelection() {
+  tlp::Observable::holdObservers();
   bool ret = false;
   std::set<GlEntity*> entities = _glScene->getEntities();
   for (std::set<GlEntity*>::iterator it = entities.begin() ; it != entities.end() ; ++it) {
     GlGraph *glGraph = dynamic_cast<GlGraph*>(*it);
     if (glGraph && glGraph->graph()) {
-      Graph *graph = glGraph->graph();
+      Graph *graph = glGraph->graph()->getSuperGraph();
       if (_selectionSg.find(graph) == _selectionSg.end()) {
         _selectionSg[graph] = NULL;
       }
@@ -122,23 +130,68 @@ bool SelectionModifierInteractor::hasSelection() {
       ret = ret || selectedNodes->hasNext();
       if (selectedNodes->hasNext()) {
         node n;
+        edge e;
         std::set<node> setNodes;
         forEach(n, selectedNodes) {
           setNodes.insert(n);
         }
+
+        if (setNodes == _previousSelection) {
+          continue;
+        }
+
+        _previousSelection = setNodes;
+
         if (_selectionSg[graph] != NULL) {
           graph->delSubGraph(_selectionSg[graph]);
         }
         _selectionSg[graph] = graph->inducedSubGraph(setNodes);
+        if (_displayGraph.find(graph) == _displayGraph.end()) {
+          _displayGraph[graph] = graph->addSubGraph();
+        }
+
+        stableForEach(n, _displayGraph[graph]->getNodes()) {
+          if (!_selectionSg[graph]->isElement(n)) {
+            _displayGraph[graph]->delNode(n);
+            glGraph->graph()->addNode(n);
+            forEach(e, graph->getInOutEdges(n)) {
+              glGraph->graph()->addEdge(e);
+            }
+          }
+        }
+        forEach(n, _selectionSg[graph]->getNodes()) {
+          if (glGraph->graph()->isElement(n))
+            glGraph->graph()->delNode(n);
+          _displayGraph[graph]->addNode(n);
+
+          forEach(e, graph->getInOutEdges(n)) {
+            _displayGraph[graph]->addEdge(e);
+          }
+        }
+        if (_displayGlGraph.find(graph) == _displayGlGraph.end()) {
+          _displayGlGraph[graph] = new GlGraph(_displayGraph[graph], new GlCPULODCalculator);
+        }
+
       } else {
         delete selectedNodes;
         if (_selectionSg[graph] != NULL) {
+          tlp::node n;
+          forEach(n, _displayGraph[graph]->getNodes()) {
+            glGraph->graph()->addNode(n);
+          }
+          tlp::edge e;
+          forEach(e, _displayGraph[graph]->getEdges()) {
+            glGraph->graph()->addEdge(e);
+          }
+          _displayGraph[graph]->clear();
           graph->delSubGraph(_selectionSg[graph]);
         }
         _selectionSg[graph] = NULL;
+        _previousSelection.clear();
       }
     }
   }
+  tlp::Observable::unholdObservers();
   return ret;
 }
 
@@ -170,4 +223,45 @@ void SelectionModifierInteractor::translateSelection(Graph *graph, int x, int y)
   tlp::Coord move = v2 - v1;
   _viewLayout[graph]->translate(move, _selectionSg[graph]);
   tlp::Observable::unholdObservers();
+}
+
+void SelectionModifierInteractor::activate() {
+  std::set<GlEntity*> entities = _glScene->getEntities();
+  for (std::set<GlEntity*>::iterator it = entities.begin() ; it != entities.end() ; ++it) {
+    GlGraph *glGraph = dynamic_cast<GlGraph*>(*it);
+    if (glGraph && glGraph->graph()) {
+      tlp::Graph *clone = glGraph->graph()->addCloneSubGraph("tmpClone");
+      glGraph->setGraph(clone);
+    }
+  }
+}
+
+void SelectionModifierInteractor::desactivate() {
+  std::map<tlp::Graph*, GlGraph *>::iterator itG = _displayGlGraph.begin();
+  for(; itG != _displayGlGraph.end() ; ++itG) {
+    delete itG->second;
+  }
+  _displayGlGraph.clear();
+  std::map<tlp::Graph*, tlp::Graph *>::iterator it = _displayGraph.begin();
+  for(; it != _displayGraph.end() ; ++it) {
+    it->first->delSubGraph(it->second);
+  }
+  _displayGraph.clear();
+  it = _selectionSg.begin();
+  for(; it != _selectionSg.end() ; ++it) {
+    if (it->second) {
+      it->first->delSubGraph(it->second);
+    }
+  }
+  _selectionSg.clear();
+  std::set<GlEntity*> entities = _glScene->getEntities();
+  for (std::set<GlEntity*>::iterator it = entities.begin() ; it != entities.end() ; ++it) {
+    GlGraph *glGraph = dynamic_cast<GlGraph*>(*it);
+    if (glGraph && glGraph->graph()) {
+      tlp::Graph *original = glGraph->graph()->getSuperGraph();
+      glGraph->setGraph(original);
+      original->delSubGraph(original->getSubGraph("tmpClone"));
+    }
+  }
+  _previousSelection.clear();
 }

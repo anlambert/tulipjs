@@ -715,6 +715,7 @@ void LabelsRenderer::clearGraphNodesLabelsRenderingData(Graph *graph) {
   if (!graph) return;
   _nodeLabelNbLines.erase(graph);
   _nodeLabelAspectRatio.erase(graph);
+  _nodeLabelAspectRatioDF.erase(graph);
 }
 
 

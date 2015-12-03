@@ -360,6 +360,7 @@
         // Closure to capture the file information.
         reader.onload = (function(theFile) {
             return function(e) {
+              $('#navigation-button').trigger('click');
               start = new Date().getTime();
               tulipView.loadGraphFromData(theFile.name, e.target.result, $('#load-in-worker').prop('checked'), setGlobalVars);
             };
@@ -387,6 +388,7 @@
  }
 
  function loadGraphFromDataFolder(tlpFilename, sgToVisualize) {
+   $('#navigation-button').trigger('click');
    start = new Date().getTime();
    if (sgToVisualize) {
      tulipView.loadGraphFromFile("data/" + tlpFilename, $('#load-in-worker').prop('checked'), setSubGraphToVisualize(sgToVisualize));

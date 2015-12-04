@@ -420,17 +420,7 @@ function resize() {
   }
 }
 
-var importScript = (function (oHead) {
 
-  return function (sSrc, fOnload) {
-    var oScript = document.createElement("script");
-    oScript.type = "text\/javascript";
-    if (fOnload) { oScript.onload = fOnload; }
-    oHead.appendChild(oScript);
-    oScript.src = sSrc;
-  }
-
-})(document.head || document.getElementsByTagName("head")[0]);
 
 $( document ).ready(function() {
   $('#tulip-view').width(window.innerWidth-50);
@@ -453,11 +443,13 @@ $( document ).ready(function() {
     applyRenderingParameters();
   });
 
-  importScript("tulip.js",
-    function() {
-      initTulipView()
-    }
-  );
+  var oHead = document.head || document.getElementsByTagName("head")[0];
+  var oScript = document.createElement("script");
+  oScript.type = "text\/javascript";
+  oHead.appendChild(oScript);
+  oScript.src = "tulip.js";
+
+  initTulipView();
 
 });
 

@@ -83,6 +83,7 @@ var importScript = (function (oHead) {
 
 })(document.head || document.getElementsByTagName("head")[0]);
 
-var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1 &&
+               navigator.vendor.toLowerCase().indexOf('google inc') > -1;
 
 importScript(getScriptPath() + (isChrome ? "tulip_no_asm_validation.js" : "tulip_asm_validation.js"));

@@ -1750,7 +1750,7 @@ void GlGraph::treatEvent(const tlp::Event &message) {
       notifyModified();
     }
   }
-  else if (pEvt && (pEvt->getProperty() == _viewLayout || pEvt->getProperty() == _viewSize)) {
+  else if (pEvt && (pEvt->getProperty() == _viewLayout || pEvt->getProperty() == _viewSize || pEvt->getProperty() == _viewColor)) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE && _graph->isElement(pEvt->getNode())) {
       _nodesToUpdate.insert(pEvt->getNode());
       forEach(e, _graph->getInOutEdges(pEvt->getNode())) {
@@ -1765,10 +1765,13 @@ void GlGraph::treatEvent(const tlp::Event &message) {
         _edgesToUpdate.insert(e);
       }
     }
-    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_EDGE_VALUE && pEvt->getProperty() == _viewLayout && _graph->isElement(pEvt->getEdge())) {
+    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_EDGE_VALUE &&
+        (pEvt->getProperty() == _viewLayout || pEvt->getProperty() == _viewColor) &&
+        _graph->isElement(pEvt->getEdge())) {
       _edgesToUpdate.insert(pEvt->getEdge());
     }
-    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_EDGE_VALUE && pEvt->getProperty() == _viewLayout && _graph->isElement(pEvt->getEdge())) {
+    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_EDGE_VALUE &&
+        (pEvt->getProperty() == _viewLayout || pEvt->getProperty() == _viewColor)) {
       forEach(e, _graph->getEdges()) {
         _edgesToUpdate.insert(e);
       }

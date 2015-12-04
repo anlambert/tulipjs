@@ -4422,26 +4422,17 @@ if (workerMode) {
     tulip.View.prototype.loadGraphFromFile = function(graphFilePath, loadGraphInWorker, graphLoadedCallback) {
 
       var view = this;
-      if (loadGraphInWorker) {
-        view.graph = tulip.Graph();
-        _setCanvasGraph(view.canvasId, view.graph.cppPointer);
-        if (graphLoadedCallback) {
-          _graphLoadedCallback[view.graph.getCppPointer()] = graphLoadedCallback;
-        }
-        _graphIdToCanvas[view.graph.getCppPointer()] = view.canvasId;
-        _graphIdToWrapper[view.graph.getCppPointer()] = view.graph;
-        _setGraphRenderingDataReady(view.canvasId, false);
-
-        _sendGraphToWorker(view.graph, graphFilePath, null, true);
-      } else {
-        var graphReq = new XMLHttpRequest();
-        graphReq.open("GET", graphFilePath, true);
-        graphReq.responseType = "arraybuffer";
-        graphReq.onload = function (oEvent) {
-          var arrayBuffer = graphReq.response;
+      var graphReq = new XMLHttpRequest();
+      graphReq.open("GET", graphFilePath, true);
+      graphReq.responseType = "arraybuffer";
+      graphReq.onload = function (oEvent) {
+        var arrayBuffer = graphReq.response;
+        var paths = graphFilePath.split('/');
+        if (loadGraphInWorker) {
+          view.loadGraphFromData(paths[paths.length-1], arrayBuffer, loadGraphInWorker, graphLoadedCallback);
+        } else {
           var file = FS.findObject(graphFilePath);
           if (!file) {
-            var paths = graphFilePath.split('/');
             var filePath = "/";
             for (var i = 0; i < paths.length - 1; ++i) {
               filePath += paths[i];
@@ -4458,9 +4449,9 @@ if (workerMode) {
           if (graphLoadedCallback) {
             graphLoadedCallback(view.graph);
           }
-        };
-        graphReq.send(null);
-      }
+        }
+      };
+      graphReq.send(null);
     };
 
     tulip.View.prototype.loadGraphFromData = function(graphFilePath, graphFileData, loadGraphInWorker, graphLoadedCallback) {

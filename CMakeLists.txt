@@ -256,7 +256,7 @@ ADD_EXECUTABLE(tulip_asm_validation.js ${TULIPJS_SRCS})
 
 TARGET_LINK_LIBRARIES(tulip_asm_validation.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
 
-SET_TARGET_PROPERTIES(tulip_asm_validation.js PROPERTIES LINK_FLAGS "--bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s STB_IMAGE=1 -s LZ4=1 -s ALLOW_MEMORY_GROWTH=1 -s PRECISE_F32=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
+SET_TARGET_PROPERTIES(tulip_asm_validation.js PROPERTIES LINK_FLAGS "--bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s STB_IMAGE=1 -s LZ4=1 -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
 
 EM_LINK_PRE_JS(tulip_asm_validation.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_pre.js)
 EM_LINK_POST_JS(tulip_asm_validation.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)

@@ -42,8 +42,10 @@ private:
     GlBuffer *_indicesBuffer;
     GlFrameBufferObject *_fbo;
 
-    float _fisheyeRadius;
+    int _fisheyeRadius;
     float _fisheyeHeight;
+
+    int _maxTextureSize;
 
 };
 

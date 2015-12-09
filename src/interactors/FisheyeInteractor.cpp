@@ -7,6 +7,8 @@
 #include "Camera.h"
 #include "TextureManager.h"
 #include "GlFrameBufferObject.h"
+#include "GlLayer.h"
+#include "ZoomAndPanAnimation.h"
 
 static std::string fisheyeVertexShaderSrc =
 #ifdef __EMSCRIPTEN__
@@ -50,20 +52,17 @@ static std::string fisheyeFragmentShaderSrc =
     "varying vec2 v_texCoord;"
 
     "void main(void) {"
-    "  vec2 pos = gl_FragCoord.xy;"
+    "  vec2 pos = v_texCoord * u_resolution;"
     "  vec2 center = u_mouse;"
     "  float radius = u_fisheyeRadius;"
     "  float height = u_fisheyeHeight;"
     "  float dist = distance(center, pos);"
-    "  if (dist < radius) {"
+    "  if (dist < radius && u_fisheyeHeight < -0.05) {"
     "		 float coeff = (height + 1.0) * dist / (height * dist/ radius + 1.0);"
     "		 vec2 dir = normalize(pos - center) * coeff;"
     "		 pos = center + dir;"
-    "    if (abs(height) < 0.4) {"
-    "      gl_FragColor = texture2D(u_texture, pos / u_resolution);"
-    "    } else {"
-    "      gl_FragColor = texture2D(u_fisheyeTexture, pos / u_resolution);"
-    "    }"
+    "    vec2 fisheyePos = vec2(pos.x - (u_mouse.x - u_fisheyeRadius), pos.y - (u_mouse.y - u_fisheyeRadius)) / vec2(2.0*u_fisheyeRadius);"
+    "    gl_FragColor = texture2D(u_fisheyeTexture, fisheyePos);"
     "  } else {"
     "    gl_FragColor = texture2D(u_texture, pos / u_resolution);"
     "  }"
@@ -73,7 +72,7 @@ static std::string fisheyeFragmentShaderSrc =
 
 FisheyeInteractor::FisheyeInteractor(GlScene *scene) :
   _curX(-1), _curY(-1), _dragStarted(false), _znpInteractor(NULL),
-  _fisheyeShader(NULL), _buffer(NULL), _fbo(NULL), _fisheyeRadius(200), _fisheyeHeight(0.5) {
+  _fisheyeShader(NULL), _buffer(NULL), _fbo(NULL), _fisheyeRadius(200), _fisheyeHeight(0.5), _maxTextureSize(0) {
   _glScene = scene;
   _znpInteractor = new ZoomAndPanInteractor(scene);
 }
@@ -87,6 +86,14 @@ void FisheyeInteractor::activate() {
   _buffer = new GlBuffer(GlBuffer::VertexBuffer);
   _indicesBuffer = new GlBuffer(GlBuffer::IndexBuffer);
   _fbo = NULL;
+
+  if (_maxTextureSize == 0) {
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &_maxTextureSize);
+    if (_maxTextureSize > 4096) {
+      _maxTextureSize = 4096;
+    }
+  }
+
 }
 
 void FisheyeInteractor::desactivate() {
@@ -149,23 +156,44 @@ void FisheyeInteractor::draw() {
 
   tlp::Vec4i viewport = _glScene->getViewport();
 
-  if (_fbo == NULL || _fbo->width() != 2 * viewport[2] || _fbo->height() != 2 * viewport[3]) {
+  int factor = 1;
+  if (_fisheyeHeight > 0.1) {
+    factor = _fisheyeHeight * 10;
+  }
+  int fboSize = factor * 2 * _fisheyeRadius;
+  fboSize = std::min(fboSize, _maxTextureSize);
+
+  if (_fbo == NULL || _fbo->width() != fboSize) {
     delete _fbo;
-    _fbo = new GlFrameBufferObject(2*viewport[2], 2*viewport[3], GlFrameBufferObject::CombinedDepthStencil, GL_LINEAR, GL_LINEAR);
+    _fbo = new GlFrameBufferObject(fboSize, fboSize, GlFrameBufferObject::CombinedDepthStencil, GL_LINEAR, GL_LINEAR);
     TextureManager::instance()->addExternalTexture("fisheyeTexture", _fbo->texture());
   }
 
+  Camera *camera = _glScene->getMainLayer()->getCamera();
+  Camera camBackup = *camera;
+
+  tlp::Coord bbMin = camera->screenTo3DWorld(tlp::Coord(viewport[2] - (_curX - _fisheyeRadius), _curY - _fisheyeRadius));
+  tlp::Coord bbMax = camera->screenTo3DWorld(tlp::Coord(viewport[2] - (_curX + _fisheyeRadius), _curY + _fisheyeRadius));
+  tlp::BoundingBox bb;
+  bb.expand(bbMin);
+  bb.expand(bbMax);
+
   _fbo->bind();
-  _glScene->setViewport(0, 0, 2*viewport[2], 2*viewport[3]);
+  _glScene->setViewport(0, 0, fboSize, fboSize);
+  adjustViewToBoundingBox(camera, bb);
+  glDisable(GL_SCISSOR_TEST);
   _glScene->draw();
-  _glScene->setViewport(viewport);
-  _glScene->setSceneNeedRedraw(false);
   _fbo->release();
 
-  Camera camera2d(false);
+  _glScene->setViewport(viewport);
+  *camera = camBackup;
+  _glScene->initGlParameters();
+  _glScene->setSceneNeedRedraw(false);
 
+  Camera camera2d(false);
   camera2d.setViewport(viewport);
   camera2d.initGl();
+
   std::vector<float> quadData;
   addTlpVecToVecFloat(tlp::Vec3f(0, 0, 0), quadData);
   addTlpVecToVecFloat(tlp::Vec2f(0, 0), quadData);

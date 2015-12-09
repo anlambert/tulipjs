@@ -144,7 +144,7 @@ void GlScene::draw() {
       backupBackBuffer();
     }
 
-  } else if (_backupBackBuffer) {
+  } else if (_backupBackBuffer && !GlFrameBufferObject::bufferBound()) {
     initGlParameters(true);
     drawBackBufferBackup();
   }

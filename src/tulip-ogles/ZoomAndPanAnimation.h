@@ -11,7 +11,7 @@ class ZoomAndPanAnimation  {
 
 public :
 
-  ZoomAndPanAnimation(Camera *_camera, const tlp::BoundingBox &boundingBox, const unsigned int _animationDuration = 1000, const bool _optimalPath = true, const float velocity = 1.1f, const double _p = sqrt(1.6));
+  ZoomAndPanAnimation(Camera *camera, const tlp::BoundingBox &boundingBox, const unsigned int animationDuration = 1000, const bool optimalPath = true, const float velocity = 1.1f, const double p = sqrt(1.6));
 
   virtual ~ZoomAndPanAnimation() {}
 
@@ -37,7 +37,8 @@ protected :
   float _zoomAreaWidth, _zoomAreaHeight;
   bool _doZoomAndPan;
 
-
 };
+
+void adjustViewToBoundingBox(Camera *camera, const tlp::BoundingBox &boundingBox);
 
 #endif /* ZoomAndPanAnimation_H_ */

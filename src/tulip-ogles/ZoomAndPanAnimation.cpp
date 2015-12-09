@@ -135,3 +135,7 @@ void ZoomAndPanAnimation::zoomAndPanAnimationStep(double t) {
   }
 }
 
+void adjustViewToBoundingBox(Camera *camera, const tlp::BoundingBox &boundingBox) {
+  ZoomAndPanAnimation znp(camera, boundingBox);
+  znp.zoomAndPanAnimationStep(1.0);
+}

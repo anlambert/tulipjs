@@ -205,6 +205,8 @@ void FisheyeInteractor::draw() {
   addTlpVecToVecFloat(tlp::Vec2f(1, 0), quadData);
   std::vector<unsigned short> indices = {0, 1, 2, 0, 2, 3};
 
+  glDisable(GL_BLEND);
+
   _buffer->bind();
   _buffer->allocate(quadData);
   _fisheyeShader->activate();

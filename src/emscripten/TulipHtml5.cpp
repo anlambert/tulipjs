@@ -62,6 +62,10 @@ static std::map<std::string, GlSceneInteractor*> currentCanvasInteractor;
 static std::map<std::string, unsigned int> canvas2dTexture;
 static std::map<std::string, bool> canvas2dModified;
 
+static std::map<std::string, GlLayer *> hullsLayer;
+static std::map<std::string, std::map<tlp::Graph *, GlConcavePolygon *> > subgraphsHulls;
+
+
 static std::string currentCanvasId;
 
 extern "C" {
@@ -149,8 +153,6 @@ void EMSCRIPTEN_KEEPALIVE draw(bool refreshDisplay = true) {
 }
 
 }
-
-
 
 static int getModifiers(const EmscriptenMouseEvent &mouseEvent) {
   int modifiers = 0;
@@ -455,6 +457,8 @@ void EMSCRIPTEN_KEEPALIVE initCanvas(const char *canvasId, int width, int height
     glGraph[currentCanvasId] = new GlGraph();
     glScene[currentCanvasId]->getMainLayer()->addGlEntity(glGraph[currentCanvasId], "graph");
 
+    hullsLayer[currentCanvasId] = new GlLayer("hulls", glScene[currentCanvasId]->getMainLayer()->getCamera(), glScene[currentCanvasId]->getMainLayer()->getLight());
+
     GlLayer *progressLayer = glScene[currentCanvasId]->createLayer("progress", false);
     glProgressBar[currentCanvasId] = new GlProgressBar(tlp::Coord(viewport[2]/2.f, viewport[3]/2.f), 0.8f * viewport[2], 0.1f * viewport[3],
         tlp::Color::Gray, tlp::Color::Black, tlp::Color::Black);
@@ -513,12 +517,45 @@ void EMSCRIPTEN_KEEPALIVE resizeCanvas(const char *canvasId, int width, int heig
   glProgressBar[canvasId]->setCenter(tlp::Coord(viewport[2]/2.f, viewport[3]/2.f));
   glProgressBar[canvasId]->setWidth(0.8f * viewport[2]);
   glProgressBar[canvasId]->setHeight(0.1f * viewport[3]);
-  //draw();
+}
+
+void addGraphHull(const char *canvasId, tlp::Graph *graph, const tlp::Color &fillColor) {
+  if (subgraphsHulls[canvasId].find(graph) != subgraphsHulls[canvasId].end()) {
+    hullsLayer[canvasId]->deleteGlEntity(subgraphsHulls[canvasId][graph]);
+    delete subgraphsHulls[canvasId][graph];
+  }
+  std::ostringstream oss;
+  oss << "hull_" << reinterpret_cast<unsigned long>(graph);
+  subgraphsHulls[canvasId][graph] = computeGraphHull(graph, fillColor, 0);
+  hullsLayer[canvasId]->addGlEntity(subgraphsHulls[canvasId][graph], oss.str());
+}
+
+void EMSCRIPTEN_KEEPALIVE addSubGraphHull(const char *canvasId, tlp::Graph *sg) {
+  tlp::Color hullColor = genRandomColor(100);
+  addGraphHull(canvasId, sg, hullColor);
+}
+
+void EMSCRIPTEN_KEEPALIVE setSubGraphsHullsVisible(const char *canvasId, bool visible, bool onTop = true) {
+  glScene[canvasId]->removeLayer(hullsLayer[canvasId]);
+  if (visible) {
+    if (onTop) {
+      glScene[canvasId]->addExistingLayerAfter(hullsLayer[canvasId], "Main");
+    } else {
+      glScene[canvasId]->addExistingLayerBefore(hullsLayer[canvasId], "Main");
+    }
+  }
+}
+
+void EMSCRIPTEN_KEEPALIVE clearSubGraphsHulls(const char *canvasId) {
+  hullsLayer[canvasId]->clear(true);
+  subgraphsHulls[canvasId].clear();
 }
 
 void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
   setCurrentCanvas(canvasId);
-  //LabelsRenderer::instance(canvasId)->clearGraphNodesLabelsRenderingData(graph[canvasId]);
+
+  clearSubGraphsHulls(canvasId);
+
   tlp::StringProperty *viewTexture = g->getProperty<tlp::StringProperty>("viewTexture");
   tlp::node n;
   nbTextureToLoad = 0;
@@ -529,12 +566,15 @@ void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
   graph[canvasId] = g;
   graphToCanvas[g] = canvasId;
   glGraph[canvasId]->setGraph(g);
+
   glScene[canvasId]->centerScene();
   glProgressBar[currentCanvasId]->setVisible(false);
   if (nbTextureToLoad == 0) {
     draw();
   }
 }
+
+
 
 void EMSCRIPTEN_KEEPALIVE centerScene(const char *canvasId) {
   glScene[canvasId]->centerScene();
@@ -597,9 +637,12 @@ void EMSCRIPTEN_KEEPALIVE endGraphViewData(const char *canvasId) {
   glGraph[canvasId]->computeGraphBoundingBox();
 }
 
-void EMSCRIPTEN_KEEPALIVE startGraphViewUpdate(const char *canvasId) {
+void EMSCRIPTEN_KEEPALIVE startGraphViewUpdate(const char *canvasId, bool clearGraph = false) {
   glProgressBar[canvasId]->setPercent(-1);
   glGraph[canvasId]->clearObservers();
+  if (clearGraph) {
+    graph[canvasId]->clear();
+  }
 }
 
 void EMSCRIPTEN_KEEPALIVE endGraphViewUpdate(const char *canvasId) {
@@ -723,6 +766,7 @@ void EMSCRIPTEN_KEEPALIVE setProgressBarComment(const char *canvasId, const char
 void EMSCRIPTEN_KEEPALIVE setGraphRenderingDataReady(const char *canvasId, bool ready) {
   glProgressBar[canvasId]->setVisible(!ready);
   glScene[canvasId]->getMainLayer()->setVisible(ready);
+  hullsLayer[canvasId]->setVisible(ready);
 }
 
 void EMSCRIPTEN_KEEPALIVE fullScreen(const char *canvasId) {

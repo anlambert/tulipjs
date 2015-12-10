@@ -116,6 +116,7 @@
 
       <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Programming Languages network" onclick ="loadGraphFromDataFolder('programming_language_network.tlp.gz')" > Programming Languages network </a>
       <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="FIFA World Cup 2014 players network" onclick ="loadGraphFromDataFolder('world_cup_network.tlp.gz')" > FIFA World Cup 2014 players network </a>
+      <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="IMDB graph" onclick ="loadGraphFromDataFolder('imdb_middle.tlp.gz')" > IMDB graph </a>
       <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Qt 5.4 Linux install" onclick ="loadGraphFromDataFolder('qt54_linux64_dist.tlp.gz')" > Qt 5.4 Linux install </a>
       <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Graph with metanodes" onclick ="loadGraphFromDataFolder('metanodes.tlp.gz', 'groups')" > Graph with metaNodes </a>
       <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Sample Tree" onclick ="loadGraphFromDataFolder('tree.tlp.gz')" > Sample Tree </a>
@@ -167,6 +168,7 @@
       <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Auto-Sizing' algorithm" onclick ="computeAutoSizing()" > Auto-Sizing </a>
       <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Edge bundling' algorithm" onclick ="computeEdgeBundling()" > Edge bundling </a>
       <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="applyGraphScript()" > Magic script </a>
+      <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="applyLouvainClusteringAndComputeHulls()" > Louvain clustering </a>
       </div>
       </div>
 
@@ -203,6 +205,11 @@
         <label for="range-1b">Rangeslider:</label>
         <input name="range-1b" id="labels-max-size" class="rendering-params-modifier" min="0" max="100" value="72" type="range" />
       </div>
+      </div>
+      <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
+      <h3> Subgraphs Hulls </h3>
+        <label><input id="display-hulls" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Display </label>
+        <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Compute" onclick ="computeSubGraphsHulls()" > Compute </a>
       </div>
       </div>
 
@@ -256,6 +263,7 @@
    renderingParameters.setEdges3D($('#edges-3d').prop('checked'));
    renderingParameters.setMinSizeOfLabels(parseInt($('#labels-min-size').prop('value')));
    renderingParameters.setMaxSizeOfLabels(parseInt($('#labels-max-size').prop('value')));
+   tulipView.setSubGraphsHullsVisible($('#display-hulls').prop('checked'), true);
    tulip.unholdObservers();
  }
 
@@ -297,6 +305,27 @@
 
  function applyGraphScript() {
    graph.executeScriptInWorker(graphScript);
+ }
+
+ function computeSubGraphsHulls() {
+   tulipView.setSubGraphsHullsVisible(true);
+   tulipView.clearSubGraphsHulls();
+   graph.getSubGraphs().forEach(function(sg) {
+     setTimeout(
+       function(g) {
+         return function() {
+           tulipView.addSubGraphHull(g);
+           tulipView.draw();
+         }
+       }(sg)
+     );
+   });
+ }
+
+ function applyLouvainClusteringAndComputeHulls() {
+   graph.applyDoubleAlgorithm('Louvain', graphProperties.viewMetric);
+   graph.applyAlgorithm('Equal Value', {}, true);
+   computeSubGraphsHulls();
  }
 
  function graphScriptEndedCallback(succeed, graph) {

@@ -3825,6 +3825,7 @@ if (workerMode) {
                          graphId : graphId,
                          numberOfNodes : graphObject[graphId].nodesNumber,
                          numberOfEdges : graphObject[graphId].edgesNumber,
+                         numberOfSubgraphs : graphObject[graphId].subgraphs.length,
                          graphAttributes : JSON.stringify(graphObject[graphId].attributes)
                        });
       var propertiesData = {};
@@ -3915,7 +3916,12 @@ if (workerMode) {
             self.postMessage({eventType : 'endGraphData', graphId : data.graphId});
           }
         } else {
-          self.postMessage({eventType : 'endGraphUpdate', graphId : data.graphId});
+          if (subGraphsData[data.graphId].length > 0) {
+            curSubGraphIdx[data.graphId] = 0;
+            self.postMessage({eventType : 'addSubGraph', graphId : data.graphId, subGraphData : subGraphsData[data.graphId][0]});
+          } else {
+            self.postMessage({eventType : 'endGraphUpdate', graphId : data.graphId});
+          }
         }
         propertiesFilter[data.graphId] = null;
         return;
@@ -3944,9 +3950,11 @@ if (workerMode) {
       getGraphData(data.graphId, function() {
         self.postMessage({eventType : 'startGraphUpdate',
                            graphId : data.graphId,
+                           clearGraph : true,
                            algoSucceed : algoSucceed,
                            numberOfNodes : graphObject[data.graphId].nodesNumber,
-                           numberOfEdges : graphObject[data.graphId].edgesNumber});
+                           numberOfEdges : graphObject[data.graphId].edgesNumber,
+                           numberOfSubgraphs : graphObject[data.graphId].subgraphs.length});
         sendGraphData(data.graphId);
       });
       break;
@@ -3960,9 +3968,11 @@ if (workerMode) {
       getGraphData(data.graphId, function() {
         self.postMessage({eventType : 'startGraphUpdate',
                            graphId : data.graphId,
+                           clearGraph : false,
                            algoSucceed : algoSucceed,
                            numberOfNodes : graphObject[data.graphId].nodesNumber,
-                           numberOfEdges : graphObject[data.graphId].edgesNumber});
+                           numberOfEdges : graphObject[data.graphId].edgesNumber,
+                           numberOfSubgraphs : graphObject[data.graphId].subgraphs.length});
         sendGraphData(data.graphId);
       });
       break;
@@ -3982,9 +3992,11 @@ if (workerMode) {
       getGraphData(data.graphId, function() {
         self.postMessage({eventType : 'startGraphUpdate',
                            graphId : data.graphId,
+                           clearGraph : true,
                            algoSucceed : scriptSucceed,
                            numberOfNodes : graphObject[data.graphId].nodesNumber,
-                           numberOfEdges : graphObject[data.graphId].edgesNumber});
+                           numberOfEdges : graphObject[data.graphId].edgesNumber,
+                           numberOfSubgraphs : graphObject[data.graphId].subgraphs.length});
         sendGraphData(data.graphId);
       });
       break;
@@ -4025,7 +4037,9 @@ if (workerMode) {
   var _fillMetaGraphInfos = Module.cwrap('fillMetaGraphInfos', null, ['number']);
   var _parseGraphAttributesJSONData =  Module.cwrap('parseGraphAttributesJSONData', null, ['number', 'string']);
   var _createGraphProperty = Module.cwrap('createGraphProperty', null, ['number', 'string', 'string', 'string', 'string']);
-  var _addSubGraph = Module.cwrap('addSubGraph', null, ['number', 'number', 'number', 'string', 'string', 'string']);
+  var _addSubGraph = Module.cwrap('addSubGraph', 'number', ['number', 'number', 'number', 'string', 'string', 'string']);
+  var _addSubGraphHull = Module.cwrap('addSubGraphHull', null, ['string', 'number']);
+
   var _parseNodesJSONData = Module.cwrap('parseNodesJSONData', null, ['number', 'string']);
   var _parseEdgesJSONData = Module.cwrap('parseEdgesJSONData', null, ['number', 'string']);
 
@@ -4034,7 +4048,7 @@ if (workerMode) {
     var _centerScene = Module.cwrap('centerScene', null, ['string']);
     var _startGraphViewData = Module.cwrap('startGraphViewData', null, ['string']);
     var _endGraphViewData = Module.cwrap('endGraphViewData', null, ['string']);
-    var _startGraphViewUpdate = Module.cwrap('startGraphViewUpdate', null, ['string']);
+    var _startGraphViewUpdate = Module.cwrap('startGraphViewUpdate', null, ['string', 'number']);
     var _endGraphViewUpdate = Module.cwrap('endGraphViewUpdate', null, ['string']);
     var _setGraphRenderingDataReady = Module.cwrap('setGraphRenderingDataReady', null, ['string', 'number']);
 
@@ -4051,6 +4065,9 @@ if (workerMode) {
     var _draw = Module.cwrap('draw', null, []);
     var _fullScreen = Module.cwrap('fullScreen', null, ['string']);
     var _updateGlScene = Module.cwrap('updateGlScene', null, ['string']);
+    var _addSubGraphHull = Module.cwrap('addSubGraphHull', null, ['string', 'number']);
+    var _setSubGraphsHullsVisible = Module.cwrap('setSubGraphsHullsVisible', null, ['string', 'number', 'number']);
+    var _clearSubGraphsHulls = Module.cwrap('clearSubGraphsHulls', null, ['string']);
 
     var _selectNodes = Module.cwrap('selectNodes', 'number', ['string', 'number', 'number', 'number', 'number']);
     var _getSelectedNodes = Module.cwrap('getSelectedNodes', null, ['number']);
@@ -4086,7 +4103,7 @@ if (workerMode) {
       busyAnimations[canvasId] = false;
     }
 
-    var currentGraphData = null;
+    var graphData = {};
 
   }
 
@@ -4143,7 +4160,7 @@ if (workerMode) {
             _setProgressBarComment(canvasId, "Initializing graph visualization ...");
             _setProgressBarPercent(canvasId, 0);
             _startGraphViewData(canvasId);
-            currentGraphData = event.data;
+            graphData[canvasId] = event.data;
             _draw();
           }
         }, delay);
@@ -4173,8 +4190,8 @@ if (workerMode) {
           setTimeout(function() {
             _setCurrentCanvas(canvasId);
             _setProgressBarComment(canvasId, "Updating graph visualization ...");
-            _startGraphViewUpdate(canvasId);
-            currentGraphData = event.data;
+            _startGraphViewUpdate(canvasId, event.data.clearGraph);
+            graphData[canvasId] = event.data;
             _draw();
           }, delay);
         }
@@ -4206,7 +4223,7 @@ if (workerMode) {
           _parseNodesJSONData(graphId, nodesJson);
           if (!tulip.coreBuild && canvasId) {
             var nodeId = event.data.lastNodeId;
-            var percent = (nodeId / (currentGraphData.numberOfNodes + currentGraphData.numberOfEdges - 1)) * 100;
+            var percent = (nodeId / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
             _setProgressBarPercent(canvasId, percent);
             _draw();
           }
@@ -4219,7 +4236,7 @@ if (workerMode) {
           _parseEdgesJSONData(graphId, edgesJson);
           if (!tulip.coreBuild && canvasId) {
             var edgeId = event.data.lastEdgeId;
-            var percent = ((currentGraphData.numberOfNodes + edgeId) / (currentGraphData.numberOfNodes + currentGraphData.numberOfEdges - 1)) * 100;
+            var percent = ((graphData[canvasId].numberOfNodes + edgeId) / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
             _setProgressBarPercent(canvasId, percent);
             _draw();
           }
@@ -4229,7 +4246,13 @@ if (workerMode) {
       case 'addSubGraph':
         setTimeout(function() {
           var subGraphData = event.data.subGraphData;
-          _addSubGraph(graphId, subGraphData.parentGraphId, subGraphData.subGraphId, subGraphData.nodesIds, subGraphData.edgesIds, subGraphData.attributes);
+          var sgPointer = _addSubGraph(graphId, subGraphData.parentGraphId, subGraphData.subGraphId, subGraphData.nodesIds, subGraphData.edgesIds, subGraphData.attributes);
+          if (!tulip.coreBuild && canvasId) {
+            var sgId = _graphIdToWrapper[graphId].numberOfDescendantGraphs();
+            var percent = ((graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + sgId) / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
+            _setProgressBarPercent(canvasId, percent);
+            _draw();
+          }
           _tulipWorker.postMessage({eventType : 'sendNextSubGraph', graphId : event.data.graphId});
         }, delay);
         break;
@@ -4243,7 +4266,6 @@ if (workerMode) {
           FS.createFile('/', "graph.tlpb.gz", {}, true, true);
         }
         var saved = tulip.saveGraph(graph, "/graph.tlpb.gz");
-        console.log(saved);
         var graphData = FS.readFile("/graph.tlpb.gz");
         _sendGraphToWorker(graph, "graph.tlpb.gz", graphData.buffer, false);
       } else {
@@ -4330,50 +4352,50 @@ if (workerMode) {
       });
     };
 
-    function CanvasContextProxy(context, canvasId) {
+//    function CanvasContextProxy(context, canvasId) {
 
-      var that = this;
+//      var that = this;
 
-      this.beginPath = function() {
-        _setCanvas2dModified(canvasId);
-        context.beginPath();
-      };
+//      this.beginPath = function() {
+//        _setCanvas2dModified(canvasId);
+//        context.beginPath();
+//      };
 
-      this.arc = function() {
-        _setCanvas2dModified(canvasId);
-        context.arc(this.arguments);
-      }
+//      this.arc = function() {
+//        _setCanvas2dModified(canvasId);
+//        context.arc(this.arguments);
+//      }
 
-      this.fillStyle = context.fillStyle;
+//      this.fillStyle = context.fillStyle;
 
-      this.fill = function() {
-        _setCanvas2dModified(canvasId);
-        context.fillStyle = this.fillStyle;
-        context.fill();
-      };
+//      this.fill = function() {
+//        _setCanvas2dModified(canvasId);
+//        context.fillStyle = this.fillStyle;
+//        context.fill();
+//      };
 
-      this.lineWidth = context.lineWidth;
-      this.strokeStyle = context.strokeStyle;
+//      this.lineWidth = context.lineWidth;
+//      this.strokeStyle = context.strokeStyle;
 
-      this.stroke = function() {
-        _setCanvas2dModified(canvasId);
-        context.stroke();
-      }
+//      this.stroke = function() {
+//        _setCanvas2dModified(canvasId);
+//        context.stroke();
+//      }
 
-    }
+//    }
 
-    tulip.View.prototype.getCanvas2dContext = function() {
-      if (this.canvas2d.width != this.canvas.width) {
-        this.canvas2d.width = this.canvas.width;
-        this.canvas2d.height = this.canvas.height;
-      }
-      return new CanvasContextProxy(this.canvas2dContext, this.canvasId);
-    };
+//    tulip.View.prototype.getCanvas2dContext = function() {
+//      if (this.canvas2d.width != this.canvas.width) {
+//        this.canvas2d.width = this.canvas.width;
+//        this.canvas2d.height = this.canvas.height;
+//      }
+//      return new CanvasContextProxy(this.canvas2dContext, this.canvasId);
+//    };
 
-    tulip.View.prototype.clearCanvas2d = function() {
-      _setCanvas2dModified(this.canvasId);
-      this.canvas2dContext.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
-    }
+//    tulip.View.prototype.clearCanvas2d = function() {
+//      _setCanvas2dModified(this.canvasId);
+//      this.canvas2dContext.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
+//    }
 
     tulip.View.prototype.setCurrent = function() {
       _setCurrentCanvas(this.canvasId);
@@ -4513,7 +4535,29 @@ if (workerMode) {
 
     tulip.View.prototype.getRenderingParameters = function() {
       return tulip.GlGraphRenderingParameters(_getViewRenderingParameters(this.canvasId));
-    }
+    };
+
+    tulip.View.prototype.addSubGraphHull = function(subgraph) {
+      checkArgumentsTypes(arguments, [tulip.Graph], 1);
+      _addSubGraphHull(this.canvasId, subgraph.cppPointer);
+    };
+
+    tulip.View.prototype.clearSubGraphsHulls = function() {
+      _clearSubGraphsHulls(this.canvasId);
+    };
+
+    tulip.View.prototype.setSubGraphsHullsVisible = function(visible, onTop) {
+      checkArgumentsTypes(arguments, ['boolean', 'boolean']);
+      if (typeOf(visible) == 'undefined') {
+        visible = true;
+      }
+      if (typeOf(onTop) == 'undefined') {
+        onTop = true;
+      }
+      _setSubGraphsHullsVisible(this.canvasId, visible, onTop);
+      this.draw();
+    };
+
 
     // ==================================================================================================
 

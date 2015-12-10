@@ -588,7 +588,7 @@ void EMSCRIPTEN_KEEPALIVE parseGraphAttributesJSONData(tlp::Graph *graph, const 
   gajdp.parse(reinterpret_cast<const unsigned char *>(attributes), strlen(attributes));
 }
 
-void EMSCRIPTEN_KEEPALIVE addSubGraph(tlp::Graph *graph, unsigned int parentGraphId, unsigned int subGraphId, const char *nodesIds, const char *edgesIds, const char *attributes) {
+tlp::Graph * EMSCRIPTEN_KEEPALIVE addSubGraph(tlp::Graph *graph, unsigned int parentGraphId, unsigned int subGraphId, const char *nodesIds, const char *edgesIds, const char *attributes) {
 
   tlp::Graph *parentGraph = graph;
   if (parentGraph->getId() != parentGraphId) {
@@ -612,6 +612,8 @@ void EMSCRIPTEN_KEEPALIVE addSubGraph(tlp::Graph *graph, unsigned int parentGrap
   }
 
   parseGraphAttributesJSONData(sg, attributes);
+
+  return sg;
 
 }
 

@@ -111,6 +111,7 @@ void GlScene::draw() {
     initGlParameters();
 
     for(vector<pair<string, GlLayer *> >::iterator it=_layersList.begin(); it!=_layersList.end(); ++it) {
+
       glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       Camera &camera = *(it->second->getCamera());
       Light &light = *(it->second->getLight());
@@ -285,6 +286,7 @@ void GlScene::addExistingLayer(GlLayer *layer) {
   _sceneNeedRedraw = true;
 
   sendEvent(GlSceneEvent(GlSceneEvent::LAYER_ADDED_IN_SCENE, this, layer));
+  layerAddedInScene(layer);
 
 }
 
@@ -304,6 +306,7 @@ bool GlScene::addExistingLayerBefore(GlLayer *layer, const string &beforeLayerWi
       _sceneNeedRedraw = true;
 
       sendEvent(GlSceneEvent(GlSceneEvent::LAYER_ADDED_IN_SCENE, this, layer));
+      layerAddedInScene(layer);
 
       break;
     }
@@ -329,12 +332,21 @@ bool GlScene::addExistingLayerAfter(GlLayer *layer, const string &afterLayerWith
       _sceneNeedRedraw = true;
 
       sendEvent(GlSceneEvent(GlSceneEvent::LAYER_ADDED_IN_SCENE, this, layer));
+      layerAddedInScene(layer);
 
       break;
     }
   }
 
   return insertionOk;
+}
+
+void GlScene::layerAddedInScene(GlLayer *layer) {
+  const std::map<std::string, GlEntity*> &entities = layer->getGlEntities();
+  std::map<std::string, GlEntity*>::const_iterator it = entities.begin();
+  for (; it != entities.end() ; ++it) {
+    _lodCalculator->addGlEntity(layer, it->second);
+  }
 }
 
 GlLayer *GlScene::getLayer(const string &name) {

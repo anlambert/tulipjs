@@ -9,6 +9,7 @@
 #include <tulip/SizeProperty.h>
 #include <tulip/IntegerProperty.h>
 #include <tulip/TulipViewSettings.h>
+#include <tulip/ParametricCurves.h>
 
 #include "ConcaveHullBuilder.h"
 #include "Utils.h"
@@ -175,6 +176,7 @@ GlConcavePolygon* computeGraphHull(Graph *graph, const Color &fillColor, const f
 
   LayoutProperty *viewLayout = graph->getProperty<LayoutProperty>("viewLayout");
   SizeProperty *viewSize = graph->getProperty<SizeProperty>("viewSize");
+  IntegerProperty *viewShape = graph->getProperty<IntegerProperty>("viewShape");
 
   ConcaveHullBuilder chb;
   chb.setHullWithHoles(withHoles);
@@ -202,6 +204,22 @@ GlConcavePolygon* computeGraphHull(Graph *graph, const Color &fillColor, const f
       edgePoints.push_back(srcCoord);
       edgePoints.insert(edgePoints.end(), bends.begin(), bends.end());
       edgePoints.push_back(tgtCoord);
+
+      const unsigned int nbCurvePoints = 20;
+
+      if (viewShape->getEdgeValue(e) == EdgeShape::BezierCurve) {
+        vector<Coord> curvePoints;
+        computeBezierPoints(edgePoints, curvePoints, nbCurvePoints);
+        edgePoints = curvePoints;
+      } else if (viewShape->getEdgeValue(e) == EdgeShape::CatmullRomCurve) {
+        vector<Coord> curvePoints;
+        computeCatmullRomPoints(edgePoints, curvePoints, false, nbCurvePoints);
+        edgePoints = curvePoints;
+      } else if (viewShape->getEdgeValue(e) == EdgeShape::CubicBSplineCurve) {
+        vector<Coord> curvePoints;
+        computeOpenUniformBsplinePoints(edgePoints, curvePoints, 3, nbCurvePoints);
+        edgePoints = curvePoints;
+      }
 
       float divisor = 1.f;
 

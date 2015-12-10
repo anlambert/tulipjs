@@ -164,6 +164,7 @@ private:
 
   void backupBackBuffer();
   void drawBackBufferBackup();
+  void layerAddedInScene(GlLayer *layer);
 
   GlLayer *_mainLayer;
   std::vector<std::pair<std::string, GlLayer *> > _layersList;

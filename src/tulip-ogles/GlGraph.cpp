@@ -615,12 +615,14 @@ void GlGraph::endEdgesData() {
   edge e;
   forEach(e, _graph->getEdges()) {
 
-    const Coord &srcCoord = _viewLayout->getNodeValue(_graph->source(e));
-    const Coord &tgtCoord = _viewLayout->getNodeValue(_graph->target(e));
-    const Color &edgeColor = _viewColor->getEdgeValue(e);
+    Color edgeColor = _viewColor->getEdgeValue(e);
     const Color &srcColor = _viewColor->getNodeValue(_graph->source(e));
     const Color &tgtColor = _viewColor->getNodeValue(_graph->target(e));
     const Color &selectionColor = uintToColor(_graph->numberOfNodes() + e.id + 1);
+
+    if (_viewBorderWidth->getEdgeValue(e) > 0) {
+      edgeColor = _viewBorderColor->getEdgeValue(e);
+    }
 
     vector<Coord> edgePoints;
     edgePoints.push_back(_edgeAnchors[e].first);
@@ -1261,11 +1263,13 @@ void GlGraph::renderEdges(const Camera &camera, const std::vector<edge> &edges, 
     const Coord &tgtCoord = _viewLayout->getNodeValue(tgt);
     Color srcColor = _viewColor->getEdgeValue(e);
     Color tgtColor = _viewColor->getEdgeValue(e);
+    Color borderColor = _viewBorderColor->getEdgeValue(e);
     if (_renderingParameters.interpolateEdgesColors()) {
       srcColor = _viewColor->getNodeValue(src);
       tgtColor = _viewColor->getNodeValue(tgt);
+    } else if (lineMode && _viewBorderWidth->getEdgeValue(e) > 0) {
+      srcColor = tgtColor = borderColor;
     }
-    Color borderColor = _viewBorderColor->getEdgeValue(e);
 
     if (_graphElementsPickingMode) {
       srcColor = tgtColor = borderColor = uintToColor(_graph->getRoot()->numberOfNodes()+e.id+1);
@@ -1781,7 +1785,7 @@ void GlGraph::treatEvent(const tlp::Event &message) {
       _labelsRenderer->addOrUpdateNodeLabel(_graph, pEvt->getNode());
       notifyModified();
     }
-  } else if (pEvt && pEvt->getProperty() == _viewShape) {
+  } else if (pEvt && (pEvt->getProperty() == _viewShape || pEvt->getProperty() == _viewBorderWidth || pEvt->getProperty() == _viewBorderColor)) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_EDGE_VALUE) {
       forEach(e, _graph->getEdges()) {
         _edgesToUpdate.insert(e);
@@ -1790,6 +1794,11 @@ void GlGraph::treatEvent(const tlp::Event &message) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_EDGE_VALUE && _graph->isElement(pEvt->getEdge())) {
       _edgesToUpdate.insert(pEvt->getEdge());
     }
+    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE) {
+      notifyModified();
+    }
+  } else if (pEvt && pEvt->getProperty() == _viewBorderColor) {
+
   } else if (rpEvt && (rpEvt->getType() == GlGraphRenderingParametersEvent::DISPLAY_EDGES_EXTREMITIES_TOGGLED)) {
     forEach(e, _graph->getEdges()) {
       _edgesToUpdate.insert(e);

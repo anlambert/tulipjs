@@ -623,9 +623,9 @@ void GlGraph::endEdgesData() {
     const Color &selectionColor = uintToColor(_graph->numberOfNodes() + e.id + 1);
 
     vector<Coord> edgePoints;
-    edgePoints.push_back(srcCoord);
+    edgePoints.push_back(_edgeAnchors[e].first);
     edgePoints.insert(edgePoints.end(), _edgePoints[e].begin(), _edgePoints[e].end());
-    edgePoints.push_back(tgtCoord);
+    edgePoints.push_back(_edgeAnchors[e].second);
 
     vector<Color> edgeColors;
     getColors(edgePoints, srcColor, tgtColor, edgeColors);

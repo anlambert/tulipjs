@@ -4080,7 +4080,7 @@ if (workerMode) {
     var _setCanvas2dModified = Module.cwrap('setCanvas2dModified', null, ['string']);
 
     var _nextCanvasId = 0;
-    var _graphIdToCanvas = {};
+    var _graphIdToView = {};
     var _canvasIdToView = {};
     var busyAnimations = {};
 
@@ -4127,7 +4127,7 @@ if (workerMode) {
       }
       if (!tulip.coreBuild) {
         if (graphId) {
-          canvasId = _graphIdToCanvas[graphId];
+          canvasId = _graphIdToView[graphId].canvasId;
         }
       }
       switch (event.data.eventType) {
@@ -4251,7 +4251,7 @@ if (workerMode) {
       case 'addSubGraph':
         setTimeout(function() {
           var subGraphData = event.data.subGraphData;
-          var sgPointer = _addSubGraph(graphId, subGraphData.parentGraphId, subGraphData.subGraphId, subGraphData.nodesIds, subGraphData.edgesIds, subGraphData.attributes);
+          _addSubGraph(graphId, subGraphData.parentGraphId, subGraphData.subGraphId, subGraphData.nodesIds, subGraphData.edgesIds, subGraphData.attributes);
           if (!tulip.coreBuild && canvasId) {
             var sgId = _graphIdToWrapper[graphId].numberOfDescendantGraphs();
             var percent = ((graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + sgId) / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
@@ -4438,7 +4438,7 @@ if (workerMode) {
       if (!graph.cppPointerValid()) return;
       this.graph = graph;
       _setCanvasGraph(this.canvasId, graph.cppPointer);
-      _graphIdToCanvas[graph.getCppPointer()] = this.canvasId;
+      _graphIdToView[graph.getCppPointer()] = this;
       _graphIdToWrapper[graph.getCppPointer()] = graph;
     };
 
@@ -4471,7 +4471,7 @@ if (workerMode) {
           FS.writeFile(graphFilePath, new Uint8Array(arrayBuffer), {'encoding' : 'binary'});
           view.graph = tulip.loadGraph(graphFilePath, false);
           _setCanvasGraph(view.canvasId, view.graph.cppPointer);
-          _graphIdToCanvas[view.graph.getCppPointer()] = view.canvasId;
+          _graphIdToView[view.graph.getCppPointer()] = view;
           _graphIdToWrapper[view.graph.getCppPointer()] = view.graph;
           if (graphLoadedCallback) {
             graphLoadedCallback(view.graph);
@@ -4490,7 +4490,7 @@ if (workerMode) {
           _graphLoadedCallback[view.graph.getCppPointer()] = graphLoadedCallback;
         }
         _setGraphRenderingDataReady(view.canvasId, false);
-        _graphIdToCanvas[view.graph.getCppPointer()] = view.canvasId;
+        _graphIdToView[view.graph.getCppPointer()] = view;
         _graphIdToWrapper[view.graph.getCppPointer()] = view.graph;
         _sendGraphToWorker(view.graph, graphFilePath, graphFileData, true);
       } else {
@@ -4508,7 +4508,7 @@ if (workerMode) {
         FS.writeFile(graphFilePath, new Uint8Array(graphFileData), {'encoding' : 'binary'});
         view.graph = tulip.loadGraph(graphFilePath, false);
         _setCanvasGraph(view.canvasId, view.graph.cppPointer);
-        _graphIdToCanvas[view.graph.getCppPointer()] = view.canvasId;
+        _graphIdToView[view.graph.getCppPointer()] = view;
         _graphIdToWrapper[view.graph.getCppPointer()] = view.graph;
         if (graphLoadedCallback) {
           graphLoadedCallback(view.graph);
@@ -4736,8 +4736,8 @@ if (workerMode) {
         algoParameters = {};
       }
       var graphId = this.getCppPointer();
-      if (!tulip.coreBuild && graphId in _graphIdToCanvas) {
-        var canvasId = _graphIdToCanvas[graphId];
+      if (!tulip.coreBuild && graphId in _graphIdToView) {
+        var canvasId = _graphIdToView[graphId].canvasId;
         _setGraphRenderingDataReady(canvasId, false);
         _startBusyAnimation(canvasId);
         _setProgressBarComment(canvasId, "Applying " + algorithmName + " algorithm ...");
@@ -4772,8 +4772,8 @@ if (workerMode) {
         _algorithmFinishedCallback[graphId] = algoFinishedCallback;
       }
       _tulipWorker.postMessage(messageData);
-      if (!tulip.coreBuild && graphId in _graphIdToCanvas) {
-        var canvasId = _graphIdToCanvas[graphId];
+      if (!tulip.coreBuild && graphId in _graphIdToView) {
+        var canvasId = _graphIdToView[graphId].canvasId;
         _setGraphRenderingDataReady(canvasId, false);
         _startBusyAnimation(canvasId);
         _setProgressBarComment(canvasId, "Applying " + algorithmName + " " + resultProperty.getTypename() + " algorithm ...");
@@ -4822,8 +4822,8 @@ if (workerMode) {
       if (scriptExecutedCallback) {
         _algorithmFinishedCallback[graphId] = scriptExecutedCallback;
       }
-      if (!tulip.coreBuild && graphId in _graphIdToCanvas) {
-        var canvasId = _graphIdToCanvas[graphId];
+      if (!tulip.coreBuild && graphId in _graphIdToView) {
+        var canvasId = _graphIdToView[graphId].canvasId;
         _setGraphRenderingDataReady(canvasId, false);
         _startBusyAnimation(canvasId);
         _setProgressBarComment(canvasId, "Executing script on graph ...");

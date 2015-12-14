@@ -595,7 +595,12 @@ tlp::Graph * EMSCRIPTEN_KEEPALIVE addSubGraph(tlp::Graph *graph, unsigned int pa
     parentGraph = parentGraph->getDescendantGraph(parentGraphId);
   }
 
-  tlp::Graph *sg = static_cast<tlp::GraphAbstract*>(parentGraph)->addSubGraph(subGraphId);
+  tlp::Graph *sg = parentGraph->getSubGraph(subGraphId);
+  if (sg) {
+    return sg;
+  }
+
+  sg = static_cast<tlp::GraphAbstract*>(parentGraph)->addSubGraph(subGraphId);
 
   std::vector<unsigned int> ids;
   std::istringstream iss;

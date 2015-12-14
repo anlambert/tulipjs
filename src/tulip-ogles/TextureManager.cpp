@@ -70,26 +70,7 @@ void TextureManager::addTextureInAtlasFromFile(const std::string &textureFile) {
         textureData = textureDataRgba;
         deleteTextureData = true;
     }
-    bool ok = false;
-    while (!ok && _currentUnit < 4) {
-        if (!_texturesAtlas[_currentUnit]) {
-            _texturesAtlas[_currentUnit] = new TextureAtlas(maxTextureSize, maxTextureSize, 4);
-        }
-        ivec4 region = _texturesAtlas[_currentUnit]->getRegion(surface->w, surface->h);
-        if (region.x >= 0 && region.y >=0) {
-            _texturesAtlas[_currentUnit]->setRegion(region.x, region.y, region.z, region.w, textureData, surface->w*4);
-            ++nbTexturesInAtlas;
-            _textureAtlasUnit[textureFile] = _currentUnit;
-            float offset = 0;
-            _coordinatesOffsets[textureFile] = Vec4f((region.x+offset)/static_cast<float>(maxTextureSize), (region.y+offset)/static_cast<float>(maxTextureSize),
-                                                     (region.x+region.z-offset)/static_cast<float>(maxTextureSize), (region.y+region.w-offset)/static_cast<float>(maxTextureSize));
-            ok = true;
-        } else {
-            std::cout << "texture atlas " <<  _currentUnit << " is full ! " << nbTexturesInAtlas << std::endl;
-            ++_currentUnit;
-            nbTexturesInAtlas = 0;
-        }
-    }
+    addTextureInAtlasFromData(textureFile, textureData, surface->w, surface->h);
     if (deleteTextureData) {
         delete [] textureData;
     }
@@ -216,11 +197,11 @@ void TextureManager::addTextureFromFile(const std::string &textureFile, bool add
   glTexImage2D(GL_TEXTURE_2D, 0, format, surface->w, surface->h, 0, format, GL_UNSIGNED_BYTE, surface->pixels);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
-  SDL_FreeSurface(surface);
   _textures[textureFile] = textureId;
   if (addAlsoInAtlas) {
-    addTextureInAtlasFromFile(textureFile);
+    addTextureInAtlasFromData(textureFile, reinterpret_cast<const unsigned char*>(surface->pixels), surface->w, surface->h);
   }
+  SDL_FreeSurface(surface);
 }
 
 void TextureManager::addTextureFromData(const std::string &textureName, const unsigned char *textureData, unsigned int width, unsigned int height, bool addAlsoInAtlas) {

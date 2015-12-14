@@ -520,20 +520,20 @@ void EMSCRIPTEN_KEEPALIVE resizeCanvas(const char *canvasId, int width, int heig
   glProgressBar[canvasId]->setHeight(0.1f * viewport[3]);
 }
 
-void addGraphHull(const char *canvasId, tlp::Graph *graph, const tlp::Color &fillColor) {
-  if (subgraphsHulls[canvasId].find(graph) != subgraphsHulls[canvasId].end()) {
-    hullsLayer[canvasId]->deleteGlEntity(subgraphsHulls[canvasId][graph]);
-    delete subgraphsHulls[canvasId][graph];
-  }
-  std::ostringstream oss;
-  oss << "hull_" << reinterpret_cast<unsigned long>(graph);
-  subgraphsHulls[canvasId][graph] = computeGraphHull(graph, fillColor, 0);
-  hullsLayer[canvasId]->addGlEntity(subgraphsHulls[canvasId][graph], oss.str());
+bool EMSCRIPTEN_KEEPALIVE subGraphHasHull(const char *canvasId, tlp::Graph *sg) {
+  return subgraphsHulls[canvasId].find(sg) != subgraphsHulls[canvasId].end();
 }
 
 void EMSCRIPTEN_KEEPALIVE addSubGraphHull(const char *canvasId, tlp::Graph *sg) {
   tlp::Color hullColor = genRandomColor(100);
-  addGraphHull(canvasId, sg, hullColor);
+  if (subgraphsHulls[canvasId].find(sg) != subgraphsHulls[canvasId].end()) {
+    hullsLayer[canvasId]->deleteGlEntity(subgraphsHulls[canvasId][sg]);
+    delete subgraphsHulls[canvasId][sg];
+  }
+  std::ostringstream oss;
+  oss << "hull_" << reinterpret_cast<unsigned long>(sg);
+  subgraphsHulls[canvasId][sg] = computeGraphHull(sg, hullColor, 0);
+  hullsLayer[canvasId]->addGlEntity(subgraphsHulls[canvasId][sg], oss.str());
 }
 
 void EMSCRIPTEN_KEEPALIVE setSubGraphsHullsVisible(const char *canvasId, bool visible, bool onTop = true) {
@@ -558,6 +558,7 @@ void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
   clearSubGraphsHulls(canvasId);
 
   tlp::StringProperty *viewTexture = g->getProperty<tlp::StringProperty>("viewTexture");
+
   tlp::node n;
   nbTextureToLoad = 0;
   forEach(n, g->getNodes()) {

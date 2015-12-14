@@ -4068,6 +4068,7 @@ if (workerMode) {
     var _draw = Module.cwrap('draw', null, []);
     var _fullScreen = Module.cwrap('fullScreen', null, ['string']);
     var _updateGlScene = Module.cwrap('updateGlScene', null, ['string']);
+    var _subGraphHasHull = Module.cwrap('subGraphHasHull', 'number', ['string', 'number']);
     var _addSubGraphHull = Module.cwrap('addSubGraphHull', null, ['string', 'number']);
     var _setSubGraphsHullsVisible = Module.cwrap('setSubGraphsHullsVisible', null, ['string', 'number', 'number']);
     var _clearSubGraphsHulls = Module.cwrap('clearSubGraphsHulls', null, ['string']);
@@ -4120,6 +4121,7 @@ if (workerMode) {
 
     _tulipWorker.addEventListener('message', function (event) {
       var delay = 0;
+      var view = null;
       var canvasId = "";
       var graphId = null;
       if ('graphId' in event.data) {
@@ -4127,7 +4129,8 @@ if (workerMode) {
       }
       if (!tulip.coreBuild) {
         if (graphId) {
-          canvasId = _graphIdToView[graphId].canvasId;
+          view = _graphIdToView[graphId];
+          canvasId = view.canvasId;
         }
       }
       switch (event.data.eventType) {
@@ -4210,6 +4213,7 @@ if (workerMode) {
           setTimeout(function() {
             _setCurrentCanvas(canvasId);
             _endGraphViewUpdate(canvasId);
+            view.computeSubGraphsHulls(true);
             _setGraphRenderingDataReady(canvasId, true);
             _centerScene(canvasId);
           }, delay);
@@ -4542,6 +4546,11 @@ if (workerMode) {
       return tulip.GlGraphRenderingParameters(_getViewRenderingParameters(this.canvasId));
     };
 
+    tulip.View.prototype.subGraphHasHull = function(subgraph) {
+      checkArgumentsTypes(arguments, [tulip.Graph], 1);
+      return _subGraphHasHull(this.canvasId, subgraph.cppPointer) > 0;
+    };
+
     tulip.View.prototype.addSubGraphHull = function(subgraph) {
       checkArgumentsTypes(arguments, [tulip.Graph], 1);
       _addSubGraphHull(this.canvasId, subgraph.cppPointer);
@@ -4549,6 +4558,26 @@ if (workerMode) {
 
     tulip.View.prototype.clearSubGraphsHulls = function() {
       _clearSubGraphsHulls(this.canvasId);
+    };
+
+    tulip.View.prototype.computeSubGraphsHulls = function(updateMode) {
+      if (typeOf(updateMode) == 'undefined') updateMode = false;
+      if (!updateMode) {
+        _clearSubGraphsHulls(this.canvasId);
+      }
+      var view = this;
+      this.graph.getSubGraphs().forEach(function(sg) {
+        if (!updateMode || view.subGraphHasHull(sg)) {
+          setTimeout(
+            function(g) {
+              return function() {
+                view.addSubGraphHull(g);
+                view.draw();
+              }
+            }(sg)
+          );
+        }
+      });
     };
 
     tulip.View.prototype.setSubGraphsHullsVisible = function(visible, onTop) {

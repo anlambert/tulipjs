@@ -76,7 +76,7 @@ void safeSetTimeout(unsigned int msecs, void (*func)(void *value), void *value);
 void setCurrentCanvas(const char *canvasId);
 bool domElementExists(const char *elementId);
 bool canXhrOnUrl(const char *url);
-void loadImageFromUrl(const char *url, void (*imageLoadedFunc)(const char *, const unsigned char *, unsigned int, unsigned int), void (*errorFunc)(const char *));
+void loadImageFromUrl(const char *url, void (*imageLoadedFunc)(const char *, const unsigned char *, unsigned int, unsigned int), void (*errorFunc)(unsigned int, void *, int));
 void createGlTextureFromCanvas(const char *canvasId);
 
 void drawCanvas2d(const char *canvasId) {
@@ -241,7 +241,7 @@ static int nbTextureToLoad = 0;
 
 static std::vector<std::string> cachedTextureName;
 
-static void onTextureLoaded(const char *texture) {
+static void onTextureLoaded(unsigned int, void*, const char *texture) {
   TextureManager::instance(currentCanvasId)->addTextureFromFile(texture, true);
   --nbTextureToLoad;
   if (nbTextureToLoad == 0) {
@@ -252,9 +252,9 @@ static void onTextureLoaded(const char *texture) {
   }
 }
 
-static void onTextureLoadError(const char *texture) {
-  std::cout << "Error when loading texture "<< texture << std::endl;
-  if (std::string(texture).substr(0, 4) == "http") {
+static void onTextureLoadError(unsigned int, void *texture, int) {
+  std::cout << "Error when loading texture "<< reinterpret_cast<const char*>(texture) << std::endl;
+  if (std::string(reinterpret_cast<const char*>(texture)).substr(0, 4) == "http") {
     std::cout << "CORS requests is probably not supported by the server hosting the image" << std::endl;
   }
   --nbTextureToLoad;
@@ -297,7 +297,8 @@ static void loadTexture(const std::string &texture) {
             mkdir(curPath.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
           }
         }
-        emscripten_async_wget(cachedTextureName.back().c_str(), cachedTextureName.back().c_str(), onTextureLoaded, onTextureLoadError);
+        emscripten_async_wget2(cachedTextureName.back().c_str(), cachedTextureName.back().c_str(), "GET", "",
+                               reinterpret_cast<void*>(const_cast<char*>(cachedTextureName.back().c_str())), onTextureLoaded, onTextureLoadError, NULL);
       }
     }
   }

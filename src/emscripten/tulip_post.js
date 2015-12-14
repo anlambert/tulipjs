@@ -3684,6 +3684,9 @@ if (workerMode) {
 
   function getEdgeObject(graphId, edgeId) {
     var graph = graphObject[graphId];
+    if (graph.edgesNumber == 0) {
+      return null;
+    }
     var edgeDataObj = {};
     edgeDataObj.edgeId = edgeId;
     edgeDataObj.srcNodeId = graph.edges[edgeId][0];
@@ -4233,7 +4236,9 @@ if (workerMode) {
       case 'addEdges':
         setTimeout(function() {
           var edgesJson = event.data.edgesJson;
-          _parseEdgesJSONData(graphId, edgesJson);
+          if (edgesJson) {
+            _parseEdgesJSONData(graphId, edgesJson);
+          }
           if (!tulip.coreBuild && canvasId) {
             var edgeId = event.data.lastEdgeId;
             var percent = ((graphData[canvasId].numberOfNodes + edgeId) / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;

@@ -100,7 +100,7 @@ void GlConvexPolygon::draw(const Camera &camera, const Light &, bool pickingMode
   TextureManager::instance()->addTextureFromFile(_texture);
   TextureManager::instance()->bindTexture(_texture);
 
-  GlShaderProgram *shader = ShaderManager::getInstance()->getDefaultRenderingShader();
+  GlShaderProgram *shader = ShaderManager::getInstance()->getFlatRenderingShader();
   shader->activate();
   shader->setUniformMat4Float("u_projectionMatrix", camera.projectionMatrix());
   shader->setUniformMat4Float("u_modelviewMatrix", camera.modelviewMatrix());

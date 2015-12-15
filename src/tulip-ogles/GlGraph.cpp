@@ -407,7 +407,7 @@ GlGraph::GlGraph(Graph *graph, GlLODCalculator *lodCalculator) :
   _canUseUIntIndices = webglExtensions.find("OES_element_index_uint") != std::string::npos;
 #endif
 
-  _flatShader = ShaderManager::getInstance()->getDefaultRenderingShader();
+  _flatShader = ShaderManager::getInstance()->getFlatRenderingShader();
 
   _pointsDataBuffer = new GlBuffer(GlBuffer::VertexBuffer, GlBuffer::DynamicDraw);
 

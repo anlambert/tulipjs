@@ -9,6 +9,7 @@
 #include "GlFrameBufferObject.h"
 #include "GlLayer.h"
 #include "ZoomAndPanAnimation.h"
+#include "ShaderManager.h"
 
 static std::string fisheyeVertexShaderSrc =
 #ifdef __EMSCRIPTEN__
@@ -45,11 +46,18 @@ static std::string fisheyeFragmentShaderSrc =
 
     "uniform float u_fisheyeRadius;"
     "uniform float u_fisheyeHeight;"
+    "uniform float u_fisheyeTextureSize;"
 
     "uniform vec2 u_mouse;"
     "uniform vec2 u_resolution;"
 
     "varying vec2 v_texCoord;"
+
+    +
+
+    ShaderManager::getFXAAFunctionsSource()
+
+    +
 
     "void main(void) {"
     "  vec2 pos = v_texCoord * u_resolution;"
@@ -62,7 +70,9 @@ static std::string fisheyeFragmentShaderSrc =
     "		 vec2 dir = normalize(pos - center) * coeff;"
     "		 pos = center + dir;"
     "    vec2 fisheyePos = vec2(pos.x - (u_mouse.x - u_fisheyeRadius), pos.y - (u_mouse.y - u_fisheyeRadius)) / vec2(2.0*u_fisheyeRadius);"
-    "    gl_FragColor = texture2D(u_fisheyeTexture, fisheyePos);"
+    "    vec2 fisheyeTexRes = vec2(u_fisheyeTextureSize);"
+    "    vec2 fisheyeFragCoord = fisheyePos * fisheyeTexRes;"
+    "    gl_FragColor = applyFXAA(u_fisheyeTexture, fisheyeFragCoord, fisheyeTexRes);"
     "  } else {"
     "    gl_FragColor = texture2D(u_texture, pos / u_resolution);"
     "  }"
@@ -220,6 +230,7 @@ void FisheyeInteractor::draw() {
   _fisheyeShader->setUniformVec2Float("u_resolution", viewport[2], viewport[3]);
   _fisheyeShader->setUniformFloat("u_fisheyeRadius", _fisheyeRadius);
   _fisheyeShader->setUniformFloat("u_fisheyeHeight", -_fisheyeHeight);
+  _fisheyeShader->setUniformFloat("u_fisheyeTextureSize", fboSize);
   _indicesBuffer->bind();
   _indicesBuffer->allocate(indices);
   TextureManager::instance()->bindTexture(_glScene->getBackBufferTextureName());

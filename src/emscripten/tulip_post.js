@@ -86,7 +86,7 @@ if (workerMode) {
 
 function checkArgumentsTypes(argList, typeList, nbRequiredArguments) {
   if (!tulip.debugChecks) return;
-  var callerName = arguments.callee.caller.name;
+  var callerName = checkArgumentsTypes.caller.name;
   if (callerName.startsWith("tulip_")) {
     callerName = callerName.replace(/_/g, '.');
   }
@@ -141,7 +141,7 @@ function checkArgumentsTypes(argList, typeList, nbRequiredArguments) {
 
 function checkArrayOfType(array, type, i) {
   if (!tulip.debugChecks) return;
-  var callerName = arguments.callee.caller.name;
+  var callerName = checkArrayOfType.caller.name;
   if (callerName.startsWith("tulip_")) {
     callerName = callerName.replace(/_/g, '.');
   }
@@ -168,7 +168,7 @@ var _isPointerDeleted = Module.cwrap('isPointerDeleted', 'number', ['number']);
 function checkWrappedCppPointer(cppPointer) {
   //if (!tulip.debugChecks) return;
   if (cppPointer == 0 || _isPointerDeleted(cppPointer)) {
-    var callerName = arguments.callee.caller.name;
+    var callerName = checkWrappedCppPointer.caller.name;
     if (callerName.startsWith("tulip_")) {
       callerName = callerName.replace(/_/g, '.');
     }
@@ -229,7 +229,7 @@ var _PropertyInterface_getEdgeStringValue = Module.cwrap('PropertyInterface_getE
 */
 tulip.PropertyInterface = function tulip_PropertyInterface(cppPointer, graphManaged) {
   var newObject = createObject(tulip.PropertyInterface, this);
-  if (arguments.callee.caller == null || arguments.callee.caller.name != "createObject") {
+  if (tulip_PropertyInterface.caller == null || tulip_PropertyInterface.caller.name != "createObject") {
     tulip.CppObjectWrapper.call(newObject, cppPointer, "tlp::PropertyInterface");
     newObject.graphManaged = graphManaged;
   }
@@ -290,7 +290,7 @@ var _BooleanProperty_getEdgesEqualTo = Module.cwrap('BooleanProperty_getEdgesEqu
 
 tulip.BooleanProperty = function tulip_BooleanProperty() {
   var newObject = createObject(tulip.BooleanProperty, this);
-  if (arguments.callee.caller == null || arguments.callee.caller.name != "createObject") {
+  if (tulip_BooleanProperty.caller == null || tulip_BooleanProperty.caller.name != "createObject") {
     var cppPointer = 0;
     var graphManaged = false;
     if (arguments.length == 1 && typeOf(arguments[0]) == "number") {
@@ -373,7 +373,7 @@ var _DoubleProperty_getSortedEdges = Module.cwrap('DoubleProperty_getSortedEdges
 
 tulip.DoubleProperty = function tulip_DoubleProperty() {
   var newObject = createObject(tulip.DoubleProperty, this);
-  if (arguments.callee.caller == null || arguments.callee.caller.name != "createObject") {
+  if (tulip_DoubleProperty.caller == null || tulip_DoubleProperty.caller.name != "createObject") {
     var cppPointer = 0;
     var graphManaged = false;
     if (arguments.length == 1 && typeOf(arguments[0]) == "number") {
@@ -457,7 +457,7 @@ var _DoubleVectorProperty_getEdgeValue = Module.cwrap('DoubleVectorProperty_getE
 
 tulip.DoubleVectorProperty = function tulip_DoubleVectorProperty() {
   var newObject = createObject(tulip.DoubleVectorProperty, this);
-  if (arguments.callee.caller == null || arguments.callee.caller.name != "createObject") {
+  if (tulip_DoubleVectorProperty.caller == null || tulip_DoubleVectorProperty.caller.name != "createObject") {
     var cppPointer = 0;
     var graphManaged = false;
     if (arguments.length == 1 && typeOf(arguments[0]) == "number") {
@@ -572,7 +572,7 @@ var _IntegerProperty_getEdgeValue = Module.cwrap('IntegerProperty_getEdgeValue',
 
 tulip.IntegerProperty = function tulip_IntegerProperty() {
   var newObject = createObject(tulip.IntegerProperty, this);
-  if (arguments.callee.caller == null || arguments.callee.caller.name != "createObject") {
+  if (tulip_IntegerProperty.caller == null || tulip_IntegerProperty.caller.name != "createObject") {
     var cppPointer = 0;
     var graphManaged = false;
     if (arguments.length == 1 && typeOf(arguments[0]) == "number") {
@@ -649,7 +649,7 @@ var _IntegerVectorProperty_getEdgeValue = Module.cwrap('IntegerVectorProperty_ge
 
 tulip.IntegerVectorProperty = function tulip_IntegerVectorProperty() {
   var newObject = createObject(tulip.IntegerVectorProperty, this);
-  if (arguments.callee.caller == null || arguments.callee.caller.name != "createObject") {
+  if (tulip_IntegerVectorProperty.caller == null || tulip_IntegerVectorProperty.caller.name != "createObject") {
     var cppPointer = 0;
     var graphManaged = false;
     if (arguments.length == 1 && typeOf(arguments[0]) == "number") {
@@ -764,7 +764,7 @@ var _StringProperty_getEdgeValue = Module.cwrap('StringProperty_getEdgeValue', '
 
 tulip.StringProperty = function tulip_StringProperty() {
   var newObject = createObject(tulip.StringProperty, this);
-  if (arguments.callee.caller == null || arguments.callee.caller.name != "createObject") {
+  if (tulip_StringProperty.caller == null || tulip_StringProperty.caller.name != "createObject") {
     var cppPointer = 0;
     var graphManaged = false;
     if (arguments.length == 1 && typeOf(arguments[0]) == "number") {
@@ -847,7 +847,7 @@ var _StringVectorProperty_getEdgeDefaultValue = Module.cwrap('StringVectorProper
 
 tulip.StringVectorProperty = function tulip_StringVectorProperty() {
   var newObject = createObject(tulip.StringVectorProperty, this);
-  if (arguments.callee.caller == null || arguments.callee.caller.name != "createObject") {
+  if (tulip_StringVectorProperty.caller == null || tulip_StringVectorProperty.caller.name != "createObject") {
     var cppPointer = 0;
     var graphManaged = false;
     if (arguments.length == 1 && typeOf(arguments[0]) == "number") {
@@ -983,7 +983,7 @@ var _ColorProperty_getEdgeValue = Module.cwrap('ColorProperty_getEdgeValue', nul
 
 tulip.ColorProperty = function tulip_ColorProperty() {
   var newObject = createObject(tulip.ColorProperty, this);
-  if (arguments.callee.caller == null || arguments.callee.caller.name != "createObject") {
+  if (tulip_ColorProperty.caller == null || tulip_ColorProperty.caller.name != "createObject") {
     var cppPointer = 0;
     var graphManaged = false;
     if (arguments.length == 1 && typeOf(arguments[0]) == "number") {
@@ -1393,7 +1393,7 @@ var _LayoutProperty_perfectAspectRatio = Module.cwrap('LayoutProperty_perfectAsp
 
 tulip.LayoutProperty = function tulip_LayoutProperty() {
   var newObject = createObject(tulip.LayoutProperty, this);
-  if (arguments.callee.caller == null || arguments.callee.caller.name != "createObject") {
+  if (tulip_LayoutProperty.caller == null || tulip_LayoutProperty.caller.name != "createObject") {
     var cppPointer = 0;
     var graphManaged = false;
     if (arguments.length == 1 && typeOf(arguments[0]) == "number") {
@@ -1605,9 +1605,9 @@ var _SizeProperty_scale = Module.cwrap('SizeProperty_scale', null, ['number', 'n
 var _SizeProperty_getMin = Module.cwrap('SizeProperty_getMin', null, ['number', 'number', 'number']);
 var _SizeProperty_getMax = Module.cwrap('SizeProperty_getMax', null, ['number', 'number', 'number']);
 
-tulip.SizeProperty = function() {
+tulip.SizeProperty = function tulip_SizeProperty() {
   var newObject = createObject(tulip.SizeProperty, this);
-  if (arguments.callee.caller == null || arguments.callee.caller.name != "createObject") {
+  if (tulip_SizeProperty.caller == null || tulip_SizeProperty.caller.name != "createObject") {
     var cppPointer = 0;
     var graphManaged = false;
     if (arguments.length == 1 && typeOf(arguments[0]) == "number") {

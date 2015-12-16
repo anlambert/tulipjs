@@ -4642,10 +4642,8 @@ if (workerMode) {
             FS.createFile('/', graphFilePath, {}, true, true);
           }
           FS.writeFile(graphFilePath, new Uint8Array(arrayBuffer), {'encoding' : 'binary'});
-          view.graph = tulip.loadGraph(graphFilePath, false);
-          _setCanvasGraph(view.canvasId, view.graph.cppPointer);
-          _graphIdToView[view.graph.getCppPointer()] = view;
-          _graphIdToWrapper[view.graph.getCppPointer()] = view.graph;
+          var graph = tulip.loadGraph(graphFilePath, false);
+          view.setGraph(graph);
           if (graphLoadedCallback) {
             graphLoadedCallback(view.graph);
           }
@@ -4657,14 +4655,12 @@ if (workerMode) {
     tulip.View.prototype.loadGraphFromData = function(graphFilePath, graphFileData, loadGraphInWorker, graphLoadedCallback) {
       var view = this;
       if (loadGraphInWorker) {
-        view.graph = tulip.Graph();
-        _setCanvasGraph(view.canvasId, view.graph.cppPointer);
+        var graph = tulip.Graph();
+        view.setGraph(graph);
         if (graphLoadedCallback) {
           _graphLoadedCallback[view.graph.getCppPointer()] = graphLoadedCallback;
         }
         _setGraphRenderingDataReady(view.canvasId, false);
-        _graphIdToView[view.graph.getCppPointer()] = view;
-        _graphIdToWrapper[view.graph.getCppPointer()] = view.graph;
         _sendGraphToWorker(view.graph, graphFilePath, graphFileData, true);
       } else {
         var file = FS.findObject(graphFilePath);
@@ -4679,10 +4675,8 @@ if (workerMode) {
           FS.createFile('/', graphFilePath, {}, true, true);
         }
         FS.writeFile(graphFilePath, new Uint8Array(graphFileData), {'encoding' : 'binary'});
-        view.graph = tulip.loadGraph(graphFilePath, false);
-        _setCanvasGraph(view.canvasId, view.graph.cppPointer);
-        _graphIdToView[view.graph.getCppPointer()] = view;
-        _graphIdToWrapper[view.graph.getCppPointer()] = view.graph;
+        var graph = tulip.loadGraph(graphFilePath, false);
+        view.setGraph(graph);
         if (graphLoadedCallback) {
           graphLoadedCallback(view.graph);
         }

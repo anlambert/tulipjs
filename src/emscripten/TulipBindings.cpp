@@ -267,13 +267,12 @@ public:
 static TulipObjectsObserver tlpObjObs;
 
 void observeObject(tlp::Observable *observable) {
-  if (!observable) return;
+  if (!observable || workerMode()) return;
   observable->addListener(&tlpObjObs);
   observable->addObserver(&tlpObjObs);
   // emscripten often reuses previous freed address so ensure to remove it from the deleted pointers set
   unsigned long pointerValue = reinterpret_cast<unsigned long>(observable);
   deletedPointers.erase(pointerValue);
-
 }
 
 void observeGraph(tlp::Graph *g) {
@@ -933,22 +932,19 @@ void EMSCRIPTEN_KEEPALIVE Graph_clear(tlp::Graph *graph) {
 
 tlp::Graph * EMSCRIPTEN_KEEPALIVE Graph_addSubGraph1(tlp::Graph *graph, tlp::BooleanProperty *selection, const char *name) {
   tlp::Graph *sg = graph->addSubGraph(selection, name);
-  if (!workerMode())
-    observeObject(sg);
+  observeObject(sg);
   return sg;
 }
 
 tlp::Graph * EMSCRIPTEN_KEEPALIVE Graph_addSubGraph2(tlp::Graph *graph, const char *name) {
   tlp::Graph *sg = graph->addSubGraph(name);
-  if (!workerMode())
-    observeObject(sg);
+  observeObject(sg);
   return sg;
 }
 
 tlp::Graph * EMSCRIPTEN_KEEPALIVE Graph_addCloneSubGraph(tlp::Graph *graph, const char *name, bool addSibling) {
   tlp::Graph *sg = graph->addCloneSubGraph(name, addSibling);
-  if (!workerMode())
-    observeObject(sg);
+  observeObject(sg);
   return sg;
 }
 
@@ -958,8 +954,7 @@ tlp::Graph * EMSCRIPTEN_KEEPALIVE Graph_inducedSubGraph(tlp::Graph *graph, unsig
     nodeSet.insert(tlp::node(*nodesIds++));
   }
   tlp::Graph *sg = graph->inducedSubGraph(nodeSet, parentSubGraph);
-  if (!workerMode())
-    observeObject(sg);
+  observeObject(sg);
   return sg;
 }
 
@@ -1304,36 +1299,31 @@ void EMSCRIPTEN_KEEPALIVE Graph_getProperties(tlp::Graph *graph, unsigned char *
 
 tlp::PropertyInterface* EMSCRIPTEN_KEEPALIVE Graph_getProperty(tlp::Graph *graph, const char *name) {
   tlp::PropertyInterface *prop = graph->getProperty(name);
-  if (prop && !workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::BooleanProperty* EMSCRIPTEN_KEEPALIVE Graph_getBooleanProperty(tlp::Graph *graph, const char *name) {
   tlp::BooleanProperty *prop = graph->getProperty<tlp::BooleanProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::ColorProperty* EMSCRIPTEN_KEEPALIVE Graph_getColorProperty(tlp::Graph *graph, const char *name) {
   tlp::ColorProperty *prop = graph->getProperty<tlp::ColorProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::DoubleProperty *EMSCRIPTEN_KEEPALIVE Graph_getDoubleProperty(tlp::Graph *graph, const char *name) {
   tlp::DoubleProperty *prop = graph->getProperty<tlp::DoubleProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::IntegerProperty *EMSCRIPTEN_KEEPALIVE Graph_getIntegerProperty(tlp::Graph *graph, const char *name) {
   tlp::IntegerProperty *prop = graph->getProperty<tlp::IntegerProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
@@ -1346,64 +1336,55 @@ tlp::LayoutProperty* EMSCRIPTEN_KEEPALIVE Graph_getLayoutProperty(tlp::Graph *gr
 
 tlp::SizeProperty* EMSCRIPTEN_KEEPALIVE Graph_getSizeProperty(tlp::Graph *graph, const char *name) {
   tlp::SizeProperty *prop = graph->getProperty<tlp::SizeProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::StringProperty *EMSCRIPTEN_KEEPALIVE Graph_getStringProperty(tlp::Graph *graph, const char *name) {
   tlp::StringProperty *prop = graph->getProperty<tlp::StringProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::BooleanVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getBooleanVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::BooleanVectorProperty *prop = graph->getProperty<tlp::BooleanVectorProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::ColorVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getColorVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::ColorVectorProperty *prop = graph->getProperty<tlp::ColorVectorProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::DoubleVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getDoubleVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::DoubleVectorProperty *prop = graph->getProperty<tlp::DoubleVectorProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::IntegerVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getIntegerVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::IntegerVectorProperty *prop = graph->getProperty<tlp::IntegerVectorProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::CoordVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getCoordVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::CoordVectorProperty *prop = graph->getProperty<tlp::CoordVectorProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::SizeVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getSizeVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::SizeVectorProperty *prop = graph->getProperty<tlp::SizeVectorProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
 tlp::StringVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getStringVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::StringVectorProperty *prop = graph->getProperty<tlp::StringVectorProperty>(name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
@@ -1638,8 +1619,7 @@ const char *EMSCRIPTEN_KEEPALIVE PropertyInterface_getEdgeStringValue(tlp::Prope
 
 tlp::BooleanProperty* EMSCRIPTEN_KEEPALIVE createBooleanProperty(tlp::Graph *graph, const char *name) {
   tlp::BooleanProperty *prop = new tlp::BooleanProperty(graph, name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
@@ -1703,8 +1683,7 @@ void EMSCRIPTEN_KEEPALIVE BooleanProperty_getEdgesEqualTo(tlp::BooleanProperty *
 
 tlp::ColorProperty* EMSCRIPTEN_KEEPALIVE createColorProperty(tlp::Graph *graph, const char *name) {
   tlp::ColorProperty *prop = new tlp::ColorProperty(graph, name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
@@ -1756,8 +1735,7 @@ void EMSCRIPTEN_KEEPALIVE ColorProperty_setAllEdgeValue(tlp::ColorProperty *colo
 
 tlp::LayoutProperty* EMSCRIPTEN_KEEPALIVE createLayoutProperty(tlp::Graph *graph, const char *name) {
   tlp::LayoutProperty *prop = new tlp::LayoutProperty(graph, name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
@@ -1881,8 +1859,7 @@ void EMSCRIPTEN_KEEPALIVE LayoutProperty_perfectAspectRatio(tlp::LayoutProperty 
 
 tlp::SizeProperty* EMSCRIPTEN_KEEPALIVE createSizeProperty(tlp::Graph *graph, const char *name) {
   tlp::SizeProperty *prop = new tlp::SizeProperty(graph, name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
@@ -1950,8 +1927,7 @@ void EMSCRIPTEN_KEEPALIVE SizeProperty_getMax(tlp::SizeProperty *sizeProperty, t
 
 tlp::IntegerProperty* EMSCRIPTEN_KEEPALIVE createIntegerProperty(tlp::Graph *graph, const char *name) {
   tlp::IntegerProperty *prop = new tlp::IntegerProperty(graph, name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
@@ -1991,8 +1967,7 @@ int EMSCRIPTEN_KEEPALIVE IntegerProperty_getEdgeValue(tlp::IntegerProperty *inte
 
 tlp::DoubleProperty* EMSCRIPTEN_KEEPALIVE createDoubleProperty(tlp::Graph *graph, const char *name) {
   tlp::DoubleProperty *prop = new tlp::DoubleProperty(graph, name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
@@ -2036,8 +2011,7 @@ void EMSCRIPTEN_KEEPALIVE DoubleProperty_getSortedEdges(tlp::DoubleProperty *dou
 
 tlp::StringProperty* EMSCRIPTEN_KEEPALIVE createStringProperty(tlp::Graph *graph, const char *name) {
   tlp::StringProperty *prop = new tlp::StringProperty(graph, name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
@@ -2085,8 +2059,7 @@ const char * EMSCRIPTEN_KEEPALIVE StringProperty_getEdgeValue(tlp::StringPropert
 
 tlp::StringVectorProperty* EMSCRIPTEN_KEEPALIVE createStringVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::StringVectorProperty *prop = new tlp::StringVectorProperty(graph, name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
@@ -2166,8 +2139,7 @@ void EMSCRIPTEN_KEEPALIVE StringVectorProperty_getEdgeValue(tlp::StringVectorPro
 
 tlp::DoubleVectorProperty* EMSCRIPTEN_KEEPALIVE createDoubleVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::DoubleVectorProperty *prop = new tlp::DoubleVectorProperty(graph, name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 
@@ -2255,8 +2227,7 @@ void EMSCRIPTEN_KEEPALIVE DoubleVectorProperty_getEdgeValue(tlp::DoubleVectorPro
 
 tlp::IntegerVectorProperty* EMSCRIPTEN_KEEPALIVE createIntegerVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::IntegerVectorProperty *prop = new tlp::IntegerVectorProperty(graph, name);
-  if (!workerMode())
-    observeObject(prop);
+  observeObject(prop);
   return prop;
 }
 

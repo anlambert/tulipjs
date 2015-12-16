@@ -3755,9 +3755,9 @@ tulip.sendEventToListeners = function(senderId, event) {
   }
   for (var i = 0, len = _tulipListeners[senderId].length ; i < len ; i++) {
     if (typeOf(_tulipListeners[senderId][i]) == "function") {
-      _tulipListeners[senderId][i].call(this, event);
+      _tulipListeners[senderId][i](event);
     } else if (typeOf(_tulipListeners[senderId][i]) == "object" && typeOf(_tulipListeners[senderId][i].treatEvent) == "function") {
-      _tulipListeners[senderId][i].treatEvent.call(this, event);
+      _tulipListeners[senderId][i].treatEvent(event);
     }
   }
 };
@@ -3796,9 +3796,9 @@ tulip.sendEventsToObservers = function(events) {
   for (var observerIdx in observerEvents) {
     var observer = observers[parseInt(observerIdx)];
     if (typeOf(observer) == "function") {
-      observer.call(this, observerEvents[observerIdx]);
+      observer(observerEvents[observerIdx]);
     } else if (typeOf(observer) == "object" && typeOf(observer.treatEvents) == "function") {
-      observer.treatEvents.call(this, observerEvents[observerIdx]);
+      observer.treatEvents(observerEvents[observerIdx]);
     }
   }
 
@@ -4327,7 +4327,7 @@ if (workerMode) {
         break;
       case 'startGraphData':
         setTimeout(function() {
-          //_graphIdToWrapper[graphId].setEventsActivated(false);
+          tulip.holdObservers();
           _parseGraphAttributesJSONData(_graphIdToWrapper[graphId].cppPointer, event.data.graphAttributes);
           if (!tulip.coreBuild && canvasId) {
             _stopBusyAnimation(canvasId);
@@ -4341,8 +4341,8 @@ if (workerMode) {
         }, delay);
         break;
       case 'endGraphData':
-        //_graphIdToWrapper[graphId].setEventsActivated(true);
         _fillMetaGraphInfos(_graphIdToWrapper[graphId].cppPointer);
+        tulip.unholdObservers();
         setTimeout(function() {
           if (!tulip.coreBuild && canvasId) {
             _setProgressBarComment(canvasId, "Finalizing rendering data ...");
@@ -4355,11 +4355,12 @@ if (workerMode) {
           if (graphId in _graphLoadedCallback) {
             _graphLoadedCallback[graphId](_graphIdToWrapper[graphId]);
           }
+          tulip.unholdObservers();
         }, delay);
         break;
       case 'startGraphUpdate':
+        tulip.holdObservers();
         _algorithmSucceed[graphId] = event.data.algoSucceed;
-        //_graphIdToWrapper[graphId].setEventsActivated(false);
         if (!tulip.coreBuild && canvasId) {
           _stopBusyAnimation(canvasId);
           setTimeout(function() {
@@ -4376,17 +4377,19 @@ if (workerMode) {
         if (graphId in _algorithmFinishedCallback) {
           _algorithmFinishedCallback[graphId](_algorithmSucceed[graphId], _graphIdToWrapper[graphId]);
         }
-        //_graphIdToWrapper[graphId].setEventsActivated(true);
 
         if (!tulip.coreBuild && canvasId) {
           setTimeout(function() {
             _setCurrentCanvas(canvasId);
             _endGraphViewUpdate(canvasId);
-            view.computeSubGraphsHulls(true);
             _setGraphRenderingDataReady(canvasId, true);
             _centerScene(canvasId);
+            tulip.unholdObservers();
           }, delay);
+        } else {
+          tulip.unholdObservers();
         }
+
         break;
       case 'createGraphProperties':
         setTimeout(function() {
@@ -4515,6 +4518,9 @@ if (workerMode) {
         newObject.canvas2d.width = width;
         newObject.canvas2d.height = height;
         newObject.container.appendChild(newObject.canvas2d);
+
+        newObject.graphDrawingChanged = false;
+
       }
       newObject.fullScreenActivated = false;
       return newObject;
@@ -4609,7 +4615,17 @@ if (workerMode) {
 
     tulip.View.prototype.setGraph = function(graph) {
       if (!graph.cppPointerValid()) return;
+      if (this.graph) {
+        tulip.removeListener(this.graph.getLayoutProperty("viewLayout"), this);
+        tulip.removeObserver(this.graph.getLayoutProperty("viewLayout"), this);
+        tulip.removeListener(this.graph.getSizeProperty("viewSize"), this);
+        tulip.removeObserver(this.graph.getSizeProperty("viewSize"), this);
+      }
       this.graph = graph;
+      tulip.addListener(this.graph.getLayoutProperty("viewLayout"), this);
+      tulip.addObserver(this.graph.getLayoutProperty("viewLayout"), this);
+      tulip.addListener(this.graph.getSizeProperty("viewSize"), this);
+      tulip.addObserver(this.graph.getSizeProperty("viewSize"), this);
       _setCanvasGraph(this.canvasId, graph.cppPointer);
       _graphIdToView[graph.getCppPointer()] = this;
       _graphIdToWrapper[graph.getCppPointer()] = graph;
@@ -4755,6 +4771,24 @@ if (workerMode) {
       this.draw();
     };
 
+    tulip.View.prototype.treatEvent = function(event) {
+      if (event instanceof tulip.PropertyEvent) {
+        if ((event.getEventType() == tulip.PropertyEventType.TLP_AFTER_SET_NODE_VALUE ||
+             event.getEventType() == tulip.PropertyEventType.TLP_AFTER_SET_EDGE_VALUE ||
+             event.getEventType() == tulip.PropertyEventType.TLP_AFTER_SET_ALL_NODE_VALUE ||
+             event.getEventType() == tulip.PropertyEventType.TLP_AFTER_SET_ALL_EDGE_VALUE) &&
+            (event.getProperty().getName() == "viewLayout" || event.getProperty().getName() == "viewSize")) {
+          this.graphDrawingChanged = true;
+        }
+      }
+    };
+
+    tulip.View.prototype.treatEvents = function(events) {
+      if (this.graphDrawingChanged) {
+        this.computeSubGraphsHulls(true);
+      }
+      this.graphDrawingChanged = false;
+    };
 
     // ==================================================================================================
 

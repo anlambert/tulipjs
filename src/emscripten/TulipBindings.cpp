@@ -113,6 +113,39 @@ static val tulip() {
   return tulipJS;
 }
 
+static val wrapPropertyToJs(tlp::PropertyInterface *prop) {
+  tlp::BooleanProperty *bp = dynamic_cast<tlp::BooleanProperty*>(prop);
+  tlp::ColorProperty *cp = dynamic_cast<tlp::ColorProperty*>(prop);
+  tlp::DoubleProperty *dp = dynamic_cast<tlp::DoubleProperty*>(prop);
+  tlp::IntegerProperty *ip = dynamic_cast<tlp::IntegerProperty*>(prop);
+  tlp::LayoutProperty *lp = dynamic_cast<tlp::LayoutProperty*>(prop);
+  tlp::SizeProperty *sp = dynamic_cast<tlp::SizeProperty*>(prop);
+  tlp::StringProperty *strp = dynamic_cast<tlp::StringProperty*>(prop);
+
+  val jsProp = val::null();
+
+  if (bp) {
+    jsProp = tulip()["BooleanProperty"].new_(reinterpret_cast<unsigned long>(prop));
+  } else if (cp) {
+    jsProp = tulip()["ColorProperty"].new_(reinterpret_cast<unsigned long>(prop));
+  } else if (dp) {
+    jsProp = tulip()["DoubleProperty"].new_(reinterpret_cast<unsigned long>(prop));
+  } else if (ip) {
+    jsProp = tulip()["IntegerProperty"].new_(reinterpret_cast<unsigned long>(prop));
+  } else if (lp) {
+    jsProp = tulip()["LayoutProperty"].new_(reinterpret_cast<unsigned long>(prop));
+  } else if (sp) {
+    jsProp = tulip()["SizeProperty"].new_(reinterpret_cast<unsigned long>(prop));
+  } else if (strp) {
+    jsProp = tulip()["StringProperty"].new_(reinterpret_cast<unsigned long>(prop));
+  } else {
+    jsProp = tulip()["PropertyInterface"].new_(reinterpret_cast<unsigned long>(prop));
+  }
+
+  return jsProp;
+
+}
+
 static std::set<unsigned long> deletedPointers;
 
 class TulipObjectsObserver : public tlp::Observable {
@@ -121,63 +154,111 @@ public:
 
   void treatEvent(const tlp::Event &event) {
 
+    if (!tulip().call<bool>("hasListener", reinterpret_cast<unsigned long>(event.sender()))) {
+      return;
+    }
+
     const tlp::GraphEvent *ge = dynamic_cast<const tlp::GraphEvent *>(&event);
     const tlp::PropertyEvent *pe = dynamic_cast<const tlp::PropertyEvent *>(&event);
     if (ge) {
       val jsGraph = tulip()["Graph"].new_(reinterpret_cast<unsigned long>(ge->getGraph()));
-      val graphEvent = tulip()["GraphEvent"].new_(jsGraph, static_cast<int>(ge->getType()));
-      if (ge->getType() == tlp::GraphEvent::TLP_ADD_NODE) {
+      val graphEvent = tulip()["GraphEvent"].new_(jsGraph, static_cast<unsigned long>(ge->getType()));
+      if (ge->getType() == tlp::GraphEvent::TLP_ADD_NODE || ge->getType() == tlp::GraphEvent::TLP_DEL_NODE) {
         graphEvent.set("node", tulip()["Node"].new_(ge->getNode().id));
-      } else if (ge->getType() == tlp::GraphEvent::TLP_ADD_EDGE) {
+      } else if (ge->getType() == tlp::GraphEvent::TLP_ADD_EDGE ||
+                 ge->getType() == tlp::GraphEvent::TLP_DEL_EDGE ||
+                 ge->getType() == tlp::GraphEvent::TLP_REVERSE_EDGE ||
+                 ge->getType() == tlp::GraphEvent::TLP_BEFORE_SET_ENDS ||
+                 ge->getType() == tlp::GraphEvent::TLP_AFTER_SET_ENDS) {
         graphEvent.set("edge", tulip()["Edge"].new_(ge->getEdge().id));
+      } else if (ge->getType() == tlp::GraphEvent::TLP_ADD_NODES) {
+        val nodesArray = val::array();
+        const std::vector<tlp::node> &nodes = ge->getNodes();
+        for (size_t i = 0 ; i < nodes.size() ; ++i) {
+          nodesArray.call<void>("push", tulip()["Node"].new_(nodes[i].id));
+        }
+        graphEvent.set("nodes", nodesArray);
+      } else if (ge->getType() == tlp::GraphEvent::TLP_ADD_EDGES) {
+        val edgesArray = val::array();
+        const std::vector<tlp::edge> &edges = ge->getEdges();
+        for (size_t i = 0 ; i < edges.size() ; ++i) {
+          edgesArray.call<void>("push", tulip()["Edge"].new_(edges[i].id));
+        }
+        graphEvent.set("edges", edgesArray);
+      } else if (ge->getType() == tlp::GraphEvent::TLP_BEFORE_ADD_DESCENDANTGRAPH ||
+                 ge->getType() == tlp::GraphEvent::TLP_AFTER_ADD_DESCENDANTGRAPH ||
+                 ge->getType() == tlp::GraphEvent::TLP_BEFORE_DEL_DESCENDANTGRAPH ||
+                 ge->getType() == tlp::GraphEvent::TLP_AFTER_DEL_DESCENDANTGRAPH ||
+                 ge->getType() == tlp::GraphEvent::TLP_BEFORE_ADD_SUBGRAPH ||
+                 ge->getType() == tlp::GraphEvent::TLP_AFTER_ADD_SUBGRAPH ||
+                 ge->getType() == tlp::GraphEvent::TLP_BEFORE_DEL_SUBGRAPH ||
+                 ge->getType() == tlp::GraphEvent::TLP_AFTER_DEL_SUBGRAPH) {
+        graphEvent.set("subgraph", tulip()["Graph"].new_(reinterpret_cast<unsigned long>(ge->getSubGraph())));
+      } else if (ge->getType() == tlp::GraphEvent::TLP_ADD_LOCAL_PROPERTY ||
+                 ge->getType() == tlp::GraphEvent::TLP_BEFORE_DEL_LOCAL_PROPERTY ||
+                 ge->getType() == tlp::GraphEvent::TLP_ADD_INHERITED_PROPERTY ||
+                 ge->getType() == tlp::GraphEvent::TLP_BEFORE_DEL_INHERITED_PROPERTY) {
+        graphEvent.set("name", ge->getPropertyName());
+        graphEvent.set("property", wrapPropertyToJs(ge->getProperty()));
+      } else if (ge->getType() == tlp::GraphEvent::TLP_BEFORE_ADD_LOCAL_PROPERTY ||
+                 ge->getType() == tlp::GraphEvent::TLP_BEFORE_ADD_INHERITED_PROPERTY ||
+                 ge->getType() == tlp::GraphEvent::TLP_AFTER_DEL_LOCAL_PROPERTY ||
+                 ge->getType() == tlp::GraphEvent::TLP_AFTER_DEL_INHERITED_PROPERTY) {
+        graphEvent.set("name", ge->getPropertyName());
+      } else if (ge->getType() == tlp::GraphEvent::TLP_BEFORE_SET_ATTRIBUTE ||
+                 ge->getType() == tlp::GraphEvent::TLP_AFTER_SET_ATTRIBUTE ||
+                 ge->getType() == tlp::GraphEvent::TLP_REMOVE_ATTRIBUTE) {
+        graphEvent.set("name", ge->getAttributeName());
       }
-      tulip().call<void>("fire", graphEvent);
+
+      tulip().call<void>("sendEventToListeners", reinterpret_cast<unsigned long>(event.sender()), graphEvent);
     }
 
     if (pe) {
-      tlp::BooleanProperty *bp = dynamic_cast<tlp::BooleanProperty*>(pe->getProperty());
-      tlp::ColorProperty *cp = dynamic_cast<tlp::ColorProperty*>(pe->getProperty());
-      tlp::DoubleProperty *dp = dynamic_cast<tlp::DoubleProperty*>(pe->getProperty());
-      tlp::IntegerProperty *ip = dynamic_cast<tlp::IntegerProperty*>(pe->getProperty());
-      tlp::LayoutProperty *lp = dynamic_cast<tlp::LayoutProperty*>(pe->getProperty());
-      tlp::SizeProperty *sp = dynamic_cast<tlp::SizeProperty*>(pe->getProperty());
-      tlp::StringProperty *strp = dynamic_cast<tlp::StringProperty*>(pe->getProperty());
+      val jsProp = wrapPropertyToJs(pe->getProperty());
 
-      val jsProp = val::null();
-
-      if (bp) {
-        jsProp = tulip()["BooleanProperty"].new_(reinterpret_cast<unsigned long>(pe->getProperty()));
-      } else if (cp) {
-        jsProp = tulip()["ColorProperty"].new_(reinterpret_cast<unsigned long>(pe->getProperty()));
-      } else if (dp) {
-        jsProp = tulip()["DoubleProperty"].new_(reinterpret_cast<unsigned long>(pe->getProperty()));
-      } else if (ip) {
-        jsProp = tulip()["IntegerProperty"].new_(reinterpret_cast<unsigned long>(pe->getProperty()));
-      } else if (lp) {
-        jsProp = tulip()["LayoutProperty"].new_(reinterpret_cast<unsigned long>(pe->getProperty()));
-      } else if (sp) {
-        jsProp = tulip()["SizeProperty"].new_(reinterpret_cast<unsigned long>(pe->getProperty()));
-      } else if (strp) {
-        jsProp = tulip()["StringProperty"].new_(reinterpret_cast<unsigned long>(pe->getProperty()));
+      val propEvent = tulip()["PropertyEvent"].new_(jsProp, static_cast<unsigned long>(pe->getType()));
+      if (pe->getType() == tlp::PropertyEvent::TLP_BEFORE_SET_NODE_VALUE ||
+          pe->getType() == tlp::PropertyEvent::TLP_AFTER_SET_NODE_VALUE) {
+        propEvent.set("node", tulip()["Node"].new_(pe->getNode().id));
+      } else if (pe->getType() == tlp::PropertyEvent::TLP_BEFORE_SET_EDGE_VALUE ||
+                 pe->getType() == tlp::PropertyEvent::TLP_AFTER_SET_EDGE_VALUE) {
+        propEvent.set("edge", tulip()["Edge"].new_(pe->getEdge().id));
       }
 
-      if (jsProp.as<bool>()) {
-        val propEvent = tulip()["PropertyEvent"].new_(jsProp, static_cast<int>(pe->getType()));
-        if (pe->getType() == tlp::PropertyEvent::TLP_AFTER_SET_NODE_VALUE) {
-          propEvent.set("node", tulip()["Node"].new_(pe->getNode().id));
-        }
-        tulip().call<void>("fire", propEvent);
-      }
-
+      tulip().call<void>("sendEventToListeners", reinterpret_cast<unsigned long>(event.sender()), propEvent);
     }
 
   }
 
   void treatEvents(const std::vector<tlp::Event> &events) {
+    val jsEvents = val::array();
+    unsigned int nbEvents = 0;
     for (size_t i = 0 ; i < events.size() ; ++i) {
       if (events[i].type() == tlp::Event::TLP_DELETE) {
         deletedPointers.insert(reinterpret_cast<unsigned long>(events[i].sender()));
       }
+      if (!tulip().call<bool>("hasObserver", reinterpret_cast<unsigned long>(events[i].sender()))) {
+        continue;
+      }
+      val jsEvent = val::null();
+      tlp::Graph *graph = dynamic_cast<tlp::Graph*>(events[i].sender());
+      tlp::PropertyInterface *prop = dynamic_cast<tlp::PropertyInterface*>(events[i].sender());
+      if (graph) {
+        val jsgraph = tulip()["Graph"].new_(reinterpret_cast<unsigned long>(graph));
+        jsEvent = tulip()["Event"].new_(jsgraph, static_cast<unsigned long>(events[i].type()));
+      } else if (prop) {
+        val jsprop = wrapPropertyToJs(prop);
+        jsEvent = tulip()["Event"].new_(jsprop, static_cast<unsigned long>(events[i].type()));
+      } else {
+        jsEvent = tulip()["Event"].new_(reinterpret_cast<unsigned long>(events[i].sender()), static_cast<unsigned long>(events[i].type()));
+      }
+      jsEvents.call<void>("push", jsEvent);
+      ++nbEvents;
+    }
+
+    if (nbEvents > 0) {
+      tulip().call<void>("sendEventsToObservers", jsEvents);
     }
   }
 
@@ -185,8 +266,9 @@ public:
 
 static TulipObjectsObserver tlpObjObs;
 
-void trackObjectDeletion(tlp::Observable *observable) {
+void observeObject(tlp::Observable *observable) {
   if (!observable) return;
+  observable->addListener(&tlpObjObs);
   observable->addObserver(&tlpObjObs);
   // emscripten often reuses previous freed address so ensure to remove it from the deleted pointers set
   unsigned long pointerValue = reinterpret_cast<unsigned long>(observable);
@@ -199,9 +281,11 @@ void observeGraph(tlp::Graph *g) {
     return;
   }
   g->addListener(&tlpObjObs);
+  g->addObserver(&tlpObjObs);
   std::string propName;
   forEach(propName, g->getProperties()) {
     g->getProperty(propName)->addListener(&tlpObjObs);
+    g->getProperty(propName)->addObserver(&tlpObjObs);
   }
 }
 
@@ -210,9 +294,11 @@ void unobserveGraph(tlp::Graph *g) {
     return;
   }
   g->removeListener(&tlpObjObs);
+  g->removeObserver(&tlpObjObs);
   std::string propName;
   forEach(propName, g->getProperties()) {
     g->getProperty(propName)->removeListener(&tlpObjObs);
+    g->getProperty(propName)->removeObserver(&tlpObjObs);
   }
 }
 
@@ -808,8 +894,7 @@ const char * EMSCRIPTEN_KEEPALIVE getJSONGraph(tlp::Graph *graph) {
 
 tlp::Graph * EMSCRIPTEN_KEEPALIVE loadGraph(const char *filename, bool notifyProgress=false) {
   tlp::Graph *g = tlp::loadGraph(filename, notifyProgress ? &progress : NULL);
-  //observeGraph(g);
-  trackObjectDeletion(g);
+  observeGraph(g);
   return g;
 }
 
@@ -820,8 +905,7 @@ bool EMSCRIPTEN_KEEPALIVE saveGraph(tlp::Graph *graph, const char *filename, boo
 
 tlp::Graph * EMSCRIPTEN_KEEPALIVE Graph_newGraph() {
   tlp::Graph *g = tlp::newGraph();
-  //observeGraph(g);
-  trackObjectDeletion(g);
+  observeGraph(g);
   return g;
 }
 
@@ -850,21 +934,21 @@ void EMSCRIPTEN_KEEPALIVE Graph_clear(tlp::Graph *graph) {
 tlp::Graph * EMSCRIPTEN_KEEPALIVE Graph_addSubGraph1(tlp::Graph *graph, tlp::BooleanProperty *selection, const char *name) {
   tlp::Graph *sg = graph->addSubGraph(selection, name);
   if (!workerMode())
-    trackObjectDeletion(sg);
+    observeObject(sg);
   return sg;
 }
 
 tlp::Graph * EMSCRIPTEN_KEEPALIVE Graph_addSubGraph2(tlp::Graph *graph, const char *name) {
   tlp::Graph *sg = graph->addSubGraph(name);
   if (!workerMode())
-    trackObjectDeletion(sg);
+    observeObject(sg);
   return sg;
 }
 
 tlp::Graph * EMSCRIPTEN_KEEPALIVE Graph_addCloneSubGraph(tlp::Graph *graph, const char *name, bool addSibling) {
   tlp::Graph *sg = graph->addCloneSubGraph(name, addSibling);
   if (!workerMode())
-    trackObjectDeletion(sg);
+    observeObject(sg);
   return sg;
 }
 
@@ -875,7 +959,7 @@ tlp::Graph * EMSCRIPTEN_KEEPALIVE Graph_inducedSubGraph(tlp::Graph *graph, unsig
   }
   tlp::Graph *sg = graph->inducedSubGraph(nodeSet, parentSubGraph);
   if (!workerMode())
-    trackObjectDeletion(sg);
+    observeObject(sg);
   return sg;
 }
 
@@ -1221,105 +1305,105 @@ void EMSCRIPTEN_KEEPALIVE Graph_getProperties(tlp::Graph *graph, unsigned char *
 tlp::PropertyInterface* EMSCRIPTEN_KEEPALIVE Graph_getProperty(tlp::Graph *graph, const char *name) {
   tlp::PropertyInterface *prop = graph->getProperty(name);
   if (prop && !workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::BooleanProperty* EMSCRIPTEN_KEEPALIVE Graph_getBooleanProperty(tlp::Graph *graph, const char *name) {
   tlp::BooleanProperty *prop = graph->getProperty<tlp::BooleanProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::ColorProperty* EMSCRIPTEN_KEEPALIVE Graph_getColorProperty(tlp::Graph *graph, const char *name) {
   tlp::ColorProperty *prop = graph->getProperty<tlp::ColorProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::DoubleProperty *EMSCRIPTEN_KEEPALIVE Graph_getDoubleProperty(tlp::Graph *graph, const char *name) {
   tlp::DoubleProperty *prop = graph->getProperty<tlp::DoubleProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::IntegerProperty *EMSCRIPTEN_KEEPALIVE Graph_getIntegerProperty(tlp::Graph *graph, const char *name) {
   tlp::IntegerProperty *prop = graph->getProperty<tlp::IntegerProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::LayoutProperty* EMSCRIPTEN_KEEPALIVE Graph_getLayoutProperty(tlp::Graph *graph, const char *name) {
   tlp::LayoutProperty *prop = graph->getProperty<tlp::LayoutProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::SizeProperty* EMSCRIPTEN_KEEPALIVE Graph_getSizeProperty(tlp::Graph *graph, const char *name) {
   tlp::SizeProperty *prop = graph->getProperty<tlp::SizeProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::StringProperty *EMSCRIPTEN_KEEPALIVE Graph_getStringProperty(tlp::Graph *graph, const char *name) {
   tlp::StringProperty *prop = graph->getProperty<tlp::StringProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::BooleanVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getBooleanVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::BooleanVectorProperty *prop = graph->getProperty<tlp::BooleanVectorProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::ColorVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getColorVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::ColorVectorProperty *prop = graph->getProperty<tlp::ColorVectorProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::DoubleVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getDoubleVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::DoubleVectorProperty *prop = graph->getProperty<tlp::DoubleVectorProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::IntegerVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getIntegerVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::IntegerVectorProperty *prop = graph->getProperty<tlp::IntegerVectorProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::CoordVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getCoordVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::CoordVectorProperty *prop = graph->getProperty<tlp::CoordVectorProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::SizeVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getSizeVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::SizeVectorProperty *prop = graph->getProperty<tlp::SizeVectorProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
 tlp::StringVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getStringVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::StringVectorProperty *prop = graph->getProperty<tlp::StringVectorProperty>(name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
@@ -1555,7 +1639,7 @@ const char *EMSCRIPTEN_KEEPALIVE PropertyInterface_getEdgeStringValue(tlp::Prope
 tlp::BooleanProperty* EMSCRIPTEN_KEEPALIVE createBooleanProperty(tlp::Graph *graph, const char *name) {
   tlp::BooleanProperty *prop = new tlp::BooleanProperty(graph, name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
@@ -1620,7 +1704,7 @@ void EMSCRIPTEN_KEEPALIVE BooleanProperty_getEdgesEqualTo(tlp::BooleanProperty *
 tlp::ColorProperty* EMSCRIPTEN_KEEPALIVE createColorProperty(tlp::Graph *graph, const char *name) {
   tlp::ColorProperty *prop = new tlp::ColorProperty(graph, name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
@@ -1673,7 +1757,7 @@ void EMSCRIPTEN_KEEPALIVE ColorProperty_setAllEdgeValue(tlp::ColorProperty *colo
 tlp::LayoutProperty* EMSCRIPTEN_KEEPALIVE createLayoutProperty(tlp::Graph *graph, const char *name) {
   tlp::LayoutProperty *prop = new tlp::LayoutProperty(graph, name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
@@ -1798,7 +1882,7 @@ void EMSCRIPTEN_KEEPALIVE LayoutProperty_perfectAspectRatio(tlp::LayoutProperty 
 tlp::SizeProperty* EMSCRIPTEN_KEEPALIVE createSizeProperty(tlp::Graph *graph, const char *name) {
   tlp::SizeProperty *prop = new tlp::SizeProperty(graph, name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
@@ -1867,7 +1951,7 @@ void EMSCRIPTEN_KEEPALIVE SizeProperty_getMax(tlp::SizeProperty *sizeProperty, t
 tlp::IntegerProperty* EMSCRIPTEN_KEEPALIVE createIntegerProperty(tlp::Graph *graph, const char *name) {
   tlp::IntegerProperty *prop = new tlp::IntegerProperty(graph, name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
@@ -1908,7 +1992,7 @@ int EMSCRIPTEN_KEEPALIVE IntegerProperty_getEdgeValue(tlp::IntegerProperty *inte
 tlp::DoubleProperty* EMSCRIPTEN_KEEPALIVE createDoubleProperty(tlp::Graph *graph, const char *name) {
   tlp::DoubleProperty *prop = new tlp::DoubleProperty(graph, name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
@@ -1953,7 +2037,7 @@ void EMSCRIPTEN_KEEPALIVE DoubleProperty_getSortedEdges(tlp::DoubleProperty *dou
 tlp::StringProperty* EMSCRIPTEN_KEEPALIVE createStringProperty(tlp::Graph *graph, const char *name) {
   tlp::StringProperty *prop = new tlp::StringProperty(graph, name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
@@ -2002,7 +2086,7 @@ const char * EMSCRIPTEN_KEEPALIVE StringProperty_getEdgeValue(tlp::StringPropert
 tlp::StringVectorProperty* EMSCRIPTEN_KEEPALIVE createStringVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::StringVectorProperty *prop = new tlp::StringVectorProperty(graph, name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
@@ -2083,7 +2167,7 @@ void EMSCRIPTEN_KEEPALIVE StringVectorProperty_getEdgeValue(tlp::StringVectorPro
 tlp::DoubleVectorProperty* EMSCRIPTEN_KEEPALIVE createDoubleVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::DoubleVectorProperty *prop = new tlp::DoubleVectorProperty(graph, name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 
@@ -2172,7 +2256,7 @@ void EMSCRIPTEN_KEEPALIVE DoubleVectorProperty_getEdgeValue(tlp::DoubleVectorPro
 tlp::IntegerVectorProperty* EMSCRIPTEN_KEEPALIVE createIntegerVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::IntegerVectorProperty *prop = new tlp::IntegerVectorProperty(graph, name);
   if (!workerMode())
-    trackObjectDeletion(prop);
+    observeObject(prop);
   return prop;
 }
 

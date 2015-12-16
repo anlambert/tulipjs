@@ -3532,6 +3532,28 @@ tulip.FontAwesomeIcon = {
 
 // ==================================================================================================================
 
+tulip.EventType = {
+  TLP_DELETE : 0,
+  TLP_MODIFICATION : 1,
+  TLP_INFORMATION : 2,
+  TLP_INVALID : 3
+};
+
+tulip.Event = function tulip_Event(sender, type) {
+  var newObject = createObject(tulip.Event, this);
+  if (tulip_Event.caller == null || tulip_Event.caller.name != "createObject") {
+    newObject.sender = sender;
+    newObject.type = type;
+  }
+  return newObject;
+};
+tulip.Event.prototype.getSender = function() {
+  return this.sender;
+};
+tulip.Event.prototype.getType = function() {
+  return this.type;
+};
+
 tulip.GraphEventType = {
   TLP_ADD_NODE : 0,
   TLP_DEL_NODE : 1,
@@ -3565,19 +3587,64 @@ tulip.GraphEventType = {
   TLP_BEFORE_ADD_INHERITED_PROPERTY : 29
 };
 
-tulip.GraphEvent = function(graph, eventType) {
+tulip.GraphEvent = function tulip_GraphEvent(graph, eventType) {
   var newObject = createObject(tulip.GraphEvent, this);
-  newObject.type = "GraphEvent";
-  newObject.graph = graph;
-  newObject.eventType = eventType;
-  newObject.node = null;
-  newObject.edge = null;
-  newObject.name = null;
-  newObject.nodes = null;
-  newObject.edges = null;
+  if (tulip_GraphEvent.caller == null || tulip_GraphEvent.caller.name != "createObject") {
+    newObject.graph = graph;
+    newObject.eventType = eventType;
+    newObject.node = null;
+    newObject.edge = null;
+    newObject.name = null;
+    newObject.nodes = null;
+    newObject.edges = null;
+    newObject.subgraph = null;
+    newObject.property = null;
+    tulip.Event.call(newObject, graph, tulip.EventType.TLP_MODIFICATION);
+  }
   return newObject;
 };
 
+tulip.GraphEvent.inheritsFrom(tulip.Event);
+
+tulip.GraphEvent.prototype.getGraph = function() {
+  return this.graph;
+};
+
+tulip.GraphEvent.prototype.getEventType = function() {
+  return this.eventType;
+};
+
+tulip.GraphEvent.prototype.getNode = function() {
+  return this.node;
+};
+
+tulip.GraphEvent.prototype.getEdge = function() {
+  return this.edge;
+};
+
+tulip.GraphEvent.prototype.getNodes = function() {
+  return this.nodes;
+};
+
+tulip.GraphEvent.prototype.getEdges = function() {
+  return this.edges;
+};
+
+tulip.GraphEvent.prototype.getSubGraph = function() {
+  return this.subgraph;
+};
+
+tulip.GraphEvent.prototype.getAttributeName = function() {
+  return this.name;
+};
+
+tulip.GraphEvent.prototype.getPropertyName = function() {
+  return this.name;
+};
+
+tulip.GraphEvent.prototype.getProperty = function() {
+  return this.property;
+};
 // ==================================================================================================================
 
 tulip.PropertyEventType = {
@@ -3591,49 +3658,151 @@ tulip.PropertyEventType = {
   TLP_AFTER_SET_EDGE_VALUE : 7
 };
 
-tulip.PropertyEvent = function(property, eventType) {
+tulip.PropertyEvent = function tulip_PropertyEvent(prop, eventType) {
   var newObject = createObject(tulip.PropertyEvent, this);
-  newObject.type = "PropertyEvent";
-  newObject.property = property;
-  newObject.eventType = eventType;
-  newObject.node = null;
-  newObject.edge = null;
+  if (tulip_PropertyEvent.caller == null || tulip_PropertyEvent.caller.name != "createObject") {
+    newObject.property = prop;
+    newObject.eventType = eventType;
+    newObject.node = null;
+    newObject.edge = null;
+    tulip.Event.call(newObject, prop, tulip.EventType.TLP_MODIFICATION);
+  }
   return newObject;
+};
+
+tulip.PropertyEvent.inheritsFrom(tulip.Event);
+
+tulip.PropertyEvent.prototype.getProperty = function() {
+  return this.property;
+};
+
+tulip.PropertyEvent.prototype.getEventType = function() {
+  return this.eventType;
+};
+
+tulip.PropertyEvent.prototype.getNode = function() {
+  return this.node;
+};
+
+tulip.PropertyEvent.prototype.getEdge = function() {
+  return this.edge;
 };
 
 // ==================================================================================================================
 
 var _tulipListeners = {};
+var _tulipObservers = {};
 
-tulip.addListener = function(type, listener) {
-  if (typeof _tulipListeners[type] == "undefined"){
-    _tulipListeners[type] = [];
+tulip.addListener = function(sender, listener) {
+  checkArgumentsTypes(arguments, [[tulip.Graph, tulip.PropertyInterface], ["function", "object"]], 2);
+  if (!_tulipListeners.hasOwnProperty(sender.cppPointer)) {
+    _tulipListeners[sender.cppPointer] = [];
   }
-  _tulipListeners[type].push(listener);
+  _tulipListeners[sender.cppPointer].push(listener);
 };
 
-tulip.fire = function(event) {
-  if (typeof event == "string") {
-    event = { type: event };
+tulip.removeListener = function(sender, listener) {
+  checkArgumentsTypes(arguments, [[tulip.Graph, tulip.PropertyInterface], ["function", "object"]], 2);
+  if (!_tulipListeners.hasOwnProperty(sender.cppPointer)) {
+    return;
   }
-  if (_tulipListeners[event.type] instanceof Array) {
-    var listeners = _tulipListeners[event.type];
-    for (var i = 0, len = listeners.length ; i < len ; i++) {
-      listeners[i].call(this, event);
+  for (var i = 0, len = _tulipListeners[sender.cppPointer].length ; i < len ; i++) {
+    if (_tulipListeners[sender.cppPointer][i] === listener) {
+      _tulipListeners[sender.cppPointer].splice(i, 1);
+      if (_tulipListeners[sender.cppPointer].length == 0) {
+        delete _tulipListeners[sender.cppPointer];
+      }
+      break;
     }
   }
 };
 
-tulip.removeListener = function(type, listener) {
-  if (_tulipListeners[type] instanceof Array) {
-    var listeners = _tulipListeners[type];
-    for (var i = 0, len = listeners.length ; i < len ; i++) {
-      if (listeners[i] === listener) {
-        listeners.splice(i, 1);
-        break;
+tulip.hasListener = function(senderId) {
+  return _tulipListeners.hasOwnProperty(senderId);
+};
+
+tulip.addObserver = function(sender, observer) {
+  checkArgumentsTypes(arguments, [[tulip.Graph, tulip.PropertyInterface], ["function", "object"]], 2);
+  if (!_tulipObservers.hasOwnProperty(sender.cppPointer)) {
+    _tulipObservers[sender.cppPointer] = [];
+  }
+  _tulipObservers[sender.cppPointer].push(observer);
+};
+
+tulip.removeObserver = function(sender, observer) {
+  checkArgumentsTypes(arguments, [[tulip.Graph, tulip.PropertyInterface], ["function", "object"]], 2);
+  if (!_tulipObservers.hasOwnProperty(sender.cppPointer)) {
+    return;
+  }
+  for (var i = 0, len = _tulipObservers[sender.cppPointer].length ; i < len ; i++) {
+    if (_tulipObservers[sender.cppPointer][i] === observer) {
+      _tulipObservers[sender.cppPointer].splice(i, 1);
+      if (_tulipObservers[sender.cppPointer].length == 0) {
+        delete _tulipObservers[sender.cppPointer];
+      }
+      break;
+    }
+  }
+};
+
+tulip.hasObserver = function(senderId) {
+  return _tulipObservers.hasOwnProperty(senderId);
+};
+
+tulip.sendEventToListeners = function(senderId, event) {
+  if (!_tulipListeners.hasOwnProperty(senderId)) {
+    return;
+  }
+  for (var i = 0, len = _tulipListeners[senderId].length ; i < len ; i++) {
+    if (typeOf(_tulipListeners[senderId][i]) == "function") {
+      _tulipListeners[senderId][i].call(this, event);
+    } else if (typeOf(_tulipListeners[senderId][i]) == "object" && typeOf(_tulipListeners[senderId][i].treatEvent) == "function") {
+      _tulipListeners[senderId][i].treatEvent.call(this, event);
+    }
+  }
+};
+
+tulip.sendEventsToObservers = function(events) {
+  var observerEvents = {};
+  var observers = [];
+
+  for (var senderId in _tulipObservers) {
+    if (_tulipObservers.hasOwnProperty(senderId)) {
+      for (var j = 0 ; j < _tulipObservers[senderId].length ; ++j) {
+        var observer = _tulipObservers[senderId][j];
+        if (observers.indexOf(observer) == -1) {
+          observers.push(observer);
+        }
       }
     }
   }
+
+  for (var i = 0 ; i < events.length ; ++i) {
+    for (var senderId in _tulipObservers) {
+      if (_tulipObservers.hasOwnProperty(senderId)) {
+        for (var j = 0 ; j < _tulipObservers[senderId].length ; ++j) {
+          var key = observers.indexOf(_tulipObservers[senderId][j]);
+          if (events[i].getSender().cppPointer.toString() == senderId) {
+            if (!observerEvents.hasOwnProperty(key)) {
+              observerEvents[key] = [];
+            }
+            observerEvents[key].push(events[i]);
+          }
+        }
+      }
+    }
+  }
+
+  for (var observerIdx in observerEvents) {
+    var observer = observers[parseInt(observerIdx)];
+    if (typeOf(observer) == "function") {
+      observer.call(this, observerEvents[observerIdx]);
+    } else if (typeOf(observer) == "object" && typeOf(observer.treatEvents) == "function") {
+      observer.treatEvents.call(this, observerEvents[observerIdx]);
+    }
+  }
+
+
 };
 
 // ==================================================================================================================

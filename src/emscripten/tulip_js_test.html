@@ -57,19 +57,25 @@
  //  tulip.computeLayout('canvas', 'FM^3 (OGDF)');
  }
 
- function tulipGraphEventHandler(event) {
-   console.log("Received event : ", event.eventType, " for graph ", event.graph.getName());
-   if (event.eventType == tulip.GraphEventType.TLP_ADD_NODE) {
-     console.log("node ", event.node.id, " has been added to the graph");
-   } else if (event.eventType == tulip.GraphEventType.TLP_ADD_EDGE) {
-     console.log("edge ", event.edge.id, " has been added to the graph");
-   }
- }
+ var EventReceiver = function() {
 
- function tulipPropertyEventHandler(event) {
-   console.log("Received event : ", event.eventType, " for graph property ", event.property.getName());
- }
+   this.treatEvent = function(event) {
+     if (event instanceof tulip.GraphEvent) {
+       console.log("Received graph event : ", event);
+     } else if (event instanceof tulip.PropertyEvent) {
+       console.log("Received property event : ", event);
+     } else {
+       console.log("Received event : ", event);
+     }
+   };
 
+   this.treatEvents = function(events) {
+     console.log("Received events : ", events);
+   };
+
+ };
+
+ var er = new EventReceiver();
 
  function initTulip() {
 
@@ -77,10 +83,15 @@
      setTimeout(initTulip, 1000);
    } else {
 
-    tulip.addListener("GraphEvent", tulipGraphEventHandler);
-    tulip.addListener("PropertyEvent", tulipPropertyEventHandler);
-
     graph = new tulip.Graph();
+    graph.setEventsActivated(true);
+
+
+    tulip.addListener(graph, er);
+    tulip.addObserver(graph, er);
+
+    tulip.holdObservers();
+
     graph.setName("Test Javascript Graph");
     var n1 = graph.addNode();
     var n2 = graph.addNode();
@@ -92,6 +103,8 @@
     var e4 = graph.addEdge(n4, n1);
 
     var viewLayout = graph.getLayoutProperty('viewLayout');
+    tulip.addListener(viewLayout, er);
+    tulip.addObserver(viewLayout, er);
     viewLayout.setNodeValue(n1, new tulip.Coord(-10, 10, 0));
     viewLayout.setNodeValue(n2, new tulip.Coord(10, 10, 0));
     viewLayout.setNodeValue(n3, new tulip.Coord(10, -10, 0));
@@ -122,6 +135,8 @@
     viewLabel.setNodeValue(n3, "node 3");
     viewLabel.setNodeValue(n4, "node 4");
 
+
+    tulip.unholdObservers();
 
     tulipView = new tulip.View('tulip-view', 640, 480);
     tulipView.setGraph(graph);

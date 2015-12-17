@@ -117,6 +117,11 @@ void GlScene::draw() {
       Light &light = *(it->second->getLight());
       GlLODSceneVisitor glLODSceneVisitor(_lodCalculator);
       it->second->acceptVisitor(&glLODSceneVisitor);
+      if (camera.is3d()) {
+        glEnable(GL_DEPTH_TEST);
+      } else {
+        glDisable(GL_DEPTH_TEST);
+      }
       camera.setViewport(_viewport);
       camera.initGl();
       if (!_pickingMode) {

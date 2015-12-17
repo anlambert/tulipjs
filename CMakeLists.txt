@@ -173,11 +173,12 @@ SET(GRAPH_RENDERER_SRCS
     thirdparty/ftgl/FTVectoriser.cpp
     thirdparty/ftgl/FTContour.cpp
     thirdparty/ftgl/FTPoint.cpp
+    thirdparty/nanovg/nanovg.c
 )
 
 INCLUDE_DIRECTORIES(${TULIP_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/src/tulip-ogles ${CMAKE_SOURCE_DIR}/src/utils ${CMAKE_SOURCE_DIR}/src/interactors)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/freetype-gl++ ${CMAKE_SOURCE_DIR}/thirdparty/utf8-cpp ${CMAKE_SOURCE_DIR}/thirdparty/clipper/cpp)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/libtess2/Include ${CMAKE_SOURCE_DIR}/thirdparty/ftgl)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/thirdparty/libtess2/Include ${CMAKE_SOURCE_DIR}/thirdparty/ftgl ${CMAKE_SOURCE_DIR}/thirdparty/nanovg)
 
 IF(NOT EMSCRIPTEN)
 

@@ -1,9 +1,25 @@
+#include "NanoVGIncludes.h"
 #include "GlProgressBar.h"
 #include "GlRect2D.h"
 #include "LabelsRenderer.h"
 
 using namespace std;
 using namespace tlp;
+
+static void fillRoundedRect(NVGcontext* vg, float x, float y, float w, float h, float cornerRadius, NVGpaint &bg) {
+  nvgBeginPath(vg);
+  nvgRoundedRect(vg, x, y, w, h, cornerRadius);
+  nvgFillPaint(vg, bg);
+  nvgFill(vg);
+}
+
+static void strokeRoundedRect(NVGcontext* vg, float x, float y, float w, float h, float cornerRadius, NVGcolor &c, float strokeWidth = 1.0f) {
+  nvgBeginPath(vg);
+  nvgRoundedRect(vg, x, y, w, h, cornerRadius);
+  nvgStrokeWidth(vg, strokeWidth);
+  nvgStrokeColor(vg, c);
+  nvgStroke(vg);
+}
 
 static const float undefinedProgressBarPercentWidth = 0.1f;
 
@@ -16,7 +32,7 @@ GlProgressBar::GlProgressBar(const tlp::Coord &center, float width, float height
   updateBoundingBox();
 }
 
-void GlProgressBar::draw(const Camera &camera, const Light &light, bool pickingMode) {
+void GlProgressBar::draw(const Camera &camera, const Light &, bool) {
   int percent = _percent;
 
   if (percent > 100)
@@ -29,26 +45,37 @@ void GlProgressBar::draw(const Camera &camera, const Light &light, bool pickingM
   float pbWidth = _width;
   float pbHeight = _height;
 
-  Color fillColor = _fillColor;
-  Color outlineColor = _outlineColor;
   Color textColor = _textColor;
-
-  if (pickingMode) {
-    fillColor = outlineColor = textColor = _pickingColor;
-  }
 
   tlp::Coord bl = _center - tlp::Coord(pbWidth, pbHeight)/2.f;
   tlp::Coord tr = _center + tlp::Coord(pbWidth, pbHeight)/2.f;
 
-  GlRect2D rect(bl, tr, 0, fillColor, outlineColor);
-  rect.setFilled(false);
-  rect.draw(camera, light);
+  tlp::Vec4i viewport = camera.getViewport();
+  NVGcontext* vg = NULL;
+  vg = nvgCreateGLES2(NVG_ANTIALIAS);
+
+  nvgBeginFrame(vg, viewport[2], viewport[3], 1.0);
+
+  NVGpaint bg;
+  float cornerRadius = _height/2-1;
+
+  float x = _center[0] - _width/2;
+  float y = _center[1] - _height/2;
+  float w = _width;
+  float h = _height;
+
+  NVGcolor fillColor = nvgRGBA(_fillColor[0],_fillColor[1],_fillColor[2],_fillColor[3]);
+  NVGcolor outlineColor = nvgRGBA(_outlineColor[0],_outlineColor[1],_outlineColor[2],_outlineColor[3]);
+
+  bg = nvgBoxGradient(vg, x, y, w, h, cornerRadius, 5, nvgRGBA(0,0,0,16), nvgRGBA(0,0,0,92));
+  fillRoundedRect(vg, x, y, w, h, cornerRadius, bg);
+  strokeRoundedRect(vg, x, y, w, h, cornerRadius, outlineColor);
 
   if (percent >= 0) {
     float pbWidth2 = (percent/100.f) * pbWidth;
-    tlp::Coord tr2 = bl + tlp::Coord(pbWidth2, pbHeight);
-    GlRect2D rect2(bl, tr2, 0, fillColor);
-    rect2.draw(camera, light);
+    w = pbWidth2;
+    bg = nvgBoxGradient(vg, x, y, w, h, cornerRadius, cornerRadius/2, fillColor, nvgRGBA(0,0,0,10));
+    fillRoundedRect(vg, x+1, y+1, w-2, h-2, cornerRadius-1, bg);
   } else {
     _undefinedProgressCurrentBarOffset += _undefinedProgressStep;
     if (_undefinedProgressCurrentBarOffset > 1.0) {
@@ -61,10 +88,18 @@ void GlProgressBar::draw(const Camera &camera, const Light &light, bool pickingM
     }
     float pbWidth2 = undefinedProgressBarPercentWidth * pbWidth;
     tlp::Coord bl2 = bl + tlp::Coord(_undefinedProgressCurrentBarOffset * pbWidth, 0);
-    tlp::Coord tr2 = bl2 + tlp::Coord(pbWidth2, pbHeight);
-    GlRect2D rect2(bl2, tr2, 0, fillColor);
-    rect2.draw(camera, light);
+
+    x = bl2[0];
+    y = bl2[1];
+    w = pbWidth2;
+
+    bg = nvgBoxGradient(vg, x, y, w, h, cornerRadius, cornerRadius/2, fillColor, nvgRGBA(0,0,0,10));
+    fillRoundedRect(vg, x+1, y+1, w-2, h-2, cornerRadius-1, bg);
   }
+
+  nvgEndFrame(vg);
+
+  nvgDeleteGLES2(vg);
 
   tlp::BoundingBox textBB;
   textBB[0] = bl + tlp::Coord(0, pbHeight*0.3f);

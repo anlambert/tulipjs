@@ -4210,7 +4210,6 @@ if (workerMode) {
   var _parseGraphAttributesJSONData =  Module.cwrap('parseGraphAttributesJSONData', null, ['number', 'string']);
   var _createGraphProperty = Module.cwrap('createGraphProperty', null, ['number', 'string', 'string', 'string', 'string']);
   var _addSubGraph = Module.cwrap('addSubGraph', 'number', ['number', 'number', 'number', 'string', 'string', 'string']);
-  var _addSubGraphHull = Module.cwrap('addSubGraphHull', null, ['string', 'number']);
 
   var _parseNodesJSONData = Module.cwrap('parseNodesJSONData', null, ['number', 'string']);
   var _parseEdgesJSONData = Module.cwrap('parseEdgesJSONData', null, ['number', 'string']);

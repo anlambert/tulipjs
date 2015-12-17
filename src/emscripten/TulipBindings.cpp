@@ -866,6 +866,7 @@ protected:
 };
 
 static EmscriptenPluginProgress progress;
+static tlp::SimplePluginProgress dummyProgress;
 
 // ==================================================================================================================
 
@@ -892,13 +893,27 @@ const char * EMSCRIPTEN_KEEPALIVE getJSONGraph(tlp::Graph *graph) {
 // ==================================================================================================================
 
 tlp::Graph * EMSCRIPTEN_KEEPALIVE loadGraph(const char *filename, bool notifyProgress=false) {
-  tlp::Graph *g = tlp::loadGraph(filename, notifyProgress ? &progress : NULL);
+  tlp::PluginProgress *pluginProgress = notifyProgress ? &progress : &dummyProgress;
+  tlp::Graph *g = tlp::loadGraph(filename, pluginProgress);
+  if (!g) {
+    std::cerr << "Error : the import of the graph file " << filename << " failed." << std::endl;
+    if (!pluginProgress->getError().empty()) {
+      std::cerr << pluginProgress->getError() << std::endl;
+    }
+  }
   observeGraph(g);
   return g;
 }
 
 bool EMSCRIPTEN_KEEPALIVE saveGraph(tlp::Graph *graph, const char *filename, bool notifyProgress=false) {
-  bool ret =  tlp::saveGraph(graph, filename, notifyProgress ? &progress : NULL);
+  tlp::PluginProgress *pluginProgress = notifyProgress ? &progress : &dummyProgress;
+  bool ret =  tlp::saveGraph(graph, filename, pluginProgress);
+  if (!ret) {
+    std::cerr << "Error : the export to the graph file " << filename << " failed." << std::endl;
+    if (!pluginProgress->getError().empty()) {
+      std::cerr << pluginProgress->getError() << std::endl;
+    }
+  }
   return ret;
 }
 

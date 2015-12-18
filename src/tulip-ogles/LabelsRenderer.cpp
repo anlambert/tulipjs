@@ -387,16 +387,20 @@ void LabelsRenderer::getLineRenderingDataUnscaled(TextureFont *textureFont, cons
 
 }
 
-tlp::BoundingBox LabelsRenderer::getLabelRenderingBoxScaled(const tlp::BoundingBox &renderingBox, float aspectRatio) {
+tlp::BoundingBox LabelsRenderer::getLabelRenderingBoxScaled(const tlp::BoundingBox &renderingBox, float textAspectRatio) {
   BoundingBox renderingBoxScaled;
 
-  float scaleX = renderingBox.width();
-  float scaleY = scaleX / aspectRatio;
+  float ratio = renderingBox.width() / renderingBox.height();
 
-  if (scaleY > renderingBox.height()) {
-    aspectRatio = 1.f / aspectRatio;
+  float scaleX = 0;
+  float scaleY = 0;
+
+  if (ratio > textAspectRatio) {
+    scaleX = renderingBox.height() * textAspectRatio;
     scaleY = renderingBox.height();
-    scaleX = scaleY / aspectRatio;
+  } else {
+    scaleX = renderingBox.width();
+    scaleY = renderingBox.width() / textAspectRatio;
   }
 
   float z = renderingBox[1][2];

@@ -94,7 +94,7 @@ private :
 
     void getLineRenderingDataUnscaled(TextureFont *textureFont, const std::wstring &line, std::vector<Vec5f> &renderingData, std::vector<unsigned short> &indices, tlp::BoundingBox &lineBB, float penY=0);
 
-    tlp::BoundingBox getLabelRenderingBoxScaled(const tlp::BoundingBox &renderingBox, float aspectRatio);
+    tlp::BoundingBox getLabelRenderingBoxScaled(const tlp::BoundingBox &renderingBox, float textAspectRatio);
 
     std::string _fontFile;
 

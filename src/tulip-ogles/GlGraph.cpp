@@ -1784,6 +1784,11 @@ void GlGraph::treatEvent(const tlp::Event &message) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE && _graph->isElement(pEvt->getNode())) {
       _labelsRenderer->addOrUpdateNodeLabel(_graph, pEvt->getNode());
       notifyModified();
+    } else if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE) {
+      forEach(n, _graph->getNodes()) {
+        _labelsRenderer->addOrUpdateNodeLabel(_graph, n);
+      }
+      notifyModified();
     }
   } else if (pEvt && (pEvt->getProperty() == _viewShape || pEvt->getProperty() == _viewBorderWidth || pEvt->getProperty() == _viewBorderColor)) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_EDGE_VALUE) {

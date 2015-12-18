@@ -268,7 +268,7 @@ static TulipObjectsObserver tlpObjObs;
 
 void observeObject(tlp::Observable *observable) {
   if (!observable || workerMode()) return;
-  observable->addListener(&tlpObjObs);
+  //observable->addListener(&tlpObjObs);
   observable->addObserver(&tlpObjObs);
   // emscripten often reuses previous freed address so ensure to remove it from the deleted pointers set
   unsigned long pointerValue = reinterpret_cast<unsigned long>(observable);
@@ -901,7 +901,8 @@ tlp::Graph * EMSCRIPTEN_KEEPALIVE loadGraph(const char *filename, bool notifyPro
       std::cerr << pluginProgress->getError() << std::endl;
     }
   }
-  observeGraph(g);
+  //observeGraph(g);
+  observeObject(g);
   return g;
 }
 
@@ -919,7 +920,8 @@ bool EMSCRIPTEN_KEEPALIVE saveGraph(tlp::Graph *graph, const char *filename, boo
 
 tlp::Graph * EMSCRIPTEN_KEEPALIVE Graph_newGraph() {
   tlp::Graph *g = tlp::newGraph();
-  observeGraph(g);
+  //observeGraph(g);
+  observeObject(g);
   return g;
 }
 

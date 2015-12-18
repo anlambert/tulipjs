@@ -4614,17 +4614,17 @@ if (workerMode) {
 
     tulip.View.prototype.setGraph = function(graph) {
       if (!graph.cppPointerValid()) return;
-      if (this.graph) {
-        tulip.removeListener(this.graph.getLayoutProperty("viewLayout"), this);
-        tulip.removeObserver(this.graph.getLayoutProperty("viewLayout"), this);
-        tulip.removeListener(this.graph.getSizeProperty("viewSize"), this);
-        tulip.removeObserver(this.graph.getSizeProperty("viewSize"), this);
-      }
+//      if (this.graph) {
+//        tulip.removeListener(this.graph.getLayoutProperty("viewLayout"), this);
+//        tulip.removeObserver(this.graph.getLayoutProperty("viewLayout"), this);
+//        tulip.removeListener(this.graph.getSizeProperty("viewSize"), this);
+//        tulip.removeObserver(this.graph.getSizeProperty("viewSize"), this);
+//      }
       this.graph = graph;
-      tulip.addListener(this.graph.getLayoutProperty("viewLayout"), this);
-      tulip.addObserver(this.graph.getLayoutProperty("viewLayout"), this);
-      tulip.addListener(this.graph.getSizeProperty("viewSize"), this);
-      tulip.addObserver(this.graph.getSizeProperty("viewSize"), this);
+//      tulip.addListener(this.graph.getLayoutProperty("viewLayout"), this);
+//      tulip.addObserver(this.graph.getLayoutProperty("viewLayout"), this);
+//      tulip.addListener(this.graph.getSizeProperty("viewSize"), this);
+//      tulip.addObserver(this.graph.getSizeProperty("viewSize"), this);
       _setCanvasGraph(this.canvasId, graph.cppPointer);
       _graphIdToView[graph.getCppPointer()] = this;
       _graphIdToWrapper[graph.getCppPointer()] = graph;

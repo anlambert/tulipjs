@@ -511,6 +511,7 @@ void GlGraph::initGraphProperties() {
   _viewTgtAnchorSize = _graph->getProperty<SizeProperty>("viewTgtAnchorSize");
   _viewFontAwesomeIcon = _graph->getProperty<StringProperty>("viewFontAwesomeIcon");
   _viewGlow = _graph->getProperty<BooleanProperty>("viewGlow");
+  _viewLabelColor = _graph->getProperty<ColorProperty>("viewLabelColor");
 }
 
 static const string viewPropPrefix = "view";
@@ -1807,15 +1808,11 @@ void GlGraph::treatEvent(const tlp::Event &message) {
   }
   else if (pEvt && (pEvt->getProperty() == _viewLayout || pEvt->getProperty() == _viewSize || pEvt->getProperty() == _viewColor)) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE && _graph->isElement(pEvt->getNode())) {
-      _nodesToUpdate.insert(pEvt->getNode());
       forEach(e, _graph->getInOutEdges(pEvt->getNode())) {
         _edgesToUpdate.insert(e);
       }
     }
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE) {
-      forEach(n, _graph->getNodes()) {
-        _nodesToUpdate.insert(n);
-      }
       forEach(e, _graph->getEdges()) {
         _edgesToUpdate.insert(e);
       }
@@ -1833,13 +1830,11 @@ void GlGraph::treatEvent(const tlp::Event &message) {
     }
   } else if (pEvt && pEvt->getProperty() == _viewLabel) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE && _graph->isElement(pEvt->getNode())) {
-      _labelsRenderer->addOrUpdateNodeLabel(_graph, pEvt->getNode());
-      notifyModified();
+      _nodesToUpdate.insert(pEvt->getNode());
     } else if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE) {
       forEach(n, _graph->getNodes()) {
-        _labelsRenderer->addOrUpdateNodeLabel(_graph, n);
+        _nodesToUpdate.insert(n);
       }
-      notifyModified();
     }
   } else if (pEvt && (pEvt->getProperty() == _viewShape || pEvt->getProperty() == _viewBorderWidth || pEvt->getProperty() == _viewBorderColor)) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_EDGE_VALUE) {
@@ -1853,7 +1848,7 @@ void GlGraph::treatEvent(const tlp::Event &message) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE) {
       notifyModified();
     }
-  } else if (pEvt && (pEvt->getProperty() == _viewGlow || pEvt->getProperty() == _viewFontAwesomeIcon) &&
+  } else if (pEvt && (pEvt->getProperty() == _viewGlow || pEvt->getProperty() == _viewFontAwesomeIcon || pEvt->getProperty() == _viewLabelColor) &&
              (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE)) {
 
     notifyModified();

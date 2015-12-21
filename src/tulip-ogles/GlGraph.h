@@ -132,6 +132,7 @@ private :
   tlp::SizeProperty *_viewTgtAnchorSize;
   tlp::StringProperty *_viewFontAwesomeIcon;
   tlp::BooleanProperty *_viewGlow;
+  tlp::ColorProperty *_viewLabelColor;
 
   GlShaderProgram *_flatShader;
 

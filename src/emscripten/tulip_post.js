@@ -4345,7 +4345,7 @@ if (workerMode) {
         tulip.unholdObservers();
         setTimeout(function() {
           if (!tulip.coreBuild && canvasId) {
-            _setProgressBarComment(canvasId, "Finalizing rendering data ...");
+            _setProgressBarComment(canvasId, "Finalizing graph rendering data ...");
             _draw();
             _setCurrentCanvas(canvasId);
             _endGraphViewData(canvasId);
@@ -4403,6 +4403,7 @@ if (workerMode) {
           if (!tulip.coreBuild && canvasId) {
             var nodeId = event.data.lastNodeId;
             var percent = (nodeId / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
+            _setProgressBarComment(canvasId, "Importing graph nodes data (" + nodeId + " / " + graphData[canvasId].numberOfNodes + ") ...");
             _setProgressBarPercent(canvasId, percent);
             _draw();
           }
@@ -4418,6 +4419,7 @@ if (workerMode) {
           if (!tulip.coreBuild && canvasId) {
             var edgeId = event.data.lastEdgeId;
             var percent = ((graphData[canvasId].numberOfNodes + edgeId) / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
+            _setProgressBarComment(canvasId, "Importing graph edges data (" + edgeId + " / " + graphData[canvasId].numberOfEdges + ") ...");
             _setProgressBarPercent(canvasId, percent);
             _draw();
           }
@@ -4431,6 +4433,7 @@ if (workerMode) {
           if (!tulip.coreBuild && canvasId) {
             var sgId = _graphIdToWrapper[graphId].numberOfDescendantGraphs();
             var percent = ((graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + sgId) / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
+            _setProgressBarComment(canvasId, "Importing subgraphs data (" + sgId + " / " + graphData[canvasId].numberOfSubgraphs + ") ...");
             _setProgressBarPercent(canvasId, percent);
             _draw();
           }

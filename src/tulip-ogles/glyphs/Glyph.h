@@ -20,7 +20,7 @@ public:
   }
 
   virtual const std::vector<tlp::Coord> &getGlyphVertices() const {
-      return _vertices;
+    return _vertices;
   }
 
   virtual const std::vector<tlp::Vec2f> &getGlyphTexCoords();
@@ -28,15 +28,15 @@ public:
   virtual const std::vector<tlp::Coord> &getGlyphNormals();
 
   virtual const std::vector<unsigned short> &getGlyphVerticesIndices() const {
-      return _indices;
+    return _indices;
   }
 
   virtual const std::vector<unsigned short> &getGlyphOutlineIndices() const {
-      return _outlineIndices;
+    return _outlineIndices;
   }
 
   virtual bool glyph2D() const {
-      return true;
+    return true;
   }
 
   /*

@@ -28,90 +28,90 @@ class LabelsRenderer {
 
 public :
 
-    static LabelsRenderer *instance();
+  static LabelsRenderer *instance();
 
-    static LabelsRenderer *instance(const std::string &canvasId);
+  static LabelsRenderer *instance(const std::string &canvasId);
 
-    static void setCurrentCanvasId(const std::string &canvasId) {
-      _currentCanvasId = canvasId;
-    }
+  static void setCurrentCanvasId(const std::string &canvasId) {
+    _currentCanvasId = canvasId;
+  }
 
-    ~LabelsRenderer();
+  ~LabelsRenderer();
 
-    void loadFontFromFile(const std::string &fontFile);
+  void loadFontFromFile(const std::string &fontFile);
 
-    void initFont();
+  void initFont();
 
-    bool fontInit() const;
+  bool fontInit() const;
 
-    std::string fontFile() const {
-      return _fontFile;
-    }
+  std::string fontFile() const {
+    return _fontFile;
+  }
 
-    void addOrUpdateNodeLabel(tlp::Graph *graph, tlp::node n);
+  void addOrUpdateNodeLabel(tlp::Graph *graph, tlp::node n);
 
-    void removeNodeLabel(tlp::Graph *graph, tlp::node n);
+  void removeNodeLabel(tlp::Graph *graph, tlp::node n);
 
-    void setLabelsScaled(const bool labelsScaled) {
-      _labelsScaled = labelsScaled;
-    }
+  void setLabelsScaled(const bool labelsScaled) {
+    _labelsScaled = labelsScaled;
+  }
 
-    bool labelsScaled() const {
-      return _labelsScaled;
-    }
+  bool labelsScaled() const {
+    return _labelsScaled;
+  }
 
-    void setMinMaxSizes(float minSize, float maxSize) {
-      _minSize = minSize;
-      _maxSize = maxSize;
-    }
+  void setMinMaxSizes(float minSize, float maxSize) {
+    _minSize = minSize;
+    _maxSize = maxSize;
+  }
 
-    void setOcclusionTest(const bool occlusionTest) {
-      _occlusionTest = occlusionTest;
-    }
+  void setOcclusionTest(const bool occlusionTest) {
+    _occlusionTest = occlusionTest;
+  }
 
-    void renderGraphNodesLabels(tlp::Graph *graph, const Camera &camera, const tlp::Color &selectionColor, bool billboarded = false);
+  void renderGraphNodesLabels(tlp::Graph *graph, const Camera &camera, const tlp::Color &selectionColor, bool billboarded = false);
 
-    void renderOneLabel(const Camera &camera, const std::string &text, const tlp::BoundingBox &renderingBox,
-                        const tlp::Color &labelColor = tlp::Color::Black);
+  void renderOneLabel(const Camera &camera, const std::string &text, const tlp::BoundingBox &renderingBox,
+                      const tlp::Color &labelColor = tlp::Color::Black);
 
-    void clearGraphNodesLabelsRenderingData(tlp::Graph *graph);
+  void clearGraphNodesLabelsRenderingData(tlp::Graph *graph);
 
-    void setGraphNodesLabelsToRender(tlp::Graph *graph, const std::vector<tlp::node> &labelsToRender) {
-      _labelsToRender[graph] = labelsToRender;
-    }
+  void setGraphNodesLabelsToRender(tlp::Graph *graph, const std::vector<tlp::node> &labelsToRender) {
+    _labelsToRender[graph] = labelsToRender;
+  }
 
 private :
 
-    static std::map<std::string, LabelsRenderer *> _instances;
-    static std::string _currentCanvasId;
+  static std::map<std::string, LabelsRenderer *> _instances;
+  static std::string _currentCanvasId;
 
 
-    LabelsRenderer();
+  LabelsRenderer();
 
-    float getTextAspectRatio(TextureFont *textureFont, const std::string &text);
+  float getTextAspectRatio(TextureFont *textureFont, const std::string &text);
 
-    void getLabelRenderingData(TextureFont *textureFont, const std::string &text, std::pair<std::vector<Vec5f>, std::vector<unsigned short> > &renderingData);
+  void getLabelRenderingData(TextureFont *textureFont, const std::string &text, std::pair<std::vector<Vec5f>, std::vector<unsigned short> > &renderingData);
 
-    void getLineRenderingDataUnscaled(TextureFont *textureFont, const std::wstring &line, std::vector<Vec5f> &renderingData, std::vector<unsigned short> &indices, tlp::BoundingBox &lineBB, float penY=0);
+  void getLineRenderingDataUnscaled(TextureFont *textureFont, const std::wstring &line, std::vector<Vec5f> &renderingData, std::vector<unsigned short> &indices, tlp::BoundingBox &lineBB, float penY=0);
 
-    tlp::BoundingBox getLabelRenderingBoxScaled(const tlp::BoundingBox &renderingBox, float textAspectRatio);
+  tlp::BoundingBox getLabelRenderingBoxScaled(const tlp::BoundingBox &renderingBox, float textAspectRatio);
 
-    std::string _fontFile;
+  std::string _fontFile;
 
-    GlShaderProgram *_labelsShader;
-    TextureFont*  _textureFont;
-    TextureFont*  _textureFontDF;
-    TextureAtlas* _textureAtlas;
-    TextureAtlas* _textureAtlasDF;
+  GlShaderProgram *_labelsShader;
+  TextureFont*  _textureFont;
+  TextureFont*  _textureFontDF;
+  TextureAtlas* _textureAtlas;
+  TextureAtlas* _textureAtlasDF;
 
-    std::map<tlp::Graph *, std::vector<tlp::node> > _labelsToRender;
-    std::map<tlp::Graph *, std::map<tlp::node, float> > _nodeLabelAspectRatio;
-    std::map<tlp::Graph *, std::map<tlp::node, float> > _nodeLabelAspectRatioDF;
-    std::map<tlp::Graph *, std::map<tlp::node, unsigned int> > _nodeLabelNbLines;
+  std::map<tlp::Graph *, std::vector<tlp::node> > _labelsToRender;
+  std::map<tlp::Graph *, std::map<tlp::node, float> > _nodeLabelAspectRatio;
+  std::map<tlp::Graph *, std::map<tlp::node, float> > _nodeLabelAspectRatioDF;
+  std::map<tlp::Graph *, std::map<tlp::node, unsigned int> > _nodeLabelNbLines;
 
-    bool _labelsScaled;
-    float _minSize, _maxSize;
-    bool _occlusionTest;
+  bool _labelsScaled;
+  float _minSize, _maxSize;
+  bool _occlusionTest;
 
 };
 

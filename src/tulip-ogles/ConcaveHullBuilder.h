@@ -15,37 +15,37 @@ class ConcaveHullBuilder {
 
 public:
 
-    ConcaveHullBuilder();
+  ConcaveHullBuilder();
 
-    void setScalingFactor(const float scalingFactor);
+  void setScalingFactor(const float scalingFactor);
 
-    void setHullWithHoles(const bool hullWithHoles);
+  void setHullWithHoles(const bool hullWithHoles);
 
-    void setHullZValue(const float z);
+  void setHullZValue(const float z);
 
-    void addPolygon(const std::vector<tlp::Coord> &polygon);
+  void addPolygon(const std::vector<tlp::Coord> &polygon);
 
-    void computeHulls();
+  void computeHulls();
 
-    unsigned int nbComputedHulls() const;
+  unsigned int nbComputedHulls() const;
 
-    const std::vector<std::vector<tlp::Coord> > &getHullWithHoles(unsigned int hullId) const;
+  const std::vector<std::vector<tlp::Coord> > &getHullWithHoles(unsigned int hullId) const;
 
-    const std::vector<tlp::Coord> &getHullOuterContour(unsigned int hullId) const;
+  const std::vector<tlp::Coord> &getHullOuterContour(unsigned int hullId) const;
 
-    void clear();
+  void clear();
 
 private:
 
-    float _scalingFactor;
+  float _scalingFactor;
 
-    bool _hullWithHoles;
+  bool _hullWithHoles;
 
-    float _z;
+  float _z;
 
-    std::vector<std::vector<tlp::Coord> > _polygons;
+  std::vector<std::vector<tlp::Coord> > _polygons;
 
-    std::vector<std::vector<std::vector<tlp::Coord> > > _computedHulls;
+  std::vector<std::vector<std::vector<tlp::Coord> > > _computedHulls;
 
 };
 

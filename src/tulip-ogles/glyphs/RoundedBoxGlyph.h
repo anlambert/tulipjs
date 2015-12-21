@@ -7,13 +7,13 @@ class RoundedBoxGlyph : public Glyph {
 
 public:
 
-    RoundedBoxGlyph();
+  RoundedBoxGlyph();
 
-    virtual void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
+  virtual void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
 
 protected:
 
-    tlp::Coord getAnchor(const tlp::Coord &vector) const;
+  tlp::Coord getAnchor(const tlp::Coord &vector) const;
 
 };
 

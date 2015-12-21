@@ -7,9 +7,9 @@ class CircleGlyph : public Glyph {
 
 public:
 
-    CircleGlyph();
+  CircleGlyph();
 
-    virtual void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
+  virtual void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
 
 };
 

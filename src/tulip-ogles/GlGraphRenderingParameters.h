@@ -150,9 +150,9 @@ class GlGraphRenderingParametersEvent : public tlp::Event {
 public:
 
   enum GlGraphRenderingParametersEventType {RENDERING_PARAMETERS_MODIFIED = 0,
-                                        DISPLAY_EDGES_EXTREMITIES_TOGGLED,
-                                        INTERPOLATE_EDGES_COLORS_TOGGLED,
-                                        INTERPOLATE_EDGES_SIZES_TOGGLED};
+                                            DISPLAY_EDGES_EXTREMITIES_TOGGLED,
+                                            INTERPOLATE_EDGES_COLORS_TOGGLED,
+                                            INTERPOLATE_EDGES_SIZES_TOGGLED};
 
   GlGraphRenderingParametersEvent(GlGraphRenderingParameters *renderingParameters,
                                   GlGraphRenderingParametersEventType eventType) :

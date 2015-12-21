@@ -7,11 +7,11 @@ class SquareGlyph : public Glyph {
 
 public:
 
-    SquareGlyph();
+  SquareGlyph();
 
 protected:
 
-    virtual tlp::Coord getAnchor(const tlp::Coord &vector) const;
+  virtual tlp::Coord getAnchor(const tlp::Coord &vector) const;
 
 };
 

@@ -189,7 +189,7 @@ public:
   enum GlSceneEventType {DRAW_REQUEST=0,
                          LAYER_ADDED_IN_SCENE,
                          LAYER_REMOVED_FROM_SCENE
-                         };
+                        };
 
   GlSceneEvent(GlSceneEventType type, GlScene *scene, GlLayer *layer = NULL,
                Event::EventType evtType = Event::TLP_MODIFICATION)

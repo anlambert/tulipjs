@@ -15,23 +15,23 @@ class RectangleZoomInteractor : public GlSceneInteractor {
 
 public:
 
-    RectangleZoomInteractor(GlScene *glScene = NULL);
+  RectangleZoomInteractor(GlScene *glScene = NULL);
 
-    virtual bool mouseCallback(const MouseButton &button, const MouseButtonState &state, int x, int y, const int &modifiers);
+  virtual bool mouseCallback(const MouseButton &button, const MouseButtonState &state, int x, int y, const int &modifiers);
 
-    virtual bool mouseMoveCallback(int x, int y, const int &modifiers);
+  virtual bool mouseMoveCallback(int x, int y, const int &modifiers);
 
-    virtual bool keyboardCallback(const std::string &keyStr, const int &modifiers);
+  virtual bool keyboardCallback(const std::string &keyStr, const int &modifiers);
 
-    virtual void draw();
+  virtual void draw();
 
 private:
 
-    MouseButton _mouseButton;
-    int _firstX, _firstY;
-    int _curX, _curY;
-    bool _dragStarted;
-    AnimateParams _animParams;
+  MouseButton _mouseButton;
+  int _firstX, _firstY;
+  int _curX, _curY;
+  bool _dragStarted;
+  AnimateParams _animParams;
 };
 
 #endif // RECTANGLEZOOMINTERACTOR_H

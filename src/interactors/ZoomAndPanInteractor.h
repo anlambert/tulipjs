@@ -9,17 +9,17 @@ class ZoomAndPanInteractor : public GlSceneInteractor {
 
 public:
 
-    ZoomAndPanInteractor(GlScene *glScene = NULL);
+  ZoomAndPanInteractor(GlScene *glScene = NULL);
 
-    bool mouseCallback(const MouseButton &button, const MouseButtonState &state, int x, int y, const int &modifiers);
+  bool mouseCallback(const MouseButton &button, const MouseButtonState &state, int x, int y, const int &modifiers);
 
-    bool mouseMoveCallback(int x, int y, const int &modifiers);
+  bool mouseMoveCallback(int x, int y, const int &modifiers);
 
-    bool keyboardCallback(const std::string &key, const int &modifiers);
+  bool keyboardCallback(const std::string &key, const int &modifiers);
 
-    int _mouseButton;
-    int _lastX, _lastY;
-    bool _dragStarted;
+  int _mouseButton;
+  int _lastX, _lastY;
+  bool _dragStarted;
 
 };
 

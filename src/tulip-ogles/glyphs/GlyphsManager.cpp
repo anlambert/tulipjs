@@ -60,8 +60,8 @@ static Glyph* createGlyph(int glyphId) {
     return new ConeGlyph();
   } else if (glyphId >= 0xf000) {
     return new FontAwesomeGlyph(glyphId);
-//  } else if (glyphId == 100) {
-//    return new MeshGlyph();
+    //  } else if (glyphId == 100) {
+    //    return new MeshGlyph();
   } else {
     return NULL;
   }

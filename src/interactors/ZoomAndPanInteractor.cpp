@@ -135,6 +135,6 @@ bool ZoomAndPanInteractor::keyboardCallback(const std::string &keyStr, const int
       _glScene->requestDraw();
       return true;
     }
-}
+  }
   return false;
 }

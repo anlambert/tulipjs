@@ -7,13 +7,13 @@ class DiamondGlyph : public Glyph {
 
 public:
 
-    DiamondGlyph();
+  DiamondGlyph();
 
-    void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
+  void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
 
 protected:
 
-    virtual tlp::Coord getAnchor(const tlp::Coord &vector) const;
+  virtual tlp::Coord getAnchor(const tlp::Coord &vector) const;
 
 };
 

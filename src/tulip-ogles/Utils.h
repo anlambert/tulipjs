@@ -27,8 +27,8 @@ class GlGraphRenderingParameters;
 template <unsigned int SIZE>
 void addTlpVecToVecFloat(const tlp::Vector<float, SIZE> &c, std::vector<float> &v) {
   for (size_t i = 0 ; i < SIZE ; ++i) {
-      v.push_back(c[i]);
-    }
+    v.push_back(c[i]);
+  }
 }
 
 template <typename T>

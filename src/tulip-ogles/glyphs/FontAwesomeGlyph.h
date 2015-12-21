@@ -7,7 +7,7 @@ class FontAwesomeGlyph : public Glyph {
 
 public:
 
-    FontAwesomeGlyph(unsigned int iconCodePoint);
+  FontAwesomeGlyph(unsigned int iconCodePoint);
 
 };
 

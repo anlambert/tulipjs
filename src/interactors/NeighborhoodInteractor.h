@@ -13,28 +13,28 @@ class NeighborhoodInteractor : public GlSceneInteractor {
 
 public:
 
-    NeighborhoodInteractor(GlScene *scene = NULL);
+  NeighborhoodInteractor(GlScene *scene = NULL);
 
-    void setScene(GlScene *glScene);
+  void setScene(GlScene *glScene);
 
-    virtual bool mouseCallback(const MouseButton & button, const MouseButtonState &state, int x, int y, const int & modifiers);
+  virtual bool mouseCallback(const MouseButton & button, const MouseButtonState &state, int x, int y, const int & modifiers);
 
-    virtual bool mouseMoveCallback(int x, int y, const int & modifiers);
+  virtual bool mouseMoveCallback(int x, int y, const int & modifiers);
 
-    virtual void draw();
+  virtual void draw();
 
 private:
 
-    void buildNeighborhoodSubgraph();
-    void destroyNeighborhoodSubgraph();
+  void buildNeighborhoodSubgraph();
+  void destroyNeighborhoodSubgraph();
 
-    ZoomAndPanInteractor *_znpInteractor;
+  ZoomAndPanInteractor *_znpInteractor;
 
-    GlGraph *_glGraph;
-    tlp::node _centralNode;
+  GlGraph *_glGraph;
+  tlp::node _centralNode;
 
-    tlp::Graph *_neighborhoodSg;
-    GlGraph *_glNeighborhoodGraph;
+  tlp::Graph *_neighborhoodSg;
+  GlGraph *_glNeighborhoodGraph;
 };
 
 #endif // NEIGHBORHOODINTERACTOR_H

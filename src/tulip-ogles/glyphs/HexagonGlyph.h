@@ -7,9 +7,9 @@ class HexagonGlyph : public Glyph {
 
 public:
 
-    HexagonGlyph();
+  HexagonGlyph();
 
-    virtual void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
+  virtual void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
 
 };
 

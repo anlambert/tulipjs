@@ -34,25 +34,25 @@ class GlSceneInteractor {
 
 public:
 
-    virtual void activate() {}
+  virtual void activate() {}
 
-    virtual void desactivate() {}
+  virtual void desactivate() {}
 
-    virtual bool mouseCallback(const MouseButton & /*button*/, const MouseButtonState & /*state*/, int /*x*/, int /*y*/, const int & /*modifiers*/) {return false;}
+  virtual bool mouseCallback(const MouseButton & /*button*/, const MouseButtonState & /*state*/, int /*x*/, int /*y*/, const int & /*modifiers*/) {return false;}
 
-    virtual bool mouseMoveCallback(int /*x*/, int /*y*/, const int & /*modifiers*/) {return false;}
+  virtual bool mouseMoveCallback(int /*x*/, int /*y*/, const int & /*modifiers*/) {return false;}
 
-    virtual bool keyboardCallback(const std::string& /*keyStr*/, const int & /*modifiers*/) {return false;}
+  virtual bool keyboardCallback(const std::string& /*keyStr*/, const int & /*modifiers*/) {return false;}
 
-    virtual void draw() {}
+  virtual void draw() {}
 
-    virtual void setScene(GlScene *glScene) {
-      _glScene = glScene;
-    }
+  virtual void setScene(GlScene *glScene) {
+    _glScene = glScene;
+  }
 
 protected:
 
-    GlScene *_glScene;
+  GlScene *_glScene;
 
 };
 

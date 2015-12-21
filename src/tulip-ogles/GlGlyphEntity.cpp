@@ -5,16 +5,16 @@ using namespace tlp;
 using namespace std;
 
 GlGlyphEntity::GlGlyphEntity(int glyphId) : _glyphId(glyphId), _center(Coord(0.f,0.f,0.f)), _size(1.f,1.f,1.f), _color(Color::Red),
-                                            _texture(""), _borderWidth(0.f), _borderColor(Color::Black),
-                                            _rotationAxisAndAngle(Vec4f(0.f,0.f,1.f,0.f)) {
+  _texture(""), _borderWidth(0.f), _borderColor(Color::Black),
+  _rotationAxisAndAngle(Vec4f(0.f,0.f,1.f,0.f)) {
   updateBoundingBox();
 }
 
 GlGlyphEntity::GlGlyphEntity(int glyphId, const Coord &center, const Size &size, const Color &color,
                              const string &texture, const float borderWidth, const Color &borderColor,
                              const Vec4f &rotationAxisAndAngle) : _glyphId(glyphId), _center(center), _size(size), _color(color),
-                                                                  _texture(texture), _borderWidth(borderWidth), _borderColor(borderColor),
-                                                                  _rotationAxisAndAngle(rotationAxisAndAngle) {
+  _texture(texture), _borderWidth(borderWidth), _borderColor(borderColor),
+  _rotationAxisAndAngle(rotationAxisAndAngle) {
   updateBoundingBox();
 }
 

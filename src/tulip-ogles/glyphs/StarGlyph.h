@@ -7,9 +7,9 @@ class StarGlyph : public Glyph {
 
 public:
 
-    StarGlyph();
+  StarGlyph();
 
-    void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
+  void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
 
 };
 

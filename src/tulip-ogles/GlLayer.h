@@ -89,10 +89,10 @@ public:
 
   enum GlLayerEventType {ENTITY_ADDED_IN_LAYER = 0,
                          ENTITY_REMOVED_FROM_LAYER
-                         };
+                        };
 
   GlLayerEvent(GlLayerEventType type, GlLayer *layer, GlEntity *entity,
-                Event::EventType evtType = Event::TLP_MODIFICATION)
+               Event::EventType evtType = Event::TLP_MODIFICATION)
 
     : Event(*layer, evtType), _type(type), _layer(layer), _entity(entity) {}
 

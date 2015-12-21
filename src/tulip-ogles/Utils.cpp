@@ -860,85 +860,85 @@ tlp::Size getEdgeSize(tlp::Graph *graph, edge e, tlp::SizeProperty *viewSize, Gl
 //===========================================================================================================
 class CellCBuilder {
 public:
-    CellCBuilder(){}
-    CellCBuilder(const std::vector<tlp::Coord> *data, int id, int next, int prev):
+  CellCBuilder(){}
+  CellCBuilder(const std::vector<tlp::Coord> *data, int id, int next, int prev):
     _data(data), _id(id) {
-        set(prev, next);
-    }
-    const std::vector<tlp::Coord> *_data;
-    int _id;
-    int  _next, _prev;
-    double _sin;
+    set(prev, next);
+  }
+  const std::vector<tlp::Coord> *_data;
+  int _id;
+  int  _next, _prev;
+  double _sin;
 
-    void set(int prev, int next) {
-        _prev = prev;
-        _next = next;
-        if (prev > -1 && next < (int) _data->size()) {
-            Vec3f v1( (*_data)[_prev] - (*_data)[_id] );
-            Vec3f v2( (*_data)[_next] - (*_data)[_id] );
-            v1.normalize();
-            v2.normalize();
-            _sin = abs((v1^v2)[2]);
-        }
-        else
-            _sin = 0; //we can't compute sin for extremities.
+  void set(int prev, int next) {
+    _prev = prev;
+    _next = next;
+    if (prev > -1 && next < (int) _data->size()) {
+      Vec3f v1( (*_data)[_prev] - (*_data)[_id] );
+      Vec3f v2( (*_data)[_next] - (*_data)[_id] );
+      v1.normalize();
+      v2.normalize();
+      _sin = abs((v1^v2)[2]);
     }
-    void setNext(int next) {
-        set(_prev, next);
-    }
-    void setPrev(int prev) {
-        set(prev, _next);
-    }
+    else
+      _sin = 0; //we can't compute sin for extremities.
+  }
+  void setNext(int next) {
+    set(_prev, next);
+  }
+  void setPrev(int prev) {
+    set(prev, _next);
+  }
 
-    bool operator()(const CellCBuilder &a, const CellCBuilder &b) const {
-        if (a._sin < b._sin) return true;
-        if (a._sin > b._sin) return false;
-        return a._id < b._id;
-    }
+  bool operator()(const CellCBuilder &a, const CellCBuilder &b) const {
+    if (a._sin < b._sin) return true;
+    if (a._sin > b._sin) return false;
+    return a._id < b._id;
+  }
 };
 
 
 std::vector<tlp::Coord> simplifyCurve(const std::vector<Coord> &in) {
-    vector<CellCBuilder> cells;
-    for(unsigned int i=0; i < in.size() ; ++i) {
-        cells.push_back(CellCBuilder(&in, i, i+1, i-1));
-    }
-    set<CellCBuilder, CellCBuilder> order;
-    for(unsigned int i=1; i < in.size()-1 ; ++i) {
-        order.insert(cells[i]);
-    }
-    set<CellCBuilder, CellCBuilder>::iterator it;
+  vector<CellCBuilder> cells;
+  for(unsigned int i=0; i < in.size() ; ++i) {
+    cells.push_back(CellCBuilder(&in, i, i+1, i-1));
+  }
+  set<CellCBuilder, CellCBuilder> order;
+  for(unsigned int i=1; i < in.size()-1 ; ++i) {
+    order.insert(cells[i]);
+  }
+  set<CellCBuilder, CellCBuilder>::iterator it;
 
-    const unsigned int    MAX_BENDS = 10; // we remove bends until there is atmost MAX_BENDS
-    const double MIN_DEV  = sin(M_PI/ 360.); //0.5 degree, if there only MIN_DEV we remove the bend even if nbBends < MAX_BENDS
-    const double MAX_DEV  = sin(M_PI/ 36. ); //5 degree, if there is more than MAX_DEV degree wee keep the bend even if nbBends > MAX_BEND;
+  const unsigned int    MAX_BENDS = 10; // we remove bends until there is atmost MAX_BENDS
+  const double MIN_DEV  = sin(M_PI/ 360.); //0.5 degree, if there only MIN_DEV we remove the bend even if nbBends < MAX_BENDS
+  const double MAX_DEV  = sin(M_PI/ 36. ); //5 degree, if there is more than MAX_DEV degree wee keep the bend even if nbBends > MAX_BEND;
 
-    while( (order.size() > 0) &&
-           ((order.begin()->_sin) < MAX_DEV) &&
-           ((order.size() > MAX_BENDS) || ((order.begin())->_sin < MIN_DEV)) ){
-        it = order.begin();
-        int prev = it->_prev;
-        int next = it->_next;
-        order.erase(it);
+  while( (order.size() > 0) &&
+         ((order.begin()->_sin) < MAX_DEV) &&
+         ((order.size() > MAX_BENDS) || ((order.begin())->_sin < MIN_DEV)) ){
+    it = order.begin();
+    int prev = it->_prev;
+    int next = it->_next;
+    order.erase(it);
 
-        if (prev > 0) {
-            order.erase(cells[prev]);
-            cells[prev].setNext(next);
-            order.insert(cells[prev]);
-        }
-        if (next < ((int)in.size())-1) {
-            order.erase(cells[next]);
-            cells[next].setPrev(prev);
-            order.insert(cells[next]);
-        }
+    if (prev > 0) {
+      order.erase(cells[prev]);
+      cells[prev].setNext(next);
+      order.insert(cells[prev]);
     }
-
-    std::vector<tlp::Coord> result;
-    result.push_back(in[0]);
-    for(unsigned int i=1; i < in.size() - 1 ; ++i) {
-        if (order.find(cells[i]) != order.end())
-            result.push_back(in[i]);
+    if (next < ((int)in.size())-1) {
+      order.erase(cells[next]);
+      cells[next].setPrev(prev);
+      order.insert(cells[next]);
     }
-    result.push_back(in[in.size()-1]);
-    return result;
+  }
+
+  std::vector<tlp::Coord> result;
+  result.push_back(in[0]);
+  for(unsigned int i=1; i < in.size() - 1 ; ++i) {
+    if (order.find(cells[i]) != order.end())
+      result.push_back(in[i]);
+  }
+  result.push_back(in[in.size()-1]);
+  return result;
 }

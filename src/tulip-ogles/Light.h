@@ -10,51 +10,51 @@ class Light {
 
 public:
 
-    Light();
-    Light(Camera *camera);
+  Light();
+  Light(Camera *camera);
 
-    void setCamera(Camera *camera) {
-      _camera = camera;
-    }
+  void setCamera(Camera *camera) {
+    _camera = camera;
+  }
 
-    void setDirectionnalLight(const bool directionnalLight);
-    bool directionnalLight() const;
+  void setDirectionnalLight(const bool directionnalLight);
+  bool directionnalLight() const;
 
-    tlp::Vec4f getPosition() const;
+  tlp::Vec4f getPosition() const;
 
-    void setModelAmbientColor(const tlp::Color &modelAmbient);
-    tlp::Color getModelAmbientColor() const;
+  void setModelAmbientColor(const tlp::Color &modelAmbient);
+  tlp::Color getModelAmbientColor() const;
 
-    void setAmbientColor(const tlp::Color &ambient);
-    tlp::Color getAmbientColor() const;
+  void setAmbientColor(const tlp::Color &ambient);
+  tlp::Color getAmbientColor() const;
 
-    void setDiffuseColor(const tlp::Color &diffuse);
-    tlp::Color getDiffuseColor() const;
+  void setDiffuseColor(const tlp::Color &diffuse);
+  tlp::Color getDiffuseColor() const;
 
-    void setSpecularColor(const tlp::Color &specular);
-    tlp::Color getSpecularColor() const;
+  void setSpecularColor(const tlp::Color &specular);
+  tlp::Color getSpecularColor() const;
 
-    void setConstantAttenuation(const float constantAttenuation);
-    float getConstantAttenuation() const;
+  void setConstantAttenuation(const float constantAttenuation);
+  float getConstantAttenuation() const;
 
-    void setLinearAttenuation(const float linearAttenuation);
-    float getLinearAttenuation() const;
+  void setLinearAttenuation(const float linearAttenuation);
+  float getLinearAttenuation() const;
 
-    void setQuadraticAttenuation(const float quadraticAttenuation);
-    float getQuadraticAttenuation() const;
+  void setQuadraticAttenuation(const float quadraticAttenuation);
+  float getQuadraticAttenuation() const;
 
 
 private:
 
-    Camera *_camera;
-    bool _directionnalLight;
-    tlp::Color _modelAmbientColor;
-    tlp::Color _ambientColor;
-    tlp::Color _diffuseColor;
-    tlp::Color _specularColor;
-    float _constantAttenuation;
-    float _linearAttenuation;
-    float _quadraticAttenuation;
+  Camera *_camera;
+  bool _directionnalLight;
+  tlp::Color _modelAmbientColor;
+  tlp::Color _ambientColor;
+  tlp::Color _diffuseColor;
+  tlp::Color _specularColor;
+  float _constantAttenuation;
+  float _linearAttenuation;
+  float _quadraticAttenuation;
 
 };
 

@@ -6,19 +6,19 @@ using namespace std;
 using namespace tlp;
 
 DiamondGlyph::DiamondGlyph() {
-    _vertices = computeRegularPolygon(4);
-    _indices.push_back(0);
-    _indices.push_back(1);
-    _indices.push_back(3);
-    _indices.push_back(1);
-    _indices.push_back(2);
-    _indices.push_back(3);
-    for (size_t i = 0 ; i < _vertices.size() - 1 ; ++i) {
-      _outlineIndices.push_back(i);
-      _outlineIndices.push_back(i+1);
-    }
-    _outlineIndices.push_back(_vertices.size()-1);
-    _outlineIndices.push_back(0);
+  _vertices = computeRegularPolygon(4);
+  _indices.push_back(0);
+  _indices.push_back(1);
+  _indices.push_back(3);
+  _indices.push_back(1);
+  _indices.push_back(2);
+  _indices.push_back(3);
+  for (size_t i = 0 ; i < _vertices.size() - 1 ; ++i) {
+    _outlineIndices.push_back(i);
+    _outlineIndices.push_back(i+1);
+  }
+  _outlineIndices.push_back(_vertices.size()-1);
+  _outlineIndices.push_back(0);
 }
 
 void DiamondGlyph::getIncludeBoundingBox(BoundingBox &boundingBox) {

@@ -13,11 +13,11 @@ class GlGraph;
 class SelectionInteractor;
 
 namespace tlp {
-  class Graph;
-  class BooleanProperty;
-  class LayoutProperty;
-  class SizeProperty;
-  class DoubleProperty;
+class Graph;
+class BooleanProperty;
+class LayoutProperty;
+class SizeProperty;
+class DoubleProperty;
 }
 
 class SelectionModifierInteractor : public GlSceneInteractor {

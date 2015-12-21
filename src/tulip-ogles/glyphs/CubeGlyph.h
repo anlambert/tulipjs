@@ -9,15 +9,15 @@ class CubeGlyph : public Glyph {
 
 public:
 
-    CubeGlyph();
+  CubeGlyph();
 
-    bool glyph2D() const {
-        return false;
-    }
+  bool glyph2D() const {
+    return false;
+  }
 
 protected:
 
-    tlp::Coord getAnchor(const tlp::Coord &vector) const;
+  tlp::Coord getAnchor(const tlp::Coord &vector) const;
 };
 
 #endif // CUBEGLYPH_H

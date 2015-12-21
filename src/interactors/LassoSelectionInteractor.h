@@ -12,24 +12,24 @@ class LassoSelectionInteractor : public GlSceneInteractor {
 
 public:
 
-    LassoSelectionInteractor(GlScene *scene = NULL);
+  LassoSelectionInteractor(GlScene *scene = NULL);
 
-    void setScene(GlScene *glScene);
+  void setScene(GlScene *glScene);
 
-    virtual bool mouseCallback(const MouseButton & button, const MouseButtonState &state, int x, int y, const int & modifiers);
+  virtual bool mouseCallback(const MouseButton & button, const MouseButtonState &state, int x, int y, const int & modifiers);
 
-    virtual bool mouseMoveCallback(int x, int y, const int & modifiers);
+  virtual bool mouseMoveCallback(int x, int y, const int & modifiers);
 
-    virtual void draw();
+  virtual void draw();
 
 private:
 
-    void selectGraphElementsUnderPolygon();
+  void selectGraphElementsUnderPolygon();
 
-    ZoomAndPanInteractor *_znpInteractor;
+  ZoomAndPanInteractor *_znpInteractor;
 
-    bool _dragStarted;
-    std::vector<tlp::Coord> _polygon;
+  bool _dragStarted;
+  std::vector<tlp::Coord> _polygon;
 
 };
 

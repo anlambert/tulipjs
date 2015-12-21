@@ -34,7 +34,7 @@
 #endif
 
 namespace tlp {
-  typedef Matrix<float,  2> Mat2f;
+typedef Matrix<float,  2> Mat2f;
 }
 
 /**
@@ -63,7 +63,7 @@ class GlShader {
 
 public :
 
-  enum ShaderType {Vertex, Fragment}; 
+  enum ShaderType {Vertex, Fragment};
   
   /**
    * Vertex and Fragment shader constructor

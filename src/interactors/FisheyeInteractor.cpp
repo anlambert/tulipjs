@@ -12,12 +12,12 @@
 #include "ShaderManager.h"
 
 static std::string fisheyeVertexShaderSrc =
-#ifdef __EMSCRIPTEN__
+    #ifdef __EMSCRIPTEN__
     "precision highp float;\n"
     "precision highp int;\n"
-#else
+    #else
     "#version 120\n"
-#endif
+    #endif
 
     "uniform mat4 u_modelviewMatrix;"
     "uniform mat4 u_projectionMatrix;"
@@ -34,12 +34,12 @@ static std::string fisheyeVertexShaderSrc =
     ;
 
 static std::string fisheyeFragmentShaderSrc =
-#ifdef __EMSCRIPTEN__
+    #ifdef __EMSCRIPTEN__
     "precision highp float;\n"
     "precision highp int;\n"
-#else
+    #else
     "#version 120\n"
-#endif
+    #endif
 
     "uniform sampler2D u_texture;"
     "uniform sampler2D u_fisheyeTexture;"
@@ -78,7 +78,7 @@ static std::string fisheyeFragmentShaderSrc =
     "  }"
     "}"
 
-;
+    ;
 
 FisheyeInteractor::FisheyeInteractor(GlScene *scene) :
   _curX(-1), _curY(-1), _dragStarted(false), _znpInteractor(NULL),

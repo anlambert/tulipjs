@@ -1515,85 +1515,85 @@ void EMSCRIPTEN_KEEPALIVE Graph_setEventsActivated(tlp::Graph *graph, bool event
 }
 
 const char* EMSCRIPTEN_KEEPALIVE Graph_getNodesPropertiesValuesJSON(tlp::Graph *graph) {
- std::ostringstream oss;
- static std::string ret;
- oss.str("");
- std::vector<std::string> propertiesNames;
- std::string propName;
- forEach(propName, graph->getProperties()) {
-   propertiesNames.push_back(propName);
- }
- oss << "[";
- unsigned int k = 0;
- tlp::node n;
+  std::ostringstream oss;
+  static std::string ret;
+  oss.str("");
+  std::vector<std::string> propertiesNames;
+  std::string propName;
+  forEach(propName, graph->getProperties()) {
+    propertiesNames.push_back(propName);
+  }
+  oss << "[";
+  unsigned int k = 0;
+  tlp::node n;
 
- forEach(n, graph->getNodes()) {
-   oss << "{\"id\": " << n.id << ", ";
-   for (size_t i = 0 ; i < propertiesNames.size() ; ++i) {
-     if (propertiesNames[i] == "viewMetaGraph") continue;
-     oss << "\"" << propertiesNames[i] << "\": ";
-     std::string strVal = graph->getProperty(propertiesNames[i])->getNodeStringValue(n);
-     if (graph->getProperty(propertiesNames[i])->getTypename() == "string") {
-       oss << "\"" << strVal << "\"";
-     } else {
-       replaceStringInPlace(strVal, "(", "[");
-       replaceStringInPlace(strVal, ")", "]");
-       oss << strVal;
-     }
-     if (i != propertiesNames.size() - 1) {
-       oss << ", ";
-     }
-   }
-   oss << "}";
-   if (++k != graph->numberOfNodes()) {
-     oss << ",";
-   }
- }
+  forEach(n, graph->getNodes()) {
+    oss << "{\"id\": " << n.id << ", ";
+    for (size_t i = 0 ; i < propertiesNames.size() ; ++i) {
+      if (propertiesNames[i] == "viewMetaGraph") continue;
+      oss << "\"" << propertiesNames[i] << "\": ";
+      std::string strVal = graph->getProperty(propertiesNames[i])->getNodeStringValue(n);
+      if (graph->getProperty(propertiesNames[i])->getTypename() == "string") {
+        oss << "\"" << strVal << "\"";
+      } else {
+        replaceStringInPlace(strVal, "(", "[");
+        replaceStringInPlace(strVal, ")", "]");
+        oss << strVal;
+      }
+      if (i != propertiesNames.size() - 1) {
+        oss << ", ";
+      }
+    }
+    oss << "}";
+    if (++k != graph->numberOfNodes()) {
+      oss << ",";
+    }
+  }
 
- oss << "]";
- ret = oss.str();
- return ret.c_str();
+  oss << "]";
+  ret = oss.str();
+  return ret.c_str();
 }
 
 const char* EMSCRIPTEN_KEEPALIVE Graph_getEdgesPropertiesValuesJSON(tlp::Graph *graph) {
- std::ostringstream oss;
- static std::string ret;
- oss.str("");
- std::vector<std::string> propertiesNames;
- std::string propName;
- forEach(propName, graph->getProperties()) {
-   propertiesNames.push_back(propName);
- }
- oss << "[";
- unsigned int k = 0;
- tlp::edge e;
+  std::ostringstream oss;
+  static std::string ret;
+  oss.str("");
+  std::vector<std::string> propertiesNames;
+  std::string propName;
+  forEach(propName, graph->getProperties()) {
+    propertiesNames.push_back(propName);
+  }
+  oss << "[";
+  unsigned int k = 0;
+  tlp::edge e;
 
- forEach(e, graph->getEdges()) {
-   oss << "{\"id\": " << e.id << ", ";
-   for (size_t i = 0 ; i < propertiesNames.size() ; ++i) {
-     if (propertiesNames[i] == "viewMetaGraph") continue;
-     oss << "\"" << propertiesNames[i] << "\": ";
-     std::string strVal = graph->getProperty(propertiesNames[i])->getEdgeStringValue(e);
-     if (graph->getProperty(propertiesNames[i])->getTypename() == "string") {
-       oss << "\"" << strVal << "\"";
-     } else {
-       replaceStringInPlace(strVal, "(", "[");
-       replaceStringInPlace(strVal, ")", "]");
-       oss << strVal;
-     }
-     if (i != propertiesNames.size() - 1) {
-       oss << ", ";
-     }
-   }
-   oss << "}";
-   if (++k != graph->numberOfEdges()) {
-     oss << ",";
-   }
- }
+  forEach(e, graph->getEdges()) {
+    oss << "{\"id\": " << e.id << ", ";
+    for (size_t i = 0 ; i < propertiesNames.size() ; ++i) {
+      if (propertiesNames[i] == "viewMetaGraph") continue;
+      oss << "\"" << propertiesNames[i] << "\": ";
+      std::string strVal = graph->getProperty(propertiesNames[i])->getEdgeStringValue(e);
+      if (graph->getProperty(propertiesNames[i])->getTypename() == "string") {
+        oss << "\"" << strVal << "\"";
+      } else {
+        replaceStringInPlace(strVal, "(", "[");
+        replaceStringInPlace(strVal, ")", "]");
+        oss << strVal;
+      }
+      if (i != propertiesNames.size() - 1) {
+        oss << ", ";
+      }
+    }
+    oss << "}";
+    if (++k != graph->numberOfEdges()) {
+      oss << ",";
+    }
+  }
 
- oss << "]";
- ret = oss.str();
- return ret.c_str();
+  oss << "]";
+  ret = oss.str();
+  return ret.c_str();
 }
 
 const char *EMSCRIPTEN_KEEPALIVE Graph_getAttributesJSON(tlp::Graph *graph) {

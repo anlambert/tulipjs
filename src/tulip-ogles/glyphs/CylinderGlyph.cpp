@@ -16,28 +16,28 @@ static void genCylinderGlyph(const float zBottom, const float zTop, vector<Coord
   vertices.insert(vertices.end(), topCircle.begin(), topCircle.end());
 
   for (unsigned int i = 0 ; i < nbContourPoints - 1 ; ++i) {
-      indices.push_back(0);
-      indices.push_back(i+1);
-      indices.push_back(i+2);
+    indices.push_back(0);
+    indices.push_back(i+1);
+    indices.push_back(i+2);
   }
   indices.push_back(0);
   indices.push_back(nbContourPoints);
   indices.push_back(1);
 
   for (unsigned int i = 0 ; i < nbContourPoints - 1 ; ++i) {
-      indices.push_back(nbContourPoints+1);
-      indices.push_back(nbContourPoints+1+i+1);
-      indices.push_back(nbContourPoints+1+i+2);
+    indices.push_back(nbContourPoints+1);
+    indices.push_back(nbContourPoints+1+i+1);
+    indices.push_back(nbContourPoints+1+i+2);
   }
   indices.push_back(nbContourPoints+1);
   indices.push_back(nbContourPoints+1+nbContourPoints);
   indices.push_back(nbContourPoints+1+1);
 
   for (size_t i = 0 ; i < vertices.size() ; ++i) {
-      tlp::Vec2f st;
-      st[0] = vertices[i][0] + 0.5f;
-      st[1] = vertices[i][1] + 0.5f;
-      texCoords.push_back(st);
+    tlp::Vec2f st;
+    st[0] = vertices[i][0] + 0.5f;
+    st[1] = vertices[i][1] + 0.5f;
+    texCoords.push_back(st);
   }
 
   unsigned startIdx = vertices.size();
@@ -46,13 +46,13 @@ static void genCylinderGlyph(const float zBottom, const float zTop, vector<Coord
   vertices.insert(vertices.end(), topCircle.begin(), topCircle.end());
 
   for (unsigned int i = 0 ; i < nbContourPoints - 1 ; ++i) {
-      indices.push_back(startIdx+i);
-      indices.push_back(startIdx+i+1);
-      indices.push_back(startIdx+i+nbContourPoints);
+    indices.push_back(startIdx+i);
+    indices.push_back(startIdx+i+1);
+    indices.push_back(startIdx+i+nbContourPoints);
 
-      indices.push_back(startIdx+i+1);
-      indices.push_back(startIdx+i+nbContourPoints+1);
-      indices.push_back(startIdx+i+nbContourPoints);
+    indices.push_back(startIdx+i+1);
+    indices.push_back(startIdx+i+nbContourPoints+1);
+    indices.push_back(startIdx+i+nbContourPoints);
   }
 
   indices.push_back(startIdx+nbContourPoints-1);
@@ -64,10 +64,10 @@ static void genCylinderGlyph(const float zBottom, const float zTop, vector<Coord
   indices.push_back(startIdx+2*nbContourPoints-1);
 
   for (size_t i = startIdx ; i < vertices.size() ; ++i) {
-      tlp::Vec2f st;
-      st[0] = vertices[i][0] + 0.5f;
-      st[1] = vertices[i][2] + 0.5f;
-      texCoords.push_back(st);
+    tlp::Vec2f st;
+    st[0] = vertices[i][0] + 0.5f;
+    st[1] = vertices[i][2] + 0.5f;
+    texCoords.push_back(st);
   }
 }
 

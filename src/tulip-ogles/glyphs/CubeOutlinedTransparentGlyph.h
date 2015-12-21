@@ -18,7 +18,7 @@ public:
   const std::vector<unsigned short> &getGlyphOutlineIndices() const;
 
   bool glyph2D() const {
-      return false;
+    return false;
   }
 
 protected:

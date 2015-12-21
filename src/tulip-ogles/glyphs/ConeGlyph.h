@@ -7,19 +7,19 @@ class ConeGlyph : public Glyph {
 
 public:
 
-    ConeGlyph(bool eeGlyph=false);
+  ConeGlyph(bool eeGlyph=false);
 
-    void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
+  void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
 
-    bool glyph2D() const {
-        return false;
-    }
+  bool glyph2D() const {
+    return false;
+  }
 
 protected:
 
-    virtual tlp::Coord getAnchor(const tlp::Coord &vector) const;
+  virtual tlp::Coord getAnchor(const tlp::Coord &vector) const;
 
-    bool _eeGlyph;
+  bool _eeGlyph;
 
 };
 

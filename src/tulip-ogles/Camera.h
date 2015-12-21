@@ -49,13 +49,13 @@ public:
   void setSceneRadius(double sceneRadius,const tlp::BoundingBox sceneBoundingBox=tlp::BoundingBox());
 
   tlp::BoundingBox getSceneBoundingBox() const {
-      return _sceneBoundingBox;
+    return _sceneBoundingBox;
   }
 
   void setViewOrtho(bool viewOrtho);
 
   bool isViewOrtho() const {
-      return _viewOrtho;
+    return _viewOrtho;
   }
 
   tlp::BoundingBox getBoundingBox();
@@ -99,23 +99,23 @@ public:
   void initGl();
 
   const tlp::MatrixGL &modelviewMatrix() const {
-      return _modelviewMatrix;
+    return _modelviewMatrix;
   }
 
   const tlp::MatrixGL &projectionMatrix() const {
-      return _projectionMatrix;
+    return _projectionMatrix;
   }
 
   const tlp::MatrixGL &transformMatrix() const {
-      return _transformMatrix;
+    return _transformMatrix;
   }
 
   const tlp::MatrixGL &transformMatrixBillboard() const {
-      return _transformMatrixBillboard;
+    return _transformMatrixBillboard;
   }
 
   const tlp::MatrixGL &normalMatrix() const {
-      return _normalMatrix;
+    return _normalMatrix;
   }
 
   tlp::Coord screenTo3DWorld(const tlp::Coord &point) ;

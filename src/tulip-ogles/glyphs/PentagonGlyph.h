@@ -7,9 +7,9 @@ class PentagonGlyph : public Glyph {
 
 public:
 
-    PentagonGlyph();
+  PentagonGlyph();
 
-    virtual void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
+  virtual void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
 
 };
 

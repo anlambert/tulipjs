@@ -30,23 +30,23 @@ vector<Coord> computeStar(const Coord &position, const Size &size, unsigned int 
 }
 
 StarGlyph::StarGlyph() {
-    const unsigned int numberOfStarPoints = 5;
-    _vertices = computeStar(Coord(0,0,0),Size(.5,.5,0),numberOfStarPoints);
-    _vertices.insert(_vertices.begin(), Coord(0,0,0));
-    for (unsigned int i = 0 ; i < 2*numberOfStarPoints - 1 ; ++i) {
-        _indices.push_back(0);
-        _indices.push_back(i+1);
-        _indices.push_back(i+2);
-    }
+  const unsigned int numberOfStarPoints = 5;
+  _vertices = computeStar(Coord(0,0,0),Size(.5,.5,0),numberOfStarPoints);
+  _vertices.insert(_vertices.begin(), Coord(0,0,0));
+  for (unsigned int i = 0 ; i < 2*numberOfStarPoints - 1 ; ++i) {
     _indices.push_back(0);
-    _indices.push_back(10);
-    _indices.push_back(1);
-    for (size_t i = 0 ; i < _vertices.size() - 2 ; ++i) {
-      _outlineIndices.push_back(i+1);
-      _outlineIndices.push_back(i+2);
-    }
-    _outlineIndices.push_back(_vertices.size()-1);
-    _outlineIndices.push_back(1);
+    _indices.push_back(i+1);
+    _indices.push_back(i+2);
+  }
+  _indices.push_back(0);
+  _indices.push_back(10);
+  _indices.push_back(1);
+  for (size_t i = 0 ; i < _vertices.size() - 2 ; ++i) {
+    _outlineIndices.push_back(i+1);
+    _outlineIndices.push_back(i+2);
+  }
+  _outlineIndices.push_back(_vertices.size()-1);
+  _outlineIndices.push_back(1);
 }
 
 void StarGlyph::getIncludeBoundingBox(BoundingBox &boundingBox) {

@@ -4,12 +4,12 @@
 using namespace std;
 
 static string defaultVertexShaderSrc =
-#ifdef __EMSCRIPTEN__
+    #ifdef __EMSCRIPTEN__
     "precision highp float;\n"
     "precision highp int;\n"
-#else
+    #else
     "#version 120\n"
-#endif
+    #endif
 
     "uniform mat4 u_modelviewMatrix;"
     "uniform mat4 u_projectionMatrix;"
@@ -59,12 +59,12 @@ static string defaultVertexShaderSrc =
     ;
 
 static string defaultFragmentShaderSrc =
-#ifdef __EMSCRIPTEN__
+    #ifdef __EMSCRIPTEN__
     "precision highp float;\n"
     "precision highp int;\n"
-#else
+    #else
     "#version 120\n"
-#endif
+    #endif
 
     "uniform bool u_textureActivated;"
     "uniform sampler2D u_texture;"
@@ -85,12 +85,12 @@ static string defaultFragmentShaderSrc =
     ;
 
 static string blinnPhongVertexShaderSrc =
-#ifdef __EMSCRIPTEN__
+    #ifdef __EMSCRIPTEN__
     "precision highp float;\n"
     "precision highp int;\n"
-#else
+    #else
     "#version 120\n"
-#endif
+    #endif
 
     "uniform mat4 u_modelviewMatrix;"
     "uniform mat4 u_projectionMatrix;"
@@ -162,12 +162,12 @@ static string blinnPhongVertexShaderSrc =
     ;
 
 static string blinnPhongFragmentShaderSrc =
-#ifdef __EMSCRIPTEN__
+    #ifdef __EMSCRIPTEN__
     "precision highp float;\n"
     "precision highp int;\n"
-#else
+    #else
     "#version 120\n"
-#endif
+    #endif
 
     "uniform bool u_flatShading;"
     "uniform bool u_textureActivated;"
@@ -332,10 +332,10 @@ static string fxaaFunctionsSrc =
     "  mediump vec2 v_rgbSE;"
     "  mediump vec2 v_rgbM;"
 
-      //compute the texture coords
+    //compute the texture coords
     "  texcoords(fragCoord, resolution, v_rgbNW, v_rgbNE, v_rgbSW, v_rgbSE, v_rgbM);"
 
-      //compute FXAA
+    //compute FXAA
     "  return fxaa(tex, fragCoord, resolution, v_rgbNW, v_rgbNE, v_rgbSW, v_rgbSE, v_rgbM);"
     "}"
     ;
@@ -346,32 +346,32 @@ string ShaderManager::_currentCanvasId("");
 
 
 ShaderManager *ShaderManager::getInstance(const string &canvasId) {
-    if (_instances.find(canvasId) == _instances.end()) {
-        _instances[canvasId] = new ShaderManager();
-    }
-    return _instances[canvasId];
+  if (_instances.find(canvasId) == _instances.end()) {
+    _instances[canvasId] = new ShaderManager();
+  }
+  return _instances[canvasId];
 }
 
 ShaderManager *ShaderManager::getInstance() {
-    return getInstance(_currentCanvasId);
+  return getInstance(_currentCanvasId);
 }
 
 ShaderManager::ShaderManager() {
-    _flatRenderingShader = new GlShaderProgram();
-    _flatRenderingShader->addShaderFromSourceCode(GlShader::Vertex, defaultVertexShaderSrc);
-    _flatRenderingShader->addShaderFromSourceCode(GlShader::Fragment, defaultFragmentShaderSrc);
-    _flatRenderingShader->link();
-    if (!_flatRenderingShader->isLinked()) {
-        _flatRenderingShader->printInfoLog();
-    }
+  _flatRenderingShader = new GlShaderProgram();
+  _flatRenderingShader->addShaderFromSourceCode(GlShader::Vertex, defaultVertexShaderSrc);
+  _flatRenderingShader->addShaderFromSourceCode(GlShader::Fragment, defaultFragmentShaderSrc);
+  _flatRenderingShader->link();
+  if (!_flatRenderingShader->isLinked()) {
+    _flatRenderingShader->printInfoLog();
+  }
 
-    _blinnPhongRenderingShader = new GlShaderProgram();
-    _blinnPhongRenderingShader->addShaderFromSourceCode(GlShader::Vertex, blinnPhongVertexShaderSrc);
-    _blinnPhongRenderingShader->addShaderFromSourceCode(GlShader::Fragment, blinnPhongFragmentShaderSrc);
-    _blinnPhongRenderingShader->link();
-    if (!_blinnPhongRenderingShader->isLinked()) {
-        _blinnPhongRenderingShader->printInfoLog();
-    }
+  _blinnPhongRenderingShader = new GlShaderProgram();
+  _blinnPhongRenderingShader->addShaderFromSourceCode(GlShader::Vertex, blinnPhongVertexShaderSrc);
+  _blinnPhongRenderingShader->addShaderFromSourceCode(GlShader::Fragment, blinnPhongFragmentShaderSrc);
+  _blinnPhongRenderingShader->link();
+  if (!_blinnPhongRenderingShader->isLinked()) {
+    _blinnPhongRenderingShader->printInfoLog();
+  }
 }
 
 string ShaderManager::getFXAAFunctionsSource() {

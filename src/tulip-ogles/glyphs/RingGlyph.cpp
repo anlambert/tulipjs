@@ -13,13 +13,13 @@ RingGlyph::RingGlyph() {
   _vertices.insert(_vertices.end(), innerContour.begin(), innerContour.end());
   _vertices.insert(_vertices.end(), outerContour.begin(), outerContour.end());
   for (unsigned int i = 0 ; i < nbContourPoints - 1 ; ++i) {
-      _indices.push_back(i);
-      _indices.push_back(i+1);
-      _indices.push_back(i + nbContourPoints);
+    _indices.push_back(i);
+    _indices.push_back(i+1);
+    _indices.push_back(i + nbContourPoints);
 
-      _indices.push_back(i+1);
-      _indices.push_back(i + nbContourPoints + 1);
-      _indices.push_back(i + nbContourPoints);
+    _indices.push_back(i+1);
+    _indices.push_back(i + nbContourPoints + 1);
+    _indices.push_back(i + nbContourPoints);
   }
 
   _indices.push_back(nbContourPoints-1);

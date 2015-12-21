@@ -7,23 +7,23 @@ class SphereGlyph : public Glyph {
 
 public:
 
-    SphereGlyph();
+  SphereGlyph();
 
-    void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
+  void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
 
-    void getTextBoundingBox(tlp::BoundingBox &boundingBox);
+  void getTextBoundingBox(tlp::BoundingBox &boundingBox);
 
-    bool glyph2D() const {
-        return false;
-    }
+  bool glyph2D() const {
+    return false;
+  }
 
-    const std::vector<tlp::Coord> &getGlyphNormals() {
-        return _vertices;
-    }
+  const std::vector<tlp::Coord> &getGlyphNormals() {
+    return _vertices;
+  }
 
 private :
 
-    void generateSphereData(int space);
+  void generateSphereData(int space);
 };
 
 #endif // SPHEREGLYPH_H

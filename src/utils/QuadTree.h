@@ -184,7 +184,7 @@ public:
     }
   }
 
-//private:
+  //private:
   //======================================
   QuadTreeNode* getChild(int i) {
     if (children[i] == 0) {

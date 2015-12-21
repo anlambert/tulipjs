@@ -22,13 +22,13 @@ class GlBuffer;
 class GlLODCalculator;
 
 namespace tlp {
-  class BooleanProperty;
-  class ColorProperty;
-  class DoubleProperty;
-  class IntegerProperty;
-  class LayoutProperty;
-  class SizeProperty;
-  class StringProperty;
+class BooleanProperty;
+class ColorProperty;
+class DoubleProperty;
+class IntegerProperty;
+class LayoutProperty;
+class SizeProperty;
+class StringProperty;
 }
 
 class GlGraph : public GlEntity {

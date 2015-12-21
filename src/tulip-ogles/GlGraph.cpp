@@ -305,12 +305,12 @@ static string curveVertexShaderSrc =
     ;
 
 static string curveFragmentShaderSrc =
-#ifdef __EMSCRIPTEN__
+    #ifdef __EMSCRIPTEN__
     "precision highp float;\n"
     "precision highp int;\n"
-#else
+    #else
     "#version 120\n"
-#endif
+    #endif
     "uniform sampler2D u_texture0;"
     "uniform sampler2D u_texture1;"
     "uniform bool u_textureActivated;"
@@ -357,12 +357,12 @@ private:
 GlShaderProgram *GlGraph::getEdgeShader(int edgeShape) {
   if (_edgesShaders.find(edgeShape) == _edgesShaders.end()) {
     string preproDefine =
-#ifdef __EMSCRIPTEN__
+    #ifdef __EMSCRIPTEN__
         "precision highp float;\n"
         "precision highp int;\n"
-#else
+    #else
         "#version 120\n"
-#endif
+    #endif
         ;
     if (edgeShape == EdgeShape::Polyline) {
       preproDefine += "#define POLYLINE_VERTEX_SHADER\n";
@@ -1413,26 +1413,26 @@ void GlGraph::renderEdges(const Camera &camera, const std::vector<edge> &edges, 
   }
 
   if (!edgesLinesRenderingIndices.empty()) {
-      _edgeLineRenderingDataBuffer->bind();
-      _edgeLineRenderingIndicesBuffer->bind();
-      _edgeLineRenderingIndicesBuffer->allocate(edgesLinesRenderingIndices);
-      _flatShader->activate();
-      _flatShader->setUniformMat4Float("u_projectionMatrix", camera.projectionMatrix());
-      _flatShader->setUniformMat4Float("u_modelviewMatrix", camera.modelviewMatrix());
-      _flatShader->setUniformBool("u_textureActivated", false);
-      _flatShader->setUniformBool("u_globalColor", false);
-      _flatShader->setUniformBool("u_pointsRendering", false);
-      _flatShader->setVertexAttribPointer("a_position", 3, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(0));
-      if (_graphElementsPickingMode) {
-        _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(11*sizeof(float)));
-      } else if (_renderingParameters.interpolateEdgesColors()) {
-        _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(7*sizeof(float)));
-      } else {
-        _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(3*sizeof(float)));
-      }
-      glLineWidth(2.0);
-      glDrawElements(GL_LINES, edgesLinesRenderingIndices.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
-      _flatShader->desactivate();
+    _edgeLineRenderingDataBuffer->bind();
+    _edgeLineRenderingIndicesBuffer->bind();
+    _edgeLineRenderingIndicesBuffer->allocate(edgesLinesRenderingIndices);
+    _flatShader->activate();
+    _flatShader->setUniformMat4Float("u_projectionMatrix", camera.projectionMatrix());
+    _flatShader->setUniformMat4Float("u_modelviewMatrix", camera.modelviewMatrix());
+    _flatShader->setUniformBool("u_textureActivated", false);
+    _flatShader->setUniformBool("u_globalColor", false);
+    _flatShader->setUniformBool("u_pointsRendering", false);
+    _flatShader->setVertexAttribPointer("a_position", 3, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(0));
+    if (_graphElementsPickingMode) {
+      _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(11*sizeof(float)));
+    } else if (_renderingParameters.interpolateEdgesColors()) {
+      _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(7*sizeof(float)));
+    } else {
+      _flatShader->setVertexAttribPointer("a_color", 4, GL_FLOAT, GL_FALSE, 15 * sizeof(float), BUFFER_OFFSET(3*sizeof(float)));
+    }
+    glLineWidth(2.0);
+    glDrawElements(GL_LINES, edgesLinesRenderingIndices.size(), GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+    _flatShader->desactivate();
 
   }
 

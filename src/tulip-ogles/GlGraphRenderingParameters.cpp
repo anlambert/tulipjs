@@ -284,10 +284,10 @@ tlp::BooleanProperty* GlGraphRenderingParameters::displayFilteringProperty() con
 //====================================================
 void GlGraphRenderingParameters::setBypassLodSystem(bool bypassLodSystem) {
   if (_bypassLodSystem != bypassLodSystem) {
-     _bypassLodSystem = bypassLodSystem;
-     sendEvent(GlGraphRenderingParametersEvent(this, GlGraphRenderingParametersEvent::RENDERING_PARAMETERS_MODIFIED));
+    _bypassLodSystem = bypassLodSystem;
+    sendEvent(GlGraphRenderingParametersEvent(this, GlGraphRenderingParametersEvent::RENDERING_PARAMETERS_MODIFIED));
   }
 }
 bool GlGraphRenderingParameters::bypassLodSystem() const {
-    return _bypassLodSystem;
+  return _bypassLodSystem;
 }

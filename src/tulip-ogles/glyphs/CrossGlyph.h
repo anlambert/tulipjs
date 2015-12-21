@@ -7,13 +7,13 @@ class CrossGlyph : public Glyph {
 
 public:
 
-    CrossGlyph();
+  CrossGlyph();
 
-    void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
+  void getIncludeBoundingBox(tlp::BoundingBox &boundingBox);
 
 protected:
 
-    tlp::Coord getAnchor(const tlp::Coord &vector) const;
+  tlp::Coord getAnchor(const tlp::Coord &vector) const;
 };
 
 #endif // CROSSGLYPH_H

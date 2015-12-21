@@ -186,6 +186,7 @@
       <h3> Nodes </h3>
       <label><input id="display-nodes" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Display </label>
       <label><input id="billboard-nodes" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Billboard </label>
+      <label><input id="glow-nodes" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Glow </label>
       </div>
       <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
       <h3> Edges </h3>
@@ -265,6 +266,8 @@
    renderingParameters.setMinSizeOfLabels(parseInt($('#labels-min-size').prop('value')));
    renderingParameters.setMaxSizeOfLabels(parseInt($('#labels-max-size').prop('value')));
    tulipView.setSubGraphsHullsVisible($('#display-hulls').prop('checked'), true);
+   var viewGlow = graph.getBooleanProperty('viewGlow');
+   viewGlow.setAllNodeValue($('#glow-nodes').prop('checked'));
    tulip.unholdObservers();
  }
 
@@ -273,6 +276,7 @@
    var time = (end - start) / 1000;
    console.log('Time for loading graph: ' + time + 's');
    graph = g;
+   applyRenderingParameters();
    graphProperties = {};
    graph.getProperties().forEach(function(propName) {
      graphProperties[propName] = graph.getProperty(propName);
@@ -427,7 +431,6 @@
      var container = document.getElementById("tulip-view");
      tulipView = tulip.View(container, window.innerWidth-50, window.innerHeight-80);
      renderingParameters = tulipView.getRenderingParameters();
-     applyRenderingParameters();
      loadGraphFromDataFolder("programming_language_network.tlp.gz");
    }
  }
@@ -455,6 +458,7 @@ $( document ).ready(function() {
   $('#scale-nodes-labels').prop('checked', false).checkboxradio('refresh');
   $('#billboard-nodes').prop('checked', false).checkboxradio('refresh');
   $('#billboard-nodes-labels').prop('checked', false).checkboxradio('refresh');
+  $('#glow-nodes').prop('checked', false).checkboxradio('refresh');
 
   $(".rendering-params-modifier").change(function(){
     applyRenderingParameters();

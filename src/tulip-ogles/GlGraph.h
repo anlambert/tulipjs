@@ -93,6 +93,7 @@ private :
   void getEdgeExtremityData(tlp::edge e, bool srcGlyph, tlp::Coord &position, tlp::Size &size, tlp::Vec4f &rotationAxisAndAngle);
 
   void renderNodes(const Camera &camera, const Light &light);
+  void renderNodesGlow(const std::vector<tlp::node> &nodes, const Camera &camera, const Light &light);
   void renderMetaNodes(const std::vector<tlp::node> &metaNodes, const Camera &camera, const Light &light);
   void renderPointsNodesAndEdges(const Camera &camera, const std::vector<tlp::node> &pointsNodes, const std::vector<tlp::edge> &pointsEdges);
 
@@ -130,6 +131,7 @@ private :
   tlp::SizeProperty *_viewSrcAnchorSize;
   tlp::SizeProperty *_viewTgtAnchorSize;
   tlp::StringProperty *_viewFontAwesomeIcon;
+  tlp::BooleanProperty *_viewGlow;
 
   GlShaderProgram *_flatShader;
 

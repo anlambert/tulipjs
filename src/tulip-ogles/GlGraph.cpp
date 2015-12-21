@@ -510,6 +510,7 @@ void GlGraph::initGraphProperties() {
   _viewSrcAnchorSize = _graph->getProperty<SizeProperty>("viewSrcAnchorSize");
   _viewTgtAnchorSize = _graph->getProperty<SizeProperty>("viewTgtAnchorSize");
   _viewFontAwesomeIcon = _graph->getProperty<StringProperty>("viewFontAwesomeIcon");
+  _viewGlow = _graph->getProperty<BooleanProperty>("viewGlow");
 }
 
 static const string viewPropPrefix = "view";
@@ -700,6 +701,7 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
   vector<node> nodesLabelsToRender;
   vector<node> selectedNodes;
   vector<node> pointsNodes;
+  vector<node> glyphsNodes;
   vector<node> metaNodes;
   selectedNodes.reserve(_graph->numberOfNodes());
   pointsNodes.reserve(_graph->numberOfNodes());
@@ -716,6 +718,7 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
       continue;
     }
     nodesLabelsToRender.push_back(nodesLodResult[i].n);
+    glyphsNodes.push_back(nodesLodResult[i].n);
     int glyphId = _viewShape->getNodeValue(nodesLodResult[i].n);
     if (glyphId == tlp::NodeShape::FontAwesomeIcon) {
       std::string icon = _viewFontAwesomeIcon->getNodeValue(nodesLodResult[i].n);
@@ -848,6 +851,8 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
     }
 
   }
+
+  renderNodesGlow(glyphsNodes, camera, light);
 
   if (_renderingParameters.displayNodes()) {
     renderNodes(camera, light);
@@ -1024,6 +1029,52 @@ void GlGraph::renderNodes(const Camera &camera, const Light &light) {
   }
 
 }
+
+void GlGraph::renderNodesGlow(const vector<node> &nodes, const Camera &camera, const Light &light) {
+
+  if (_graphElementsPickingMode) {
+    return;
+  }
+
+  glStencilMask(0x00);
+  glDepthMask(GL_FALSE);
+
+  vector<Coord> centers;
+  vector<Size> sizes;
+  vector<Color> colors;
+  vector<string> textures;
+
+  centers.reserve(_graph->numberOfNodes());
+  sizes.reserve(_graph->numberOfNodes());
+  colors.reserve(_graph->numberOfNodes());
+  textures.reserve(_graph->numberOfNodes());
+
+
+  for (size_t i = 0 ; i < nodes.size() ; ++i) {
+    node n = nodes[i];
+    if (!_viewGlow->getNodeValue(n)) continue;
+    centers.push_back(_viewLayout->getNodeValue(n));
+    sizes.push_back(_viewSize->getNodeValue(n) * 2.f);
+    Color nodeColor = _viewColor->getNodeValue(n);
+    nodeColor.setA(128);
+    colors.push_back(nodeColor);
+    textures.push_back("resources/radialGradientTexture.png");
+    TextureManager::instance()->addTextureInAtlasFromFile("resources/radialGradientTexture.png");
+  }
+
+
+  if (_renderingParameters.billboardedNodes()) {
+    GlyphsRenderer::instance()->setBillboardMode(true);
+  }
+  GlyphsRenderer::instance()->renderGlyphs(camera, light, NodeShape::Square, centers, sizes, colors, textures);
+  GlyphsRenderer::instance()->setBillboardMode(false);
+
+
+  glStencilMask(0xFF);
+  glDepthMask(GL_TRUE);
+
+}
+
 
 void GlGraph::renderPointsNodesAndEdges(const Camera &camera, const std::vector<tlp::node> &pointsNodes, const std::vector<tlp::edge> &pointsEdges) {
 
@@ -1802,8 +1853,10 @@ void GlGraph::treatEvent(const tlp::Event &message) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE) {
       notifyModified();
     }
-  } else if (pEvt && pEvt->getProperty() == _viewBorderColor) {
+  } else if (pEvt && pEvt->getProperty() == _viewGlow &&
+             (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE)) {
 
+    notifyModified();
   } else if (rpEvt && (rpEvt->getType() == GlGraphRenderingParametersEvent::DISPLAY_EDGES_EXTREMITIES_TOGGLED)) {
     forEach(e, _graph->getEdges()) {
       _edgesToUpdate.insert(e);

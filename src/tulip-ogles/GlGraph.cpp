@@ -1853,7 +1853,7 @@ void GlGraph::treatEvent(const tlp::Event &message) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE) {
       notifyModified();
     }
-  } else if (pEvt && pEvt->getProperty() == _viewGlow &&
+  } else if (pEvt && (pEvt->getProperty() == _viewGlow || pEvt->getProperty() == _viewFontAwesomeIcon) &&
              (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE)) {
 
     notifyModified();

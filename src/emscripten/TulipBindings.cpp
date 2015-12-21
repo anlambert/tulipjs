@@ -556,49 +556,49 @@ void EMSCRIPTEN_KEEPALIVE createGraphProperty(tlp::Graph *graph, const char *typ
   tlp::PropertyInterface *prop = NULL;
   std::string typeStr = type;
   if (typeStr == "bool") {
-    prop = graph->getProperty<tlp::BooleanProperty>(name);
+    prop = graph->getLocalProperty<tlp::BooleanProperty>(name);
   }
   if (typeStr == "color") {
-    prop = graph->getProperty<tlp::ColorProperty>(name);
+    prop = graph->getLocalProperty<tlp::ColorProperty>(name);
   }
   if (typeStr == "double") {
-    prop = graph->getProperty<tlp::DoubleProperty>(name);
+    prop = graph->getLocalProperty<tlp::DoubleProperty>(name);
   }
   if (typeStr == "string") {
-    prop = graph->getProperty<tlp::StringProperty>(name);
+    prop = graph->getLocalProperty<tlp::StringProperty>(name);
   }
   if (typeStr == "int") {
-    prop = graph->getProperty<tlp::IntegerProperty>(name);
+    prop = graph->getLocalProperty<tlp::IntegerProperty>(name);
   }
   if (typeStr == "layout") {
-    prop = graph->getProperty<tlp::LayoutProperty>(name);
+    prop = graph->getLocalProperty<tlp::LayoutProperty>(name);
   }
   if (typeStr == "size") {
-    prop = graph->getProperty<tlp::SizeProperty>(name);
+    prop = graph->getLocalProperty<tlp::SizeProperty>(name);
   }
   if (typeStr == "graph") {
-    prop = graph->getProperty<tlp::GraphProperty>(name);
+    prop = graph->getLocalProperty<tlp::GraphProperty>(name);
   }
   if (typeStr == "vector<color>") {
-    prop = graph->getProperty<tlp::ColorVectorProperty>(name);
+    prop = graph->getLocalProperty<tlp::ColorVectorProperty>(name);
   }
   if (typeStr == "vector<double>") {
-    prop = graph->getProperty<tlp::DoubleVectorProperty>(name);
+    prop = graph->getLocalProperty<tlp::DoubleVectorProperty>(name);
   }
   if (typeStr == "vector<string>") {
-    prop = graph->getProperty<tlp::StringVectorProperty>(name);
+    prop = graph->getLocalProperty<tlp::StringVectorProperty>(name);
   }
   if (typeStr == "vector<int>") {
-    prop = graph->getProperty<tlp::IntegerVectorProperty>(name);
+    prop = graph->getLocalProperty<tlp::IntegerVectorProperty>(name);
   }
   if (typeStr == "vector<coord>") {
-    prop = graph->getProperty<tlp::CoordVectorProperty>(name);
+    prop = graph->getLocalProperty<tlp::CoordVectorProperty>(name);
   }
   if (typeStr == "vector<bool>") {
-    prop = graph->getProperty<tlp::BooleanVectorProperty>(name);
+    prop = graph->getLocalProperty<tlp::BooleanVectorProperty>(name);
   }
   if (typeStr == "vector<size>") {
-    prop = graph->getProperty<tlp::SizeVectorProperty>(name);
+    prop = graph->getLocalProperty<tlp::SizeVectorProperty>(name);
   }
   if (prop) {
     prop->setAllNodeStringValue(nodeDefaultStringValue);
@@ -673,7 +673,81 @@ void EMSCRIPTEN_KEEPALIVE parseGraphAttributesJSONData(tlp::Graph *graph, const 
   gajdp.parse(reinterpret_cast<const unsigned char *>(attributes), strlen(attributes));
 }
 
-tlp::Graph * EMSCRIPTEN_KEEPALIVE addSubGraph(tlp::Graph *graph, unsigned int parentGraphId, unsigned int subGraphId, const char *nodesIds, const char *edgesIds, const char *attributes) {
+class SubGraphPropertiesJSONDataParser : public YajlParseFacade {
+
+public:
+
+  SubGraphPropertiesJSONDataParser(tlp::Graph *subgraph) :
+    _subgraph(subgraph), _treeLevel(-1), _parsingNodesPropertyValues(false), _parsingEdgesPropertyValues(false) {}
+
+  void parseStartMap() {
+    ++_treeLevel;
+  }
+
+  void parseEndMap() {
+    --_treeLevel;
+    if (_treeLevel == 1 && _parsingNodesPropertyValues) {
+      _parsingNodesPropertyValues = false;
+    }
+    if (_treeLevel == 1 && _parsingEdgesPropertyValues) {
+      _parsingEdgesPropertyValues = false;
+    }
+  }
+
+  void parseMapKey(const std::string& value) {
+    _lastMapKey = value;
+    if (_treeLevel == 0) {
+      _currentPropertyName = value;
+    }
+    if (_treeLevel == 1 && value == "nodesValues") {
+      _parsingNodesPropertyValues = true;
+    }
+    if (_treeLevel == 1 && value == "edgesValues") {
+      _parsingEdgesPropertyValues = true;
+    }
+    if (_treeLevel == 2) {
+      _elementId = strtoul(value.c_str(), NULL, 10);
+    }
+
+  }
+
+  void parseString(const std::string& value) {
+    if (_lastMapKey == "type" && _treeLevel == 1) {
+      _currentPropertyType = value;
+    }
+    if (_lastMapKey == "nodeDefault" && _treeLevel == 1) {
+      _currentPropertyNodeDefaultValue = value;
+    }
+    if (_lastMapKey == "edgeDefault" && _treeLevel == 1) {
+      _currentPropertyNodeDefaultValue = value;
+      createGraphProperty(_subgraph, _currentPropertyType.c_str(), _currentPropertyName.c_str(), _currentPropertyNodeDefaultValue.c_str(), _currentPropertyEdgeDefaultValue.c_str());
+    }
+    if (_treeLevel == 2 && _parsingNodesPropertyValues) {
+      setNodePropertyStringValue(_subgraph, _elementId, _currentPropertyName.c_str(), value.c_str());
+    }
+    if (_treeLevel == 2 && _parsingEdgesPropertyValues) {
+      setEdgePropertyStringValue(_subgraph, _elementId, _currentPropertyName.c_str(), value.c_str());
+    }
+  }
+
+
+private:
+
+  tlp::Graph *_subgraph;
+  int _treeLevel;
+  std::string _lastMapKey;
+  std::string _currentPropertyName;
+  std::string _currentPropertyType;
+  std::string _currentPropertyNodeDefaultValue;
+  std::string _currentPropertyEdgeDefaultValue;
+  bool _parsingNodesPropertyValues;
+  bool _parsingEdgesPropertyValues;
+  unsigned int _elementId;
+
+};
+
+tlp::Graph * EMSCRIPTEN_KEEPALIVE addSubGraph(tlp::Graph *graph, unsigned int parentGraphId, unsigned int subGraphId,
+                                              const char *nodesIds, const char *edgesIds, const char *attributes, const char *properties) {
 
   tlp::Graph *parentGraph = graph;
   if (parentGraph->getId() != parentGraphId) {
@@ -703,6 +777,9 @@ tlp::Graph * EMSCRIPTEN_KEEPALIVE addSubGraph(tlp::Graph *graph, unsigned int pa
 
   parseGraphAttributesJSONData(sg, attributes);
 
+  SubGraphPropertiesJSONDataParser sgpjdp(sg);
+  sgpjdp.parse(reinterpret_cast<const unsigned char *>(properties), strlen(properties));
+
   return sg;
 
 }
@@ -724,7 +801,7 @@ public:
       if (_lastMapKey != "viewMetaGraph") {
         setNodePropertyStringValue(_graph, _nodeId, _lastMapKey, value);
       } else if (value != "") {
-        metaNodeValue[tlp::node(_nodeId)] = atoi(value.c_str());
+        metaNodeValue[tlp::node(_nodeId)] = strtoul(value.c_str(), NULL, 10);
       }
     }
   }

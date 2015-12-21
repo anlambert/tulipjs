@@ -3962,6 +3962,7 @@ if (workerMode) {
       }
       subGraphDataObj.edgesIds += ")";
       subGraphDataObj.attributes = JSON.stringify(subGraphObj.attributes);
+      subGraphDataObj.properties = JSON.stringify(subGraphObj.properties);
       subGraphsData[graphId].push(subGraphDataObj);
       prepareSubGraphsData(graphId, subGraphObj);
     }
@@ -4209,7 +4210,7 @@ if (workerMode) {
   var _fillMetaGraphInfos = Module.cwrap('fillMetaGraphInfos', null, ['number']);
   var _parseGraphAttributesJSONData =  Module.cwrap('parseGraphAttributesJSONData', null, ['number', 'string']);
   var _createGraphProperty = Module.cwrap('createGraphProperty', null, ['number', 'string', 'string', 'string', 'string']);
-  var _addSubGraph = Module.cwrap('addSubGraph', 'number', ['number', 'number', 'number', 'string', 'string', 'string']);
+  var _addSubGraph = Module.cwrap('addSubGraph', 'number', ['number', 'number', 'number', 'string', 'string', 'string', 'string']);
 
   var _parseNodesJSONData = Module.cwrap('parseNodesJSONData', null, ['number', 'string']);
   var _parseEdgesJSONData = Module.cwrap('parseEdgesJSONData', null, ['number', 'string']);
@@ -4426,7 +4427,7 @@ if (workerMode) {
       case 'addSubGraph':
         setTimeout(function() {
           var subGraphData = event.data.subGraphData;
-          _addSubGraph(graphId, subGraphData.parentGraphId, subGraphData.subGraphId, subGraphData.nodesIds, subGraphData.edgesIds, subGraphData.attributes);
+          _addSubGraph(graphId, subGraphData.parentGraphId, subGraphData.subGraphId, subGraphData.nodesIds, subGraphData.edgesIds, subGraphData.attributes, subGraphData.properties);
           if (!tulip.coreBuild && canvasId) {
             var sgId = _graphIdToWrapper[graphId].numberOfDescendantGraphs();
             var percent = ((graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + sgId) / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;

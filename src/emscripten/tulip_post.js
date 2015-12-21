@@ -2888,6 +2888,7 @@ tulip.unholdObservers = function() {
 
 tulip.NodeShape = {
   Circle : 14,
+  ChristmasTree : 28,
   Cone : 3,
   Cross : 8,
   Cube : 0,

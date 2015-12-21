@@ -1,4 +1,5 @@
 #include <tulip/TulipViewSettings.h>
+#include <tulip/TulipFontAwesome.h>
 
 #include "GlyphsManager.h"
 #include "SquareGlyph.h"
@@ -58,6 +59,8 @@ static Glyph* createGlyph(int glyphId) {
     return new HalfCylinderGlyph();
   } else if (glyphId == tlp::NodeShape::Cone) {
     return new ConeGlyph();
+  } else if (glyphId == tlp::NodeShape::ChristmasTree) {
+    return new FontAwesomeGlyph(tlp::TulipFontAwesome::getFontAwesomeIconCodePoint(tlp::TulipFontAwesome::Tree));
   } else if (glyphId >= 0xf000) {
     return new FontAwesomeGlyph(glyphId);
     //  } else if (glyphId == 100) {

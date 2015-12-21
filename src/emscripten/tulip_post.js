@@ -3997,7 +3997,7 @@ if (workerMode) {
                          graphId : graphId,
                          numberOfNodes : graphObject[graphId].nodesNumber,
                          numberOfEdges : graphObject[graphId].edgesNumber,
-                         numberOfSubgraphs : graphObject[graphId].subgraphs.length,
+                         numberOfSubgraphs : subGraphsData[graphId].length,
                          graphAttributes : JSON.stringify(graphObject[graphId].attributes)
                        });
       var propertiesData = {};
@@ -4126,7 +4126,7 @@ if (workerMode) {
                            algoSucceed : algoSucceed,
                            numberOfNodes : graphObject[data.graphId].nodesNumber,
                            numberOfEdges : graphObject[data.graphId].edgesNumber,
-                           numberOfSubgraphs : graphObject[data.graphId].subgraphs.length});
+                           numberOfSubgraphs : subGraphsData[data.graphId].length});
         sendGraphData(data.graphId);
       });
       break;
@@ -4144,7 +4144,7 @@ if (workerMode) {
                            algoSucceed : algoSucceed,
                            numberOfNodes : graphObject[data.graphId].nodesNumber,
                            numberOfEdges : graphObject[data.graphId].edgesNumber,
-                           numberOfSubgraphs : graphObject[data.graphId].subgraphs.length});
+                           numberOfSubgraphs : subGraphsData[data.graphId].length});
         sendGraphData(data.graphId);
       });
       break;
@@ -4168,7 +4168,7 @@ if (workerMode) {
                            algoSucceed : scriptSucceed,
                            numberOfNodes : graphObject[data.graphId].nodesNumber,
                            numberOfEdges : graphObject[data.graphId].edgesNumber,
-                           numberOfSubgraphs : graphObject[data.graphId].subgraphs.length});
+                           numberOfSubgraphs : subGraphsData[data.graphId].length});
         sendGraphData(data.graphId);
       });
       break;

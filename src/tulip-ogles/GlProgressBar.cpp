@@ -1,7 +1,9 @@
-#include "NanoVGIncludes.h"
 #include "GlProgressBar.h"
-#include "GlRect2D.h"
-#include "LabelsRenderer.h"
+
+#include "NanoVGManager.h"
+#include "Camera.h"
+
+#include <sstream>
 
 using namespace std;
 using namespace tlp;
@@ -19,6 +21,36 @@ static void strokeRoundedRect(NVGcontext* vg, float x, float y, float w, float h
   nvgStrokeWidth(vg, strokeWidth);
   nvgStrokeColor(vg, c);
   nvgStroke(vg);
+}
+
+static void renderText(NVGcontext *vg, const std::string &text, const tlp::BoundingBox &renderingBox, const tlp::Color &textColor) {
+  nvgFontFace(vg, "DejaVuSans");
+  float bounds[4];
+  nvgTextBounds(vg, renderingBox.center()[0], renderingBox.center()[1], text.c_str(), NULL, bounds);
+
+  float textAspectRatio = (bounds[2] - bounds[0]) / (bounds[3] - bounds[1]);
+
+  float ratio = renderingBox.width() / renderingBox.height();
+
+  float scaleX = 0;
+  float scaleY = 0;
+
+  if (ratio > textAspectRatio) {
+    scaleX = renderingBox.height() * textAspectRatio;
+    scaleY = renderingBox.height();
+  } else {
+    scaleX = renderingBox.width();
+    scaleY = renderingBox.width() / textAspectRatio;
+  }
+
+  tlp::BoundingBox renderingBoxScaled;
+  renderingBoxScaled[0] = Coord(renderingBox.center()[0] - scaleX / 2.f, renderingBox.center()[1] - scaleY / 2.f);
+  renderingBoxScaled[1] = Coord(renderingBox.center()[0] + scaleX / 2.f, renderingBox.center()[1] + scaleY / 2.f);
+
+  nvgFontSize(vg, renderingBoxScaled.height());
+  nvgTextAlign(vg,NVG_ALIGN_CENTER|NVG_ALIGN_MIDDLE);
+  nvgFillColor(vg, nvgRGBA(textColor[0],textColor[1],textColor[2],textColor[3]));
+  nvgText(vg, renderingBoxScaled.center()[0], renderingBoxScaled.center()[1], text.c_str(), NULL);
 }
 
 static const float undefinedProgressBarPercentWidth = 0.1f;
@@ -51,8 +83,7 @@ void GlProgressBar::draw(const Camera &camera, const Light &, bool) {
   tlp::Coord tr = _center + tlp::Coord(pbWidth, pbHeight)/2.f;
 
   tlp::Vec4i viewport = camera.getViewport();
-  NVGcontext* vg = NULL;
-  vg = nvgCreateGLES2(NVG_ANTIALIAS);
+  NVGcontext* vg = NanoVGManager::instance()->getNanoVGContext();
 
   nvgBeginFrame(vg, viewport[2], viewport[3], 1.0);
 
@@ -97,25 +128,25 @@ void GlProgressBar::draw(const Camera &camera, const Light &, bool) {
     fillRoundedRect(vg, x+1, y+1, w-2, h-2, cornerRadius-1, bg);
   }
 
-  nvgEndFrame(vg);
-
-  nvgDeleteGLES2(vg);
-
   tlp::BoundingBox textBB;
   textBB[0] = bl + tlp::Coord(0, pbHeight*0.3f);
   textBB[1] = tr - tlp::Coord(0, pbHeight*0.3f);
 
   if (percent >= 0) {
-    LabelsRenderer::instance()->renderOneLabel(camera, oss.str(), textBB, textColor);
+    renderText(vg, oss.str(), textBB, textColor);
   }
 
   pbWidth = 0.9f * pbWidth;
   float pbHeight2 = 0.9f * pbHeight;
   bl = _center - tlp::Coord(pbWidth, pbHeight2)/2.f;
   tr = _center + tlp::Coord(pbWidth, pbHeight2)/2.f;
-  textBB[0] = bl + tlp::Coord(0, pbHeight);
-  textBB[1] = tr + tlp::Coord(0, pbHeight);
-  LabelsRenderer::instance()->renderOneLabel(camera, _comment, textBB, textColor);
+  textBB[0] = bl - tlp::Coord(0, pbHeight);
+  textBB[1] = tr - tlp::Coord(0, pbHeight);
+
+  renderText(vg, _comment, textBB, textColor);
+
+  nvgEndFrame(vg);
+
 }
 
 void GlProgressBar::setPercent(int percent) {

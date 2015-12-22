@@ -27,6 +27,7 @@
 #include <tulip/PropertyTypes.h>
 #include <tulip/ColorScale.h>
 
+#include "NanoVGManager.h"
 #include "GlGraph.h"
 #include "Camera.h"
 #include "Light.h"
@@ -45,6 +46,7 @@
 #include "GlProgressBar.h"
 #include "GlGraphRenderingParameters.h"
 #include "Interactors.h"
+
 
 #include <sys/stat.h>
 #include <emscripten/emscripten.h>
@@ -484,6 +486,7 @@ void EMSCRIPTEN_KEEPALIVE setCurrentCanvas(const char *canvasId) {
     TextureManager::setCurrentCanvasId(canvasId);
     LabelsRenderer::setCurrentCanvasId(canvasId);
     GlyphsRenderer::setCurrentCanvasId(canvasId);
+    NanoVGManager::setCurrentCanvasId(canvasId);
     if (currentCanvasInteractor[canvasId]) {
       currentCanvasInteractor[canvasId]->setScene(glScene[canvasId]);
     }

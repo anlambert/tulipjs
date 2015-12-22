@@ -432,6 +432,7 @@ void EMSCRIPTEN_KEEPALIVE initCanvas(const char *canvasId, int width, int height
     emscripten_webgl_init_context_attributes(&webGlContextAttributes);
     webGlContextAttributes.stencil = true;
     webGlContextAttributes.alpha = false;
+    webGlContextAttributes.preserveDrawingBuffer = true;
 
     webGlContextHandle[canvasId] = emscripten_webgl_create_context(canvasId, &webGlContextAttributes);
 

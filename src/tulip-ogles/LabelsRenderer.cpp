@@ -193,7 +193,7 @@ LabelsRenderer::LabelsRenderer() :
     _labelsShader->printInfoLog();
   }
 
-  loadFontFromFile("resources/DejaVuSans.ttf");
+  setFontFile("resources/DejaVuSans.ttf");
 
 }
 
@@ -209,6 +209,13 @@ const size_t fontPointSizeDF = fontPointSize * 2;
 
 void LabelsRenderer::initFont() {
   if (fontInit() || _fontFile.empty()) return;
+#ifdef __EMSCRIPTEN__
+  if (!fileExists(_fontFile.c_str()) && fontFileRequested.find(_fontFile) == fontFileRequested.end()) {
+    fontFileRequested.insert(_fontFile);
+    emscripten_async_wget(_fontFile.c_str(), _fontFile.c_str(), fontFileLoaded, fontFileLoadError);
+    return;
+  }
+#endif
   if (fileExists(_fontFile.c_str())) {
     _textureAtlas = new TextureAtlas(1024, 1024, 1);
     _textureFont = new TextureFont(_textureAtlas, fontPointSize, _fontFile);
@@ -231,21 +238,6 @@ void LabelsRenderer::initFont() {
   } else {
     std::cout << _fontFile << " is not loaded" << std::endl;
   }
-}
-
-void LabelsRenderer::loadFontFromFile(const string &fontFile) {
-  if (fontInit()) return;
-  _fontFile = fontFile;
-#ifdef __EMSCRIPTEN__
-  if (fileExists(fontFile.c_str())) {
-    initFont();
-  } else if (fontFileRequested.find(fontFile) == fontFileRequested.end()) {
-    fontFileRequested.insert(fontFile);
-    emscripten_async_wget(_fontFile.c_str(), _fontFile.c_str(), fontFileLoaded, fontFileLoadError);
-  }
-#else
-  initFont();
-#endif
 }
 
 bool LabelsRenderer::fontInit() const {

@@ -38,7 +38,9 @@ public :
 
   ~LabelsRenderer();
 
-  void loadFontFromFile(const std::string &fontFile);
+  void setFontFile(const std::string &fontFile) {
+    _fontFile = fontFile;
+  }
 
   void initFont();
 

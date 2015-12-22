@@ -4350,7 +4350,7 @@ if (workerMode) {
     var _selectEdges = Module.cwrap('selectEdges', 'number', ['string', 'number', 'number', 'number', 'number']);
     var _getSelectedEdges = Module.cwrap('getSelectedEdges', null, ['number']);
 
-    var _setCanvas2dModified = Module.cwrap('setCanvas2dModified', null, ['string']);
+//    var _setCanvas2dModified = Module.cwrap('setCanvas2dModified', null, ['string']);
 
     var _nextCanvasId = 0;
     var _graphIdToView = {};
@@ -4617,13 +4617,13 @@ if (workerMode) {
         newObject.graph = null;
         _canvasIdToView[newObject.canvasId] = newObject;
 
-        newObject.canvas2d = document.createElement("canvas");
-        newObject.canvas2dContext = newObject.canvas2d.getContext('2d');
-        newObject.canvas2d.id = newObject.canvasId + '-2d';
-        newObject.canvas2d.style.display = 'none';
-        newObject.canvas2d.width = width;
-        newObject.canvas2d.height = height;
-        newObject.container.appendChild(newObject.canvas2d);
+//        newObject.canvas2d = document.createElement("canvas");
+//        newObject.canvas2dContext = newObject.canvas2d.getContext('2d');
+//        newObject.canvas2d.id = newObject.canvasId + '-2d';
+//        newObject.canvas2d.style.display = 'none';
+//        newObject.canvas2d.width = width;
+//        newObject.canvas2d.height = height;
+//        newObject.container.appendChild(newObject.canvas2d);
 
         newObject.graphDrawingChanged = false;
 
@@ -4705,14 +4705,14 @@ if (workerMode) {
 
     tulip.View.prototype.fullScreen = function() {
       _fullScreen(this.canvasId);
-      this.canvas2d.width = this.canvas.width;
-      this.canvas2d.height = this.canvas.height;
+//      this.canvas2d.width = this.canvas.width;
+//      this.canvas2d.height = this.canvas.height;
     };
 
     tulip.View.prototype.resize = function(width, height) {
       _resizeCanvas(this.canvasId, width, height, this.sizeRelativeToContainer);
-      this.canvas2d.width = this.canvas.width;
-      this.canvas2d.height = this.canvas.height;
+//      this.canvas2d.width = this.canvas.width;
+//      this.canvas2d.height = this.canvas.height;
     };
 
     tulip.View.prototype.getWidth = function() {

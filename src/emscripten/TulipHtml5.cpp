@@ -59,8 +59,8 @@ static std::map<std::string, GlProgressBar *> glProgressBar;
 static std::map<std::string, tlp::Graph *> graph;
 static std::map<tlp::Graph *, std::string> graphToCanvas;
 static std::map<std::string, GlSceneInteractor*> currentCanvasInteractor;
-static std::map<std::string, unsigned int> canvas2dTexture;
-static std::map<std::string, bool> canvas2dModified;
+//static std::map<std::string, unsigned int> canvas2dTexture;
+//static std::map<std::string, bool> canvas2dModified;
 
 static std::map<std::string, GlLayer *> hullsLayer;
 static std::map<std::string, std::map<unsigned int, GlConcavePolygon *> > subgraphsHulls;
@@ -79,42 +79,42 @@ bool canXhrOnUrl(const char *url);
 void loadImageFromUrl(const char *url, void (*imageLoadedFunc)(const char *, const unsigned char *, unsigned int, unsigned int), void (*errorFunc)(unsigned int, void *, int));
 void createGlTextureFromCanvas(const char *canvasId);
 
-void drawCanvas2d(const char *canvasId) {
-  std::string canvas2dId = canvasId;
-  canvas2dId += "-2d";
-  if (canvas2dTexture.find(canvasId) == canvas2dTexture.end()) {
-    unsigned int texId = 0;
-    glGenTextures(1, &texId);
-    glBindTexture(GL_TEXTURE_2D, texId);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    canvas2dTexture[canvasId] = texId;
-    TextureManager::instance()->addExternalTexture(canvas2dId, texId);
-  }
+//void drawCanvas2d(const char *canvasId) {
+//  std::string canvas2dId = canvasId;
+//  canvas2dId += "-2d";
+//  if (canvas2dTexture.find(canvasId) == canvas2dTexture.end()) {
+//    unsigned int texId = 0;
+//    glGenTextures(1, &texId);
+//    glBindTexture(GL_TEXTURE_2D, texId);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    glBindTexture(GL_TEXTURE_2D, 0);
+//    canvas2dTexture[canvasId] = texId;
+//    TextureManager::instance()->addExternalTexture(canvas2dId, texId);
+//  }
 
-  if (canvas2dModified[canvasId]) {
-    glBindTexture(GL_TEXTURE_2D, canvas2dTexture[canvasId]);
-    createGlTextureFromCanvas(canvas2dId.c_str());
-    glBindTexture(GL_TEXTURE_2D, 0);
-    canvas2dModified[canvasId] = false;
-  }
+//  if (canvas2dModified[canvasId]) {
+//    glBindTexture(GL_TEXTURE_2D, canvas2dTexture[canvasId]);
+//    createGlTextureFromCanvas(canvas2dId.c_str());
+//    glBindTexture(GL_TEXTURE_2D, 0);
+//    canvas2dModified[canvasId] = false;
+//  }
 
-  Camera camera2d(false);
-  tlp::Vec4i viewport = glScene[canvasId]->getViewport();
-  camera2d.setViewport(viewport);
-  camera2d.initGl();
-  tlp::Vec2f bl(0, 0);
-  tlp::Vec2f tr(viewport[2], viewport[3]);
-  GlRect2D rect(bl, tr, 0, tlp::Color::White);
-  rect.setTexture(canvas2dId);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  rect.draw(camera2d);
-  glDisable(GL_BLEND);
-}
+//  Camera camera2d(false);
+//  tlp::Vec4i viewport = glScene[canvasId]->getViewport();
+//  camera2d.setViewport(viewport);
+//  camera2d.initGl();
+//  tlp::Vec2f bl(0, 0);
+//  tlp::Vec2f tr(viewport[2], viewport[3]);
+//  GlRect2D rect(bl, tr, 0, tlp::Color::White);
+//  rect.setTexture(canvas2dId);
+//  glEnable(GL_BLEND);
+//  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//  rect.draw(camera2d);
+//  glDisable(GL_BLEND);
+//}
 
 void EMSCRIPTEN_KEEPALIVE updateGlScene(const char *canvasId) {
   std::string curCanvasBak = currentCanvasId;
@@ -424,7 +424,7 @@ void EMSCRIPTEN_KEEPALIVE initCanvas(const char *canvasId, int width, int height
     emscripten_run_script(oss.str().c_str());
 
     canvasIds.push_back(currentCanvasId);
-    canvas2dModified[currentCanvasId] = true;
+//    canvas2dModified[currentCanvasId] = true;
 
     resizeWebGLCanvas(canvasIds.back().c_str(), width, height, sizeRelativeToContainer);
 
@@ -504,9 +504,9 @@ void EMSCRIPTEN_KEEPALIVE setCurrentCanvas(const char *canvasId) {
 
 }
 
-void EMSCRIPTEN_KEEPALIVE setCanvas2dModified(const char *canvasId) {
-  canvas2dModified[canvasId] = true;
-}
+//void EMSCRIPTEN_KEEPALIVE setCanvas2dModified(const char *canvasId) {
+//  canvas2dModified[canvasId] = true;
+//}
 
 const char * EMSCRIPTEN_KEEPALIVE getCurrentCanvas() {
   return currentCanvasId.c_str();

@@ -81,7 +81,7 @@ static std::string fisheyeFragmentShaderSrc =
     ;
 
 FisheyeInteractor::FisheyeInteractor(GlScene *scene) :
-  _curX(-1), _curY(-1), _dragStarted(false), _znpInteractor(NULL),
+  _curX(-1), _curY(-1), _znpInteractor(NULL),
   _fisheyeShader(NULL), _buffer(NULL), _fbo(NULL), _fisheyeRadius(200), _fisheyeHeight(0.5), _maxTextureSize(0) {
   _glScene = scene;
   _znpInteractor = new ZoomAndPanInteractor(scene);
@@ -154,7 +154,7 @@ bool FisheyeInteractor::mouseCallback(const MouseButton &button, const MouseButt
   }
 }
 
-bool FisheyeInteractor::mouseMoveCallback(int x, int y, const int &modifiers) {
+bool FisheyeInteractor::mouseMoveCallback(int x, int y, const int & /*modifiers*/) {
   if (!_glScene) return false;
   _curX = x;
   _curY = y;

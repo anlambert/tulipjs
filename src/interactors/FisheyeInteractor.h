@@ -31,9 +31,7 @@ public:
 
 private:
 
-  MouseButton _mouseButton;
   int _curX, _curY;
-  bool _dragStarted;
 
   ZoomAndPanInteractor *_znpInteractor;
 

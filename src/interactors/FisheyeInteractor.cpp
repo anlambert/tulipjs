@@ -10,6 +10,9 @@
 #include "GlLayer.h"
 #include "ZoomAndPanAnimation.h"
 #include "ShaderManager.h"
+#include "GlScene.h"
+#include "GlGraph.h"
+
 
 static std::string fisheyeVertexShaderSrc =
     #ifdef __EMSCRIPTEN__
@@ -143,7 +146,7 @@ bool FisheyeInteractor::mouseCallback(const MouseButton &button, const MouseButt
       } else {
         _fisheyeHeight -= 0.05;
       }
-      _fisheyeHeight = clamp(_fisheyeHeight, 0.0, 0.9);
+      _fisheyeHeight = clamp(_fisheyeHeight, 0.2, 0.9);
       _glScene->requestDraw();
       return true;
     } else {
@@ -169,7 +172,7 @@ void FisheyeInteractor::draw() {
 
   tlp::Vec4i viewport = _glScene->getViewport();
 
-  int factor = 1;
+  float factor = 1;
   if (_fisheyeHeight > 0.1) {
     factor = _fisheyeHeight * 10;
   }
@@ -191,12 +194,28 @@ void FisheyeInteractor::draw() {
   bb.expand(bbMin);
   bb.expand(bbMax);
 
+  std::set<GlEntity*> glEntities = _glScene->getEntities();
+  for (std::set<GlEntity*>::iterator it = glEntities.begin() ; it != glEntities.end() ; ++it) {
+    GlGraph *glGraph = dynamic_cast<GlGraph*>(*it);
+    if (glGraph) {
+      glGraph->getRenderingParameters().setMinSizeOfLabels(glGraph->getRenderingParameters().minSizeOfLabels()+factor*2);
+    }
+  }
+
   _fbo->bind();
   _glScene->setViewport(0, 0, fboSize, fboSize);
   adjustViewToBoundingBox(camera, bb);
   glDisable(GL_SCISSOR_TEST);
   _glScene->draw();
   _fbo->release();
+
+  glEntities = _glScene->getEntities();
+  for (std::set<GlEntity*>::iterator it = glEntities.begin() ; it != glEntities.end() ; ++it) {
+    GlGraph *glGraph = dynamic_cast<GlGraph*>(*it);
+    if (glGraph) {
+      glGraph->getRenderingParameters().setMinSizeOfLabels(glGraph->getRenderingParameters().minSizeOfLabels()-factor*2);
+    }
+  }
 
   _glScene->setViewport(viewport);
   *camera = camBackup;

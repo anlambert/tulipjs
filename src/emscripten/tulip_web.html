@@ -384,14 +384,16 @@
       }
    }
 
+   tulip.holdObservers();
    graphProperties.viewRotation.setAllNodeValue(0);
 
    graphProperties.viewShape.setAllNodeValue(tulip.NodeShape.FontAwesomeIcon);
    graph.getNodes().forEach(function(n) {
-       var idx = (Math.random() * iconNames.length) | 0;
-       graphProperties.viewFontAwesomeIcon.setNodeValue(n, iconNames[idx]);
-       graphProperties.viewColor.setNodeValue(n, genRandomColor());
+     var idx = (Math.random() * iconNames.length) | 0;
+     graphProperties.viewFontAwesomeIcon.setNodeValue(n, iconNames[idx]);
+     graphProperties.viewColor.setNodeValue(n, genRandomColor());
    });
+   tulip.unholdObservers();
  }
 
  function handleFileSelect(evt) {

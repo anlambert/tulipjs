@@ -4318,7 +4318,7 @@ if (workerMode) {
   var _parseNodesJSONData = Module.cwrap('parseNodesJSONData', null, ['number', 'string']);
   var _parseEdgesJSONData = Module.cwrap('parseEdgesJSONData', null, ['number', 'string']);
 
-  if (!tulip.coreBuild) {
+  if (tulip.vizFeatures) {
 
     var _centerScene = Module.cwrap('centerScene', null, ['string']);
     var _startGraphViewData = Module.cwrap('startGraphViewData', null, ['string']);
@@ -4399,7 +4399,7 @@ if (workerMode) {
       if ('graphId' in event.data) {
         graphId = event.data.graphId;
       }
-      if (!tulip.coreBuild) {
+      if (tulip.vizFeatures) {
         if (graphId) {
           view = _graphIdToView[graphId];
           canvasId = view.canvasId;
@@ -4413,7 +4413,7 @@ if (workerMode) {
         console.log(event.data.text);
         break;
       case 'progressValue':
-        if (!tulip.coreBuild && canvasId) {
+        if (tulip.vizFeatures && canvasId) {
           _stopBusyAnimation(canvasId);
           _setProgressBarPercent(canvasId, event.data.value);
           if (event.data.value >= 0) {
@@ -4424,7 +4424,7 @@ if (workerMode) {
         }
         break;
       case 'progressComment':
-        if (!tulip.coreBuild && canvasId) {
+        if (tulip.vizFeatures && canvasId) {
           _setProgressBarComment(canvasId, event.data.comment);
         }
         break;
@@ -4432,7 +4432,7 @@ if (workerMode) {
         setTimeout(function() {
           tulip.holdObservers();
           _parseGraphAttributesJSONData(_graphIdToWrapper[graphId].cppPointer, event.data.graphAttributes);
-          if (!tulip.coreBuild && canvasId) {
+          if (tulip.vizFeatures && canvasId) {
             _stopBusyAnimation(canvasId);
             _setCurrentCanvas(canvasId);
             _setProgressBarComment(canvasId, "Initializing graph visualization ...");
@@ -4447,7 +4447,7 @@ if (workerMode) {
         _fillMetaGraphInfos(_graphIdToWrapper[graphId].cppPointer);
         tulip.unholdObservers();
         setTimeout(function() {
-          if (!tulip.coreBuild && canvasId) {
+          if (tulip.vizFeatures && canvasId) {
             _setProgressBarComment(canvasId, "Finalizing graph rendering data ...");
             _draw();
             _setCurrentCanvas(canvasId);
@@ -4464,7 +4464,7 @@ if (workerMode) {
       case 'startGraphUpdate':
         tulip.holdObservers();
         _algorithmSucceed[graphId] = event.data.algoSucceed;
-        if (!tulip.coreBuild && canvasId) {
+        if (tulip.vizFeatures && canvasId) {
           _stopBusyAnimation(canvasId);
           setTimeout(function() {
             _setCurrentCanvas(canvasId);
@@ -4481,7 +4481,7 @@ if (workerMode) {
           _algorithmFinishedCallback[graphId](_algorithmSucceed[graphId], _graphIdToWrapper[graphId]);
         }
 
-        if (!tulip.coreBuild && canvasId) {
+        if (tulip.vizFeatures && canvasId) {
           setTimeout(function() {
             _setCurrentCanvas(canvasId);
             _endGraphViewUpdate(canvasId);
@@ -4503,7 +4503,7 @@ if (workerMode) {
         setTimeout(function() {
           var nodesJson =  event.data.nodesJson;
           _parseNodesJSONData(graphId, nodesJson);
-          if (!tulip.coreBuild && canvasId) {
+          if (tulip.vizFeatures && canvasId) {
             var nodeId = event.data.lastNodeId;
             var percent = (nodeId / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
             _setProgressBarComment(canvasId, "Importing graph nodes data (" + nodeId + " / " + graphData[canvasId].numberOfNodes + ") ...");
@@ -4519,7 +4519,7 @@ if (workerMode) {
           if (edgesJson) {
             _parseEdgesJSONData(graphId, edgesJson);
           }
-          if (!tulip.coreBuild && canvasId) {
+          if (tulip.vizFeatures && canvasId) {
             var edgeId = event.data.lastEdgeId;
             var percent = ((graphData[canvasId].numberOfNodes + edgeId) / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
             _setProgressBarComment(canvasId, "Importing graph edges data (" + edgeId + " / " + graphData[canvasId].numberOfEdges + ") ...");
@@ -4533,7 +4533,7 @@ if (workerMode) {
         setTimeout(function() {
           var subGraphData = event.data.subGraphData;
           _addSubGraph(graphId, subGraphData.parentGraphId, subGraphData.subGraphId, subGraphData.nodesIds, subGraphData.edgesIds, subGraphData.attributes, subGraphData.properties);
-          if (!tulip.coreBuild && canvasId) {
+          if (tulip.vizFeatures && canvasId) {
             var sgId = _graphIdToWrapper[graphId].numberOfDescendantGraphs();
             var percent = ((graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + sgId) / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
             _setProgressBarComment(canvasId, "Importing subgraphs data (" + sgId + " / " + graphData[canvasId].numberOfSubgraphs + ") ...");
@@ -4575,7 +4575,7 @@ if (workerMode) {
 
   // ==================================================================================================================
 
-  if (!tulip.coreBuild) {
+  if (tulip.vizFeatures) {
 
     var _setCanvasGraph = Module.cwrap('setCanvasGraph', null, ['string', 'number']);
     var _getViewRenderingParameters = Module.cwrap('getViewRenderingParameters', 'number', ['string']);
@@ -5092,7 +5092,7 @@ if (workerMode) {
         algoParameters = {};
       }
       var graphId = this.getCppPointer();
-      if (!tulip.coreBuild && graphId in _graphIdToView) {
+      if (tulip.vizFeatures && graphId in _graphIdToView) {
         var canvasId = _graphIdToView[graphId].canvasId;
         _setGraphRenderingDataReady(canvasId, false);
         _startBusyAnimation(canvasId);
@@ -5128,7 +5128,7 @@ if (workerMode) {
         _algorithmFinishedCallback[graphId] = algoFinishedCallback;
       }
       _tulipWorker.postMessage(messageData);
-      if (!tulip.coreBuild && graphId in _graphIdToView) {
+      if (tulip.vizFeatures && graphId in _graphIdToView) {
         var canvasId = _graphIdToView[graphId].canvasId;
         _setGraphRenderingDataReady(canvasId, false);
         _startBusyAnimation(canvasId);
@@ -5178,7 +5178,7 @@ if (workerMode) {
       if (scriptExecutedCallback) {
         _algorithmFinishedCallback[graphId] = scriptExecutedCallback;
       }
-      if (!tulip.coreBuild && graphId in _graphIdToView) {
+      if (tulip.vizFeatures && graphId in _graphIdToView) {
         var canvasId = _graphIdToView[graphId].canvasId;
         _setGraphRenderingDataReady(canvasId, false);
         _startBusyAnimation(canvasId);

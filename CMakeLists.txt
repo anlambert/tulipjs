@@ -249,7 +249,7 @@ EM_LINK_POST_JS(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)
 EM_LINK_JS_LIBRARY(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_library.js)
 
 ADD_CUSTOM_COMMAND(TARGET tulip-node.js POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -DTULIP_CORE_BUILD=ON -DJSFILE=tulip-node.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
+                   COMMAND ${CMAKE_COMMAND} -DTULIP_VIZ_FEATURES=OFF -DJSFILE=tulip-node.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 ADD_EXECUTABLE(tulip.js ${TULIPJS_SRCS})
@@ -263,7 +263,21 @@ EM_LINK_POST_JS(tulip.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)
 EM_LINK_JS_LIBRARY(tulip.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_library.js)
 
 ADD_CUSTOM_COMMAND(TARGET tulip.js POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -DTULIP_CORE_BUILD=OFF -DJSFILE=tulip.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
+                   COMMAND ${CMAKE_COMMAND} -DTULIP_VIZ_FEATURES=ON -DJSFILE=tulip.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
+                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+ADD_EXECUTABLE(tulip-lite.js ${TULIPJS_SRCS})
+
+TARGET_LINK_LIBRARIES(tulip-lite.js ${TULIP_CORE_LIBRARY})
+
+SET_TARGET_PROPERTIES(tulip-lite.js PROPERTIES LINK_FLAGS "-s STB_IMAGE=1 --bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
+
+EM_LINK_PRE_JS(tulip-lite.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_pre.js)
+EM_LINK_POST_JS(tulip-lite.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)
+EM_LINK_JS_LIBRARY(tulip-lite.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_library.js)
+
+ADD_CUSTOM_COMMAND(TARGET tulip-lite.js POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -DTULIP_VIZ_FEATURES=ON -DJSFILE=tulip-lite.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_webix.html DESTINATION ${CMAKE_INSTALL_PREFIX})
@@ -272,21 +286,23 @@ INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_web_multi.html DESTINATIO
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_js_test.html DESTINATION ${CMAKE_INSTALL_PREFIX})
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_graph_traversals.html DESTINATION ${CMAKE_INSTALL_PREFIX})
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/FileSaver.js DESTINATION ${CMAKE_INSTALL_PREFIX})
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/spinner.css DESTINATION ${CMAKE_INSTALL_PREFIX})
 INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/data DESTINATION ${CMAKE_INSTALL_PREFIX})
 INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/images DESTINATION ${CMAKE_INSTALL_PREFIX})
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/images/favicon.ico DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 IF(BUILD_TYPE MATCHES "release")
-  INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/tulip.js DESTINATION ${CMAKE_SOURCE_DIR}/dist)
   INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tulip.js DESTINATION ${CMAKE_SOURCE_DIR}/dist)
   INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tulip.js.mem DESTINATION ${CMAKE_SOURCE_DIR}/dist)
   INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tulip.data DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tulip-lite.js DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tulip-lite.js.mem DESTINATION ${CMAKE_SOURCE_DIR}/dist)
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tulip-lite.data DESTINATION ${CMAKE_SOURCE_DIR}/dist)
   INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tulip-node.js DESTINATION ${CMAKE_SOURCE_DIR}/dist)
 
   SET(DEMO_WEBSITE_LOCAL_REPO ${CMAKE_SOURCE_DIR}/../anlambert.github.io)
 
   IF(EXISTS ${DEMO_WEBSITE_LOCAL_REPO})
-    INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/tulip.js DESTINATION ${DEMO_WEBSITE_LOCAL_REPO}/tulipjs/)
     INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tulip.js DESTINATION ${DEMO_WEBSITE_LOCAL_REPO}/tulipjs/)
     INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tulip.js.mem DESTINATION ${DEMO_WEBSITE_LOCAL_REPO}/tulipjs/)
     INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/tulip.data DESTINATION ${DEMO_WEBSITE_LOCAL_REPO}/tulipjs/)
@@ -297,6 +313,7 @@ IF(BUILD_TYPE MATCHES "release")
     INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_js_test.html DESTINATION ${DEMO_WEBSITE_LOCAL_REPO}/tulipjs/)
     INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_graph_traversals.html DESTINATION ${DEMO_WEBSITE_LOCAL_REPO}/tulipjs/)
     INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/FileSaver.js DESTINATION ${DEMO_WEBSITE_LOCAL_REPO}/tulipjs/)
+    INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/spinner.css DESTINATION ${DEMO_WEBSITE_LOCAL_REPO}/tulipjs/)
     INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/data DESTINATION ${DEMO_WEBSITE_LOCAL_REPO}/tulipjs/)
     INSTALL(DIRECTORY ${CMAKE_SOURCE_DIR}/images DESTINATION ${DEMO_WEBSITE_LOCAL_REPO}/tulipjs/)
     INSTALL(FILES ${CMAKE_SOURCE_DIR}/images/favicon.ico DESTINATION ${DEMO_WEBSITE_LOCAL_REPO}/tulipjs/)

@@ -33,7 +33,10 @@ static std::string fisheyeVertexShaderSrc =
     "}"
     ;
 
-static std::string fisheyeFragmentShaderSrc =
+static std::string fisheyeFragmentShaderSrc() {
+
+  return
+
     #ifdef __EMSCRIPTEN__
     "precision highp float;\n"
     "precision highp int;\n"
@@ -77,8 +80,8 @@ static std::string fisheyeFragmentShaderSrc =
     "    gl_FragColor = texture2D(u_texture, pos / u_resolution);"
     "  }"
     "}"
-
     ;
+}
 
 FisheyeInteractor::FisheyeInteractor(GlScene *scene) :
   _curX(-1), _curY(-1), _znpInteractor(NULL),
@@ -90,7 +93,7 @@ FisheyeInteractor::FisheyeInteractor(GlScene *scene) :
 void FisheyeInteractor::activate() {
   _fisheyeShader = new GlShaderProgram();
   _fisheyeShader->addShaderFromSourceCode(GlShader::Vertex, fisheyeVertexShaderSrc);
-  _fisheyeShader->addShaderFromSourceCode(GlShader::Fragment, fisheyeFragmentShaderSrc);
+  _fisheyeShader->addShaderFromSourceCode(GlShader::Fragment, fisheyeFragmentShaderSrc());
   _fisheyeShader->link();
   _fisheyeShader->printInfoLog();
   _buffer = new GlBuffer(GlBuffer::VertexBuffer);

@@ -12,8 +12,8 @@ function getScriptName() {
 
   var scriptName
   , source
-  , lastStackFrameRegex = new RegExp(/.+\/(.*?):\d+:\d+.*$/)
-  , currentStackFrameRegex = new RegExp('getScriptName \\(.+\\/(.*?):\\d+:\\d+.*\\)');
+  , lastStackFrameRegex = new RegExp(/.+\/(.*?):\d+[:]*\d*.*$/)
+  , currentStackFrameRegex = new RegExp('getScriptName \\(.+\\/(.*?):\\d+[:]*\\d*.*\\)');
 
   try {
     var x = v43x76fr.name;
@@ -55,8 +55,8 @@ function getScriptPath() {
 
   var scriptPath
   , source
-  , lastStackFrameRegex = new RegExp('.*' + origin + '(.*)' + scriptName + '.*:\\d+:\\d+.*$')
-  , currentStackFrameRegex = new RegExp('getScriptPath \\(.*' + origin + '(.*)' + scriptName + '.*:\\d+:\\d+.*\\)');
+  , lastStackFrameRegex = new RegExp('.*' + origin + '(.*)' + scriptName + '.*:\\d+[:]*\\d*.*$')
+  , currentStackFrameRegex = new RegExp('getScriptPath \\(.*' + origin + '(.*)' + scriptName + '.*:\\d+[:]*\\d*.*\\)');
 
   try {
     var x = v43x76fr.name;

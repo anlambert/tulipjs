@@ -173,6 +173,7 @@
         <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
           <h3> Miscellaneous algorithms </h3>
           <div data-role = "controlgroup" data-type = "vertical" >
+            <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Fast Overlap Removal' algorithm" onclick ="computeFastOverlapRemoval()" > Fast Overlap Removal </a>
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Auto-Sizing' algorithm" onclick ="computeAutoSizing()" > Auto-Sizing </a>
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Edge bundling' algorithm" onclick ="computeEdgeBundling()" > Edge bundling </a>
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="applyGraphScript()" > Magic script </a>
@@ -305,6 +306,11 @@
   function computeLayout(layoutAlgoName) {
     start = new Date().getTime();
     graph.applyLayoutAlgorithmInWorker(layoutAlgoName, graphProperties.viewLayout, {}, algoFinishedCallback);
+  }
+
+  function computeFastOverlapRemoval() {
+    start = new Date().getTime();
+    graph.applyLayoutAlgorithmInWorker('Fast Overlap Removal', graphProperties.viewLayout, {'x border' : 2.0, 'y border' : 2.0}, algoFinishedCallback);
   }
 
   function computeAutoSizing() {

@@ -37,82 +37,14 @@
 #include <cassert>
 #include <climits>
 #include <iostream>
+#include <cmath>
 
 #include <GL/glew.h>
 
-#include <edtaa3func.h>
-
 #include "TextureAtlas.h"
 
-// make_distance_map function from demo-distance-field.c in freetype-gl
-static unsigned char *
-make_distance_map(unsigned char *img,
-                  unsigned int width, unsigned int height) {
-
-  short *xdist = new short[width * height];
-  short *ydist = new short[width * height];
-  double *gx  = new double[width * height]();
-  double *gy  = new double[width * height]();
-  double *data = new double[width * height]();
-  double *outside = new double[width * height]();
-  double *inside = new double[width * height]();
-  unsigned int i;
-
-  // Convert img into double (data)
-  double img_min = 255, img_max = -255;
-  for (i = 0 ; i < width * height ; ++i) {
-    double v = img[i];
-    data[i] = v;
-    if (v > img_max) img_max = v;
-    if (v < img_min) img_min = v;
-  }
-
-  // Rescale image levels between 0 and 1
-  for (i=0; i < width * height ; ++i) {
-    data[i] = (img[i]-img_min)/img_max;
-  }
-
-  // Compute outside = edtaa3(bitmap); % Transform background (0's)
-  computegradient(data, width, height, gx, gy);
-  edtaa3(data, gx, gy, width, height, xdist, ydist, outside);
-  for (i = 0; i < width * height ; ++i)
-    if( outside[i] < 0)
-      outside[i] = 0.0;
-
-  // Compute inside = edtaa3(1-bitmap); % Transform foreground (1's)
-  memset(gx, 0, sizeof(double)*width*height);
-  memset(gy, 0, sizeof(double)*width*height);
-  for (i = 0 ; i < width*height ; ++i)
-    data[i] = 1 - data[i];
-  computegradient(data, width, height, gx, gy);
-  edtaa3(data, gx, gy, width, height, xdist, ydist, inside);
-  for (i = 0 ; i < width * height ; ++i)
-    if(inside[i] < 0)
-      inside[i] = 0.0;
-
-  // distmap = outside - inside; % Bipolar distance field
-  unsigned char *out = new unsigned char[width * height];
-  for (i = 0 ; i < width * height ; ++i) {
-    outside[i] -= inside[i];
-    outside[i] = 128+outside[i]*16;
-    if( outside[i] < 0 ) outside[i] = 0;
-    if( outside[i] > 255 ) outside[i] = 255;
-    out[i] = 255 - static_cast<unsigned char>(outside[i]);
-    //out[i] = (unsigned char) outside[i];
-  }
-
-  delete [] xdist;
-  delete [] ydist;
-  delete [] gx;
-  delete [] gy;
-  delete [] data;
-  delete [] outside;
-  delete [] inside;
-  return out;
-}
-
-TextureAtlas::TextureAtlas( const size_t width, const size_t height, const size_t depth, bool useDistanceField) :
-  _width(width), _height(height), _depth(depth), _used(0), _id(0), _data(NULL), _needUpload(false), _useDistanceField(useDistanceField) {
+TextureAtlas::TextureAtlas( const size_t width, const size_t height, const size_t depth) :
+  _width(width), _height(height), _depth(depth), _used(0), _id(0), _data(NULL), _needUpload(false) {
 
   assert((depth == 1) || (depth == 3) || (depth == 4));
 
@@ -305,19 +237,13 @@ TextureAtlas::upload() {
   }
 
   unsigned char *data = _data;
-  if (_useDistanceField) {
-    data = make_distance_map(_data, _width, _height);
-  }
 
   glBindTexture(GL_TEXTURE_2D, _id);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  if (_useDistanceField) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  } else {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  }
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
 
   if(_depth == 4) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height,
@@ -330,11 +256,8 @@ TextureAtlas::upload() {
                  0, GL_ALPHA, GL_UNSIGNED_BYTE, data);
   }
 
-  if (_useDistanceField) {
-    delete [] data;
-  } else {
-    glGenerateMipmap(GL_TEXTURE_2D);
-  }
+  glGenerateMipmap(GL_TEXTURE_2D);
+
 
   _needUpload = false;
 }

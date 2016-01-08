@@ -30,7 +30,6 @@ std::map<std::string, NanoVGManager *> NanoVGManager::_instances;
 
 NanoVGManager::NanoVGManager() {
   _vg = nvgCreateGLES2(NVG_ANTIALIAS);
-  nvgCreateFont(_vg, "DejaVuSans", "resources/DejaVuSans.ttf");
 }
 
 NanoVGManager::~NanoVGManager() {

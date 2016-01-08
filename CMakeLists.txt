@@ -155,14 +155,11 @@ SET(GRAPH_RENDERER_SRCS
     src/tulip-ogles/glyphs/GlyphsManager.cpp
     src/tulip-ogles/glyphs/GlyphsRenderer.cpp
     src/tulip-ogles/TextureManager.cpp
+    src/tulip-ogles/TextureAtlas.cpp
     src/tulip-ogles/GlGraphRenderingParameters.cpp
     src/tulip-ogles/GlProgressBar.cpp
     src/tulip-ogles/NanoVGManager.cpp
     src/utils/TimeMeasurer.cpp
-    thirdparty/freetype-gl++/TextureAtlas.cpp
-    thirdparty/freetype-gl++/TextureFont.cpp
-    thirdparty/freetype-gl++/FTLibrary.cpp
-    thirdparty/freetype-gl++/edtaa3func.cpp
     thirdparty/clipper/cpp/clipper.cpp
     thirdparty/libtess2/Source/bucketalloc.c
     thirdparty/libtess2/Source/dict.c
@@ -171,6 +168,7 @@ SET(GRAPH_RENDERER_SRCS
     thirdparty/libtess2/Source/priorityq.c
     thirdparty/libtess2/Source/sweep.c
     thirdparty/libtess2/Source/tess.c
+    thirdparty/ftgl/FTLibrary.cpp
     thirdparty/ftgl/FTVectoriser.cpp
     thirdparty/ftgl/FTContour.cpp
     thirdparty/ftgl/FTPoint.cpp

@@ -103,7 +103,7 @@ public:
    * @param   depth   bit depth of the atlas
    *
    */
-  TextureAtlas(const size_t width, const size_t height, const size_t depth, bool useDistanceField=false);
+  TextureAtlas(const size_t width, const size_t height, const size_t depth);
 
   /**
    *  Deletes a texture atlas.
@@ -210,8 +210,6 @@ private:
   unsigned char * _data;
 
   bool _needUpload;
-
-  bool _useDistanceField;
 
 };
 

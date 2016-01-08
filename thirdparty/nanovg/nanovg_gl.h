@@ -1070,7 +1070,9 @@ static void glnvg__renderFlush(void* uptr)
 	int i;
 
 	if (gl->ncalls > 0) {
-
+		// Save origin GL Shader
+		GLint oldProgram;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &oldProgram);
 		// Setup require GL state.
 		glUseProgram(gl->shader.prog);
 
@@ -1140,6 +1142,7 @@ static void glnvg__renderFlush(void* uptr)
 		glDisable(GL_CULL_FACE);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glUseProgram(0);
+		glUseProgram(oldProgram);
 		glnvg__bindTexture(gl, 0);
 	}
 

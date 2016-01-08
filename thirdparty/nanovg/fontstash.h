@@ -239,11 +239,8 @@ int fons__tt_getGlyphKernAdvance(FONSttFontImpl *font, int glyph1, int glyph2)
 #else
 
 #define STB_TRUETYPE_IMPLEMENTATION
-static void* fons__tmpalloc(size_t size, void* up);
-static void fons__tmpfree(void* ptr, void* up);
-#define STBTT_malloc(x,u)    fons__tmpalloc(x,u)
-#define STBTT_free(x,u)      fons__tmpfree(x,u)
 #include "stb_truetype.h"
+#include <stdlib.h>
 
 struct FONSttFontImpl {
 	stbtt_fontinfo font;
@@ -420,31 +417,6 @@ struct FONScontext
 	void (*handleError)(void* uptr, int error, int val);
 	void* errorUptr;
 };
-
-static void* fons__tmpalloc(size_t size, void* up)
-{
-	unsigned char* ptr;
-	FONScontext* stash = (FONScontext*)up;
-
-	// 16-byte align the returned pointer
-	size = (size + 0xf) & ~0xf;
-
-	if (stash->nscratch+(int)size > FONS_SCRATCH_BUF_SIZE) {
-		if (stash->handleError)
-			stash->handleError(stash->errorUptr, FONS_SCRATCH_FULL, stash->nscratch+(int)size);
-		return NULL;
-	}
-	ptr = stash->scratch + stash->nscratch;
-	stash->nscratch += (int)size;
-	return ptr;
-}
-
-static void fons__tmpfree(void* ptr, void* up)
-{
-	(void)ptr;
-	(void)up;
-	// empty
-}
 
 // Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 // See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.

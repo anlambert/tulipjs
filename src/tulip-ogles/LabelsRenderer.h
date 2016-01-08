@@ -1,8 +1,6 @@
 #ifndef LABELSRENDERER_H
 #define LABELSRENDERER_H
 
-#include <GL/gl.h>
-
 #include <tulip/BoundingBox.h>
 #include <tulip/Graph.h>
 #include <tulip/StringProperty.h>
@@ -11,18 +9,10 @@
 #include <tulip/ColorProperty.h>
 #include <tulip/BooleanProperty.h>
 
-#include <TextureAtlas.h>
-#include <TextureFont.h>
-
 #include <vector>
 #include <map>
 
 #include "Camera.h"
-
-typedef tlp::Vector<float,  5, double> Vec5f;
-
-class GlShaderProgram;
-class GlBuffer;
 
 class LabelsRenderer {
 
@@ -40,11 +30,14 @@ public :
 
   void setFontFile(const std::string &fontFile) {
     _fontFile = fontFile;
+    _fontHandle = -1;
   }
 
   void initFont();
 
-  bool fontInit() const;
+  bool fontInit() const {
+    return _fontHandle != -1;
+  }
 
   std::string fontFile() const {
     return _fontFile;
@@ -90,25 +83,15 @@ private :
 
   LabelsRenderer();
 
-  float getTextAspectRatio(TextureFont *textureFont, const std::string &text);
-
-  void getLabelRenderingData(TextureFont *textureFont, const std::string &text, std::pair<std::vector<Vec5f>, std::vector<unsigned short> > &renderingData);
-
-  void getLineRenderingDataUnscaled(TextureFont *textureFont, const std::wstring &line, std::vector<Vec5f> &renderingData, std::vector<unsigned short> &indices, tlp::BoundingBox &lineBB, float penY=0);
+  float getTextAspectRatio(const std::string &text);
 
   tlp::BoundingBox getLabelRenderingBoxScaled(const tlp::BoundingBox &renderingBox, float textAspectRatio);
 
   std::string _fontFile;
-
-  GlShaderProgram *_labelsShader;
-  TextureFont*  _textureFont;
-  TextureFont*  _textureFontDF;
-  TextureAtlas* _textureAtlas;
-  TextureAtlas* _textureAtlasDF;
+  int _fontHandle;
 
   std::map<tlp::Graph *, std::vector<tlp::node> > _labelsToRender;
   std::map<tlp::Graph *, std::map<tlp::node, float> > _nodeLabelAspectRatio;
-  std::map<tlp::Graph *, std::map<tlp::node, float> > _nodeLabelAspectRatioDF;
   std::map<tlp::Graph *, std::map<tlp::node, unsigned int> > _nodeLabelNbLines;
 
   bool _labelsScaled;

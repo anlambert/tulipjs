@@ -4350,8 +4350,6 @@ if (workerMode) {
     var _selectEdges = Module.cwrap('selectEdges', 'number', ['string', 'number', 'number', 'number', 'number']);
     var _getSelectedEdges = Module.cwrap('getSelectedEdges', null, ['number']);
 
-//    var _setCanvas2dModified = Module.cwrap('setCanvas2dModified', null, ['string']);
-
     var _nextCanvasId = 0;
     var _graphIdToView = {};
     var _canvasIdToView = {};
@@ -4617,14 +4615,6 @@ if (workerMode) {
         newObject.graph = null;
         _canvasIdToView[newObject.canvasId] = newObject;
 
-//        newObject.canvas2d = document.createElement("canvas");
-//        newObject.canvas2dContext = newObject.canvas2d.getContext('2d');
-//        newObject.canvas2d.id = newObject.canvasId + '-2d';
-//        newObject.canvas2d.style.display = 'none';
-//        newObject.canvas2d.width = width;
-//        newObject.canvas2d.height = height;
-//        newObject.container.appendChild(newObject.canvas2d);
-
         newObject.graphDrawingChanged = false;
 
       }
@@ -4641,51 +4631,6 @@ if (workerMode) {
         _updateGlScene(view.canvasId);
       });
     };
-
-//    function CanvasContextProxy(context, canvasId) {
-
-//      var that = this;
-
-//      this.beginPath = function() {
-//        _setCanvas2dModified(canvasId);
-//        context.beginPath();
-//      };
-
-//      this.arc = function() {
-//        _setCanvas2dModified(canvasId);
-//        context.arc(this.arguments);
-//      }
-
-//      this.fillStyle = context.fillStyle;
-
-//      this.fill = function() {
-//        _setCanvas2dModified(canvasId);
-//        context.fillStyle = this.fillStyle;
-//        context.fill();
-//      };
-
-//      this.lineWidth = context.lineWidth;
-//      this.strokeStyle = context.strokeStyle;
-
-//      this.stroke = function() {
-//        _setCanvas2dModified(canvasId);
-//        context.stroke();
-//      }
-
-//    }
-
-//    tulip.View.prototype.getCanvas2dContext = function() {
-//      if (this.canvas2d.width != this.canvas.width) {
-//        this.canvas2d.width = this.canvas.width;
-//        this.canvas2d.height = this.canvas.height;
-//      }
-//      return new CanvasContextProxy(this.canvas2dContext, this.canvasId);
-//    };
-
-//    tulip.View.prototype.clearCanvas2d = function() {
-//      _setCanvas2dModified(this.canvasId);
-//      this.canvas2dContext.clearRect(0, 0, this.canvas2d.width, this.canvas2d.height);
-//    }
 
     tulip.View.prototype.setCurrent = function() {
       _setCurrentCanvas(this.canvasId);
@@ -4705,14 +4650,10 @@ if (workerMode) {
 
     tulip.View.prototype.fullScreen = function() {
       _fullScreen(this.canvasId);
-//      this.canvas2d.width = this.canvas.width;
-//      this.canvas2d.height = this.canvas.height;
     };
 
     tulip.View.prototype.resize = function(width, height) {
       _resizeCanvas(this.canvasId, width, height, this.sizeRelativeToContainer);
-//      this.canvas2d.width = this.canvas.width;
-//      this.canvas2d.height = this.canvas.height;
     };
 
     tulip.View.prototype.getWidth = function() {

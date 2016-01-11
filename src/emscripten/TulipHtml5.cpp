@@ -121,6 +121,7 @@ void createGlTextureFromCanvas(const char *canvasId);
 void EMSCRIPTEN_KEEPALIVE updateGlScene(const char *canvasId) {
   std::string curCanvasBak = currentCanvasId;
   setCurrentCanvas(canvasId);
+
   glScene[canvasId]->draw();
 
   if (curCanvasBak == canvasId && currentCanvasInteractor[canvasId]) {
@@ -132,6 +133,7 @@ void EMSCRIPTEN_KEEPALIVE updateGlScene(const char *canvasId) {
   if (GlShaderProgram::getCurrentActiveShader()) {
     GlShaderProgram::getCurrentActiveShader()->desactivate();
   }
+
   checkOpenGLError();
   setCurrentCanvas(curCanvasBak.c_str());
 }
@@ -755,6 +757,30 @@ void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setMaxSizeOfLabels(GlGraphR
 
 float EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_maxSizeOfLabels(GlGraphRenderingParameters *glgrp) {
   return glgrp->maxSizeOfLabels();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setElementsOrdered(GlGraphRenderingParameters *glgrp, const bool state) {
+  glgrp->setElementsOrdered(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_elementsOrdered(GlGraphRenderingParameters *glgrp) {
+  return glgrp->elementsOrdered();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setElementOrderedDescending(GlGraphRenderingParameters *glgrp, const bool state) {
+  glgrp->setElementOrderedDescending(state);
+}
+
+bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_elementsOrderedDescending(GlGraphRenderingParameters *glgrp) {
+  return glgrp->elementsOrderedDescending();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setElementsOrderingProperty(GlGraphRenderingParameters *glgrp, tlp::NumericProperty* property) {
+  glgrp->setElementsOrderingProperty(property);
+}
+
+tlp::NumericProperty* EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_elementsOrderingProperty(GlGraphRenderingParameters *glgrp) {
+  return glgrp->elementsOrderingProperty();
 }
 
 //==============================================================

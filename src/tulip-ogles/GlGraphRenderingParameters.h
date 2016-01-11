@@ -72,6 +72,9 @@ public:
   void setElementsOrdered(const bool state);
   bool elementsOrdered() const;
 
+  void setElementOrderedDescending(const bool state);
+  bool elementsOrderedDescending() const;
+
   void setElementsOrderingProperty(tlp::NumericProperty* property);
   tlp::NumericProperty* elementsOrderingProperty() const;
 
@@ -119,6 +122,7 @@ private:
   bool _displayEdgesLabels;
   bool _displayMetaNodesLabels;
   bool _elementsOrdered;
+  bool _elementsOrderedDescending;
   bool _interpolateEdgesColors;
   bool _edges3D;
   bool _interpolateEdgesSizes;

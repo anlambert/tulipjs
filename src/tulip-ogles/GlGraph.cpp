@@ -336,13 +336,15 @@ const float alpha = 0.5f;
 
 struct NodesLabelsSorting {
 
-  NodesLabelsSorting(BooleanProperty *selection) : _selection(selection) {}
+  NodesLabelsSorting(BooleanProperty *selection, NumericProperty *metric = NULL) : _selection(selection), _metric(metric) {}
 
   bool operator()(const tlp::node &n1, const tlp::node &n2) const {
     if (_selection->getNodeValue(n1) && !_selection->getNodeValue(n2)) {
       return true;
     } else if (!_selection->getNodeValue(n1) && _selection->getNodeValue(n2)) {
       return false;
+    } else if (_metric) {
+      return (_metric->getNodeDoubleValue(n1) > _metric->getNodeDoubleValue(n2));
     } else {
       return n1.id < n2.id;
     }
@@ -351,6 +353,40 @@ struct NodesLabelsSorting {
 private:
 
   BooleanProperty *_selection;
+  NumericProperty *_metric;
+
+};
+
+
+class GreatThanNode {
+
+public:
+
+  GreatThanNode(NumericProperty *metric) : _metric(metric) {}
+
+  bool operator() (const node &n1, const node &n2) const {
+    return (_metric->getNodeDoubleValue(n1) > _metric->getNodeDoubleValue(n2));
+  }
+
+private:
+
+  NumericProperty *_metric;
+
+};
+
+class GreatThanEdge {
+
+public:
+
+  GreatThanEdge(NumericProperty *metric) : _metric(metric) {}
+
+  bool operator() (const edge &e1, const edge &e2) const {
+    return (_metric->getEdgeDoubleValue(e1) > _metric->getEdgeDoubleValue(e2));
+  }
+
+private:
+
+  NumericProperty *_metric;
 
 };
 
@@ -829,6 +865,61 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
     renderMetaNodes(metaNodes, camera, light);
   }
 
+  NumericProperty *orderingProperty = _renderingParameters.elementsOrderingProperty();
+
+  if (_renderingParameters.elementsOrdered() && orderingProperty) {
+
+    GreatThanEdge gte(orderingProperty);
+    GreatThanNode gtn(orderingProperty);
+
+    std::sort(lineEdges.begin(), lineEdges.end(), gte);
+    std::sort(quadsEdges.begin(), quadsEdges.end(), gte);
+    std::sort(pointsEdges.begin(), pointsEdges.end(), gte);
+    std::sort(glyphsNodes.begin(), glyphsNodes.end(), gtn);
+    std::sort(pointsNodes.begin(), pointsNodes.end(), gtn);
+
+    if (!_renderingParameters.elementsOrderedDescending()) {
+      std::reverse(lineEdges.begin(), lineEdges.end());
+      std::reverse(quadsEdges.begin(), quadsEdges.end());
+      std::reverse(pointsEdges.begin(), pointsEdges.end());
+      std::reverse(glyphsNodes.begin(), glyphsNodes.end());
+      std::reverse(pointsNodes.begin(), pointsNodes.end());
+    }
+
+    std::map<int, std::vector<tlp::edge> >::iterator it = _srcEdgeExtremityGlyphs.begin();
+    for (; it != _srcEdgeExtremityGlyphs.end() ; ++it) {
+      vector<edge> &edges = it->second;
+      vector<edge>::iterator itE = edges.begin();
+      while (itE != edges.end()) {
+        if (_viewSelection->getEdgeValue(*itE)) {
+          break;
+        }
+        ++itE;
+      }
+      std::sort(edges.begin(), itE, gte);
+      if (!_renderingParameters.elementsOrderedDescending()) {
+        std::reverse(edges.begin(), itE);
+      }
+    }
+
+    it = _tgtEdgeExtremityGlyphs.begin();
+    for (; it != _tgtEdgeExtremityGlyphs.end() ; ++it) {
+      vector<edge> &edges = it->second;
+      vector<edge>::iterator itE = edges.begin();
+      while (itE != edges.end()) {
+        if (_viewSelection->getEdgeValue(*itE)) {
+          break;
+        }
+        ++itE;
+      }
+      std::sort(edges.begin(), itE, gte);
+      if (!_renderingParameters.elementsOrderedDescending()) {
+        std::reverse(edges.begin(), itE);
+      }
+    }
+
+  }
+
   if (_renderingParameters.displayEdges()) {
 
     if (_renderingParameters.displayEdgesExtremities()) {
@@ -866,7 +957,18 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
   if (!_graphElementsPickingMode && _renderingParameters.displayNodesLabels()) {
     _labelsRenderer->setLabelsScaled(_renderingParameters.labelsScaled());
     _labelsRenderer->setMinMaxSizes(_renderingParameters.minSizeOfLabels(), _renderingParameters.maxSizeOfLabels());
-    std::sort(nodesLabelsToRender.begin(), nodesLabelsToRender.end(), NodesLabelsSorting(_viewSelection));
+    std::sort(nodesLabelsToRender.begin(), nodesLabelsToRender.end(), NodesLabelsSorting(_viewSelection, orderingProperty));
+    if (_renderingParameters.elementsOrdered() && orderingProperty && !_renderingParameters.elementsOrderedDescending()) {
+      vector<node>::iterator itN = nodesLabelsToRender.begin();
+      while (itN != nodesLabelsToRender.end()) {
+        if (_viewSelection->getNodeValue(*itN)) {
+          break;
+        } else {
+          ++itN;
+        }
+      }
+      std::reverse(nodesLabelsToRender.begin(), itN);
+    }
     _labelsRenderer->setGraphNodesLabelsToRender(_graph, nodesLabelsToRender);
     _labelsRenderer->renderGraphNodesLabels(_graph, camera, _renderingParameters.selectionColor(), _renderingParameters.billboardedLabels());
   }

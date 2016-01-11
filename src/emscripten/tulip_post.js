@@ -4946,6 +4946,12 @@ if (workerMode) {
     var _GlGraphRenderingParameters_minSizeOfLabels = Module.cwrap('GlGraphRenderingParameters_minSizeOfLabels', 'number', ['number']);
     var _GlGraphRenderingParameters_setMaxSizeOfLabels = Module.cwrap('GlGraphRenderingParameters_setMaxSizeOfLabels', null, ['number', 'number']);
     var _GlGraphRenderingParameters_maxSizeOfLabels = Module.cwrap('GlGraphRenderingParameters_maxSizeOfLabels', 'number', ['number']);
+    var _GlGraphRenderingParameters_setElementsOrdered = Module.cwrap('GlGraphRenderingParameters_setElementsOrdered', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_elementsOrdered = Module.cwrap('GlGraphRenderingParameters_elementsOrdered', 'number', ['number']);
+    var _GlGraphRenderingParameters_setElementOrderedDescending = Module.cwrap('GlGraphRenderingParameters_setElementOrderedDescending', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_elementsOrderedDescending = Module.cwrap('GlGraphRenderingParameters_elementsOrderedDescending', 'number', ['number']);
+    var _GlGraphRenderingParameters_setElementsOrderingProperty = Module.cwrap('GlGraphRenderingParameters_setElementsOrderingProperty', null, ['number', 'number']);
+    var _GlGraphRenderingParameters_elementsOrderingProperty = Module.cwrap('GlGraphRenderingParameters_elementsOrderingProperty', 'number', ['number']);
 
     tulip.GlGraphRenderingParameters = function tulip_GlGraphRenderingParameters(cppPointer) {
       var newObject = createObject(tulip.GlGraphRenderingParameters, this);
@@ -5060,6 +5066,33 @@ if (workerMode) {
 
     tulip.GlGraphRenderingParameters.prototype.maxSizeOfLabels = function tulip_GlGraphRenderingParameters_prototype_maxSizeOfLabels() {
       return _GlGraphRenderingParameters_maxSizeOfLabels(this.cppPointer);
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.setElementsOrdered = function tulip_GlGraphRenderingParameters_prototype_setElementsOrdered(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setElementsOrdered(this.cppPointer, state);
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.elementsOrdered = function tulip_GlGraphRenderingParameters_prototype_elementsOrdered() {
+      return _GlGraphRenderingParameters_elementsOrdered(this.cppPointer) > 0;
+    }
+
+    tulip.GlGraphRenderingParameters.prototype.setElementsOrderedDescending = function tulip_GlGraphRenderingParameters_prototype_setElementsOrderedDescending(state) {
+      checkArgumentsTypes(arguments, ["boolean"], 1);
+      _GlGraphRenderingParameters_setElementOrderedDescending(this.cppPointer, state);
+    };
+
+    tulip.GlGraphRenderingParameters.prototype.elementsOrderedDescending = function tulip_GlGraphRenderingParameters_prototype_elementsOrderedDescending() {
+      return _GlGraphRenderingParameters_elementsOrderedDescending(this.cppPointer) > 0;
+    }
+
+    tulip.GlGraphRenderingParameters.prototype.setElementsOrderingProperty = function tulip_GlGraphRenderingParameters_prototype_setElementsOrderingProperty(prop) {
+      if (!prop) {
+        _GlGraphRenderingParameters_setElementsOrderingProperty(this.cppPointer, 0);
+      } else {
+        checkArgumentsTypes(arguments, [[tulip.DoubleProperty, tulip.IntegerProperty]], 1);
+        _GlGraphRenderingParameters_setElementsOrderingProperty(this.cppPointer, prop.cppPointer);
+      }
     };
 
     tulip.Graph.prototype.getTlpFileBlob = function(gzip) {

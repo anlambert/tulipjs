@@ -9,6 +9,7 @@ GlGraphRenderingParameters::GlGraphRenderingParameters() :
   _displayEdgesLabels(false),
   _displayMetaNodesLabels(false),
   _elementsOrdered(false),
+  _elementsOrderedDescending(false),
   _interpolateEdgesColors(false),
   _edges3D(false),
   _interpolateEdgesSizes(true),
@@ -98,7 +99,21 @@ bool GlGraphRenderingParameters::elementsOrdered() const {
   return _elementsOrdered;
 }
 void GlGraphRenderingParameters::setElementsOrdered(const bool b) {
-  _elementsOrdered = b;
+  if (b != _elementsOrdered) {
+    _elementsOrdered=b;
+    sendEvent(GlGraphRenderingParametersEvent(this, GlGraphRenderingParametersEvent::RENDERING_PARAMETERS_MODIFIED));
+  }
+}
+//====================================================
+void GlGraphRenderingParameters::setElementOrderedDescending(const bool b) {
+  if (b != _elementsOrderedDescending) {
+    _elementsOrderedDescending=b;
+    sendEvent(GlGraphRenderingParametersEvent(this, GlGraphRenderingParametersEvent::RENDERING_PARAMETERS_MODIFIED));
+  }
+}
+
+bool GlGraphRenderingParameters::elementsOrderedDescending() const {
+  return _elementsOrderedDescending;
 }
 //====================================================
 bool GlGraphRenderingParameters::elementsZOrdered() const {
@@ -249,7 +264,10 @@ void GlGraphRenderingParameters::setMaxSizeOfLabels(float size) {
 }
 //====================================================
 void GlGraphRenderingParameters::setElementsOrderingProperty(tlp::NumericProperty* property) {
-  _elementsOrderingProperty = property;
+  if (property !=_elementsOrderingProperty) {
+    _elementsOrderingProperty = property;
+    sendEvent(GlGraphRenderingParametersEvent(this, GlGraphRenderingParametersEvent::RENDERING_PARAMETERS_MODIFIED));
+  }
 }
 tlp::NumericProperty* GlGraphRenderingParameters::elementsOrderingProperty() const {
   return _elementsOrderingProperty;

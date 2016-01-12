@@ -145,6 +145,11 @@ var LibraryTulipUtils = {
       img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
       img.src = src;
     }
+  },
+
+  isChrome: function() {
+    return navigator.userAgent.toLowerCase().indexOf('chrome') > -1 &&
+           navigator.vendor.toLowerCase().indexOf('google inc') > -1;
   }
 
 };

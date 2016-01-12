@@ -77,6 +77,7 @@ void setCurrentCanvas(const char *canvasId);
 bool domElementExists(const char *elementId);
 bool canXhrOnUrl(const char *url);
 void loadImageFromUrl(const char *url, void (*imageLoadedFunc)(const char *, const unsigned char *, unsigned int, unsigned int), void (*errorFunc)(unsigned int, void *, int));
+bool isChrome();
 
 void EMSCRIPTEN_KEEPALIVE updateGlScene(const char *canvasId) {
   std::string curCanvasBak = currentCanvasId;
@@ -174,7 +175,11 @@ static EM_BOOL mouseCallback(int eventType, const EmscriptenMouseEvent *mouseEve
 static EM_BOOL wheelCallback(int /* eventType */, const EmscriptenWheelEvent *wheelEvent, void *userData) {
   std::string canvasId = canvasIds[reinterpret_cast<int>(userData)];
   if (currentCanvasInteractor[canvasId]) {
-    if (wheelEvent->deltaY > 0) {
+    double delta = wheelEvent->deltaY;
+    if (wheelEvent->mouse.shiftKey && isChrome()) {
+      delta = wheelEvent->deltaX;
+    }
+    if (delta > 0) {
       return currentCanvasInteractor[canvasId]->mouseCallback(WHEEL, DOWN, wheelEvent->mouse.targetX, wheelEvent->mouse.targetY, getModifiers(wheelEvent->mouse));
     } else {
       return currentCanvasInteractor[canvasId]->mouseCallback(WHEEL, UP, wheelEvent->mouse.targetX, wheelEvent->mouse.targetY, getModifiers(wheelEvent->mouse));

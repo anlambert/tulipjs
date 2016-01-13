@@ -113,8 +113,6 @@ private :
 
   tlp::Size getEdgeSize(tlp::edge e);
 
-  tlp::BoundingBox labelBoundingBoxForNode(tlp::node n);
-
   tlp::Graph *_graph;
   tlp::ColorProperty *_viewColor;
   tlp::LayoutProperty *_viewLayout;

@@ -1992,11 +1992,3 @@ void GlGraph::treatEvents(const std::vector<tlp::Event> &) {
   }
 
 }
-
-BoundingBox GlGraph::labelBoundingBoxForNode(node n) {
-  BoundingBox renderingBox;
-  GlyphsManager::getGlyph(_viewShape->getNodeValue(n))->getTextBoundingBox(renderingBox);
-  Coord pos = _viewLayout->getNodeValue(n);
-  Size size = _viewSize->getNodeValue(n) * Size(renderingBox.width(), renderingBox.height(), renderingBox.depth());
-  return BoundingBox(pos - size/2.f, pos + size/2.f);
-}

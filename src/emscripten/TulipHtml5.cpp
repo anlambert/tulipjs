@@ -496,7 +496,7 @@ void EMSCRIPTEN_KEEPALIVE addSubGraphHull(const char *canvasId, tlp::Graph *sg) 
   }
   std::ostringstream oss;
   oss << "hull_" << sg->getId();
-  subgraphsHulls[canvasId][sg->getId()] = computeGraphHull(sg, hullColor, 0, false);
+  subgraphsHulls[canvasId][sg->getId()] = new GlConcavePolygon(computeGraphHullVertices(sg, 0, false), hullColor);
   hullsLayer[canvasId]->addGlEntity(subgraphsHulls[canvasId][sg->getId()], oss.str());
 }
 

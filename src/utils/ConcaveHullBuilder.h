@@ -5,8 +5,6 @@
 
 #include <vector>
 
-#include "GlConcavePolygon.h"
-
 namespace tlp {
 class Graph;
 }
@@ -49,6 +47,6 @@ private:
 
 };
 
-GlConcavePolygon* computeGraphHull(tlp::Graph *graph, const tlp::Color &fillColor, const float z, const bool withHoles = true, const float spacing = 0.1f);
+std::vector<std::vector<tlp::Coord> > computeGraphHullVertices(tlp::Graph *graph, const float z, const bool withHoles = true, const float spacing = 0.1f);
 
 #endif // CONCAVEHULLBUILDER_H

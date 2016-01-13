@@ -118,7 +118,6 @@ SET(GRAPH_RENDERER_SRCS
     src/tulip-ogles/LabelsRenderer.cpp
     src/tulip-ogles/GlConvexPolygon.cpp
     src/tulip-ogles/GlConcavePolygon.cpp
-    src/tulip-ogles/ConcaveHullBuilder.cpp
     src/tulip-ogles/GlRect2D.cpp
     src/tulip-ogles/GlComposite.cpp
     src/tulip-ogles/GlCPULODCalculator.cpp
@@ -160,6 +159,7 @@ SET(GRAPH_RENDERER_SRCS
     src/tulip-ogles/GlProgressBar.cpp
     src/tulip-ogles/NanoVGManager.cpp
     src/utils/TimeMeasurer.cpp
+    src/utils/ConcaveHullBuilder.cpp
     thirdparty/clipper/cpp/clipper.cpp
     thirdparty/libtess2/Source/bucketalloc.c
     thirdparty/libtess2/Source/dict.c

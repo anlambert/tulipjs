@@ -172,7 +172,7 @@ static vector<Coord> genNodePolygon(Graph *graph, node n, const tlp::LayoutPrope
   return nodeShape;
 }
 
-GlConcavePolygon* computeGraphHull(Graph *graph, const Color &fillColor, const float z, const bool withHoles, const float spacing) {
+std::vector<std::vector<tlp::Coord> > computeGraphHullVertices(Graph *graph, const float z, const bool withHoles, const float spacing) {
 
   LayoutProperty *viewLayout = graph->getProperty<LayoutProperty>("viewLayout");
   SizeProperty *viewSize = graph->getProperty<SizeProperty>("viewSize");
@@ -271,7 +271,6 @@ GlConcavePolygon* computeGraphHull(Graph *graph, const Color &fillColor, const f
     }
   }
 
-  return new GlConcavePolygon(contours, fillColor);
+  return contours;
 
 }
-

@@ -14,17 +14,17 @@ function typeOf(value) {
   return s;
 }
 
-function _allocArrayInEmHeap(ArrayType, size) {
+function allocArrayInEmHeap(ArrayType, size) {
   var nDataBytes = size * ArrayType.BYTES_PER_ELEMENT;
   var dataPtr = Module._malloc(nDataBytes);
   return new ArrayType(Module.HEAPU8.buffer, dataPtr, size);
 }
 
-function _freeArrayInEmHeap(arrayHeap) {
+function freeArrayInEmHeap(arrayHeap) {
   Module._free(arrayHeap.byteOffset);
 }
 
-function _bytesTypedArrayToStringArray(bytesArray, offsetArray, nbStrings) {
+function bytesTypedArrayToStringArray(bytesArray, offsetArray, nbStrings) {
   var ret = [];
   var start = 0;
   for (var i = 0 ; i < nbStrings ; ++i) {
@@ -34,15 +34,15 @@ function _bytesTypedArrayToStringArray(bytesArray, offsetArray, nbStrings) {
   return ret;
 }
 
-function _stringArrayToBytesAndOffsetsTypedArray(stringArray) {
+function stringArrayToBytesAndOffsetsTypedArray(stringArray) {
   var nbBytes = 0;
-  var uintArray = _allocArrayInEmHeap(Uint32Array, stringArray.length);
+  var uintArray = allocArrayInEmHeap(Uint32Array, stringArray.length);
   for (var i = 0 ; i < stringArray.length ; ++i) {
     var strNbBytes = Module.lengthBytesUTF8(stringArray[i]) + 1;
     nbBytes += strNbBytes;
     uintArray[i] = strNbBytes;
   }
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, nbBytes);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, nbBytes);
   var offset = 0;
   for (var i = 0 ; i < stringArray.length ; ++i) {
     Module.stringToUTF8Array(stringArray[i], ucharArray, offset, uintArray[i]);
@@ -177,7 +177,7 @@ function checkWrappedCppPointer(cppPointer) {
 }
 
 function getArrayOfTulipType(arraySize, arrayFillFunc, tulipType) {
-  var result = _allocArrayInEmHeap(Uint32Array, arraySize);
+  var result = allocArrayInEmHeap(Uint32Array, arraySize);
   arrayFillFunc(result.byteOffset);
   var tulipTypeArray = new Array();
   for (var i = 0 ; i < arraySize ; ++i) {
@@ -188,7 +188,7 @@ function getArrayOfTulipType(arraySize, arrayFillFunc, tulipType) {
     }
     tulipTypeArray.push(tulipType(result[i]));
   }
-  _freeArrayInEmHeap(result);
+  freeArrayInEmHeap(result);
   return tulipTypeArray;
 };
 
@@ -272,7 +272,7 @@ tulip.PropertyInterface.prototype.getEdgeStringValue = function tulip_PropertyIn
 tulip.PropertyInterface.prototype.getGraph = function tulip_PropertyInterface_prototype_getGraph() {
   checkWrappedCppPointer(this.cppPointer);
   return tulip.Graph(_PropertyInterface_getGraph(this.cppPointer));
-}
+};
 
 // ==================================================================================================================
 
@@ -478,84 +478,84 @@ tulip.DoubleVectorProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.DoubleVectorProperty.prototype.getNodeDefaultValue = function tulip_DoubleVectorProperty_prototype_getNodeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
   var size = _DoubleVectorProperty_getNodeDefaultVectorSize(this.cppPointer);
-  var doubleArray = _allocArrayInEmHeap(Float64Array, size);
+  var doubleArray = allocArrayInEmHeap(Float64Array, size);
   _DoubleVectorProperty_getNodeDefaultValue(this.cppPointer, doubleArray.byteOffset);
   var ret = Array.prototype.slice.call(doubleArray);
-  _freeArrayInEmHeap(doubleArray);
+  freeArrayInEmHeap(doubleArray);
   return ret;
 };
 tulip.DoubleVectorProperty.prototype.getNodeValue = function tulip_DoubleVectorProperty_prototype_getNodeValue(node) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Node], 1);
   var size = _DoubleVectorProperty_getNodeVectorSize(this.cppPointer, node.id);
-  var doubleArray = _allocArrayInEmHeap(Float64Array, size);
+  var doubleArray = allocArrayInEmHeap(Float64Array, size);
   _DoubleVectorProperty_getNodeValue(this.cppPointer, node.id, doubleArray.byteOffset);
   var ret = Array.prototype.slice.call(doubleArray);
-  _freeArrayInEmHeap(doubleArray);
+  freeArrayInEmHeap(doubleArray);
   return ret;
 };
 tulip.DoubleVectorProperty.prototype.setNodeValue = function tulip_DoubleVectorProperty_prototype_setNodeValue(node, val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Node, "array"], 2);
   checkArrayOfType(val, "number", 1);
-  var doubleArray = _allocArrayInEmHeap(Float64Array, val.length);
+  var doubleArray = allocArrayInEmHeap(Float64Array, val.length);
   for (var i = 0 ; i < val.length ; ++i) {
     doubleArray[i] = val[i];
   }
   _DoubleVectorProperty_setNodeValue(this.cppPointer, node.id, doubleArray.byteOffset, val.length);
-  _freeArrayInEmHeap(doubleArray);
+  freeArrayInEmHeap(doubleArray);
 };
 tulip.DoubleVectorProperty.prototype.getEdgeDefaultValue = function tulip_DoubleVectorProperty_prototype_getEdgeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
   var size = _DoubleVectorProperty_getEdgeDefaultVectorSize(this.cppPointer);
-  var doubleArray = _allocArrayInEmHeap(Float64Array, size);
+  var doubleArray = allocArrayInEmHeap(Float64Array, size);
   _DoubleVectorProperty_getEdgeDefaultValue(this.cppPointer, doubleArray.byteOffset);
   var ret = Array.prototype.slice.call(doubleArray);
-  _freeArrayInEmHeap(doubleArray);
+  freeArrayInEmHeap(doubleArray);
   return ret;
 };
 tulip.DoubleVectorProperty.prototype.getEdgeValue = function tulip_DoubleVectorProperty_prototype_getEdgeValue(edge) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge], 1);
   var size = _DoubleVectorProperty_getEdgeVectorSize(this.cppPointer, edge.id);
-  var doubleArray = _allocArrayInEmHeap(Float64Array, size);
+  var doubleArray = allocArrayInEmHeap(Float64Array, size);
   _DoubleVectorProperty_getEdgeValue(this.cppPointer, edge.id, doubleArray.byteOffset);
   var ret = Array.prototype.slice.call(doubleArray);
-  _freeArrayInEmHeap(doubleArray);
+  freeArrayInEmHeap(doubleArray);
   return ret;
 };
 tulip.DoubleVectorProperty.prototype.setEdgeValue = function tulip_DoubleVectorProperty_prototype_setEdgeValue(edge, val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge, "array"], 2);
   checkArrayOfType(val, "number", 1);
-  var doubleArray = _allocArrayInEmHeap(Float64Array, val.length);
+  var doubleArray = allocArrayInEmHeap(Float64Array, val.length);
   for (var i = 0 ; i < val.length ; ++i) {
     doubleArray[i] = val[i];
   }
   _DoubleVectorProperty_setEdgeValue(this.cppPointer, edge.id, doubleArray.byteOffset, val.length);
-  _freeArrayInEmHeap(doubleArray);
+  freeArrayInEmHeap(doubleArray);
 };
 tulip.DoubleVectorProperty.prototype.setAllNodeValue = function tulip_DoubleVectorProperty_prototype_setAllNodeValue(val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["array"], 1);
   checkArrayOfType(val, "number", 0);
-  var doubleArray = _allocArrayInEmHeap(Float64Array, val.length);
+  var doubleArray = allocArrayInEmHeap(Float64Array, val.length);
   for (var i = 0 ; i < val.length ; ++i) {
     doubleArray[i] = val[i];
   }
   _DoubleVectorProperty_setAllNodeValue(this.cppPointer, doubleArray.byteOffset, val.length);
-  _freeArrayInEmHeap(doubleArray);
+  freeArrayInEmHeap(doubleArray);
 };
 tulip.DoubleVectorProperty.prototype.setAllEdgeValue = function tulip_DoubleVectorProperty_prototype_setAllEdgeValue(val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["array"], 1);
   checkArrayOfType(val, "number", 0);
-  var doubleArray = _allocArrayInEmHeap(Float64Array, val.length);
+  var doubleArray = allocArrayInEmHeap(Float64Array, val.length);
   for (var i = 0 ; i < val.length ; ++i) {
     doubleArray[i] = val[i];
   }
   _DoubleVectorProperty_setAllEdgeValue(this.cppPointer, doubleArray.byteOffset, val.length);
-  _freeArrayInEmHeap(doubleArray);
+  freeArrayInEmHeap(doubleArray);
 };
 
 // ==================================================================================================================
@@ -670,84 +670,84 @@ tulip.IntegerVectorProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.IntegerVectorProperty.prototype.getNodeDefaultValue = function tulip_IntegerVectorProperty_prototype_getNodeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
   var size = _IntegerVectorProperty_getNodeDefaultVectorSize(this.cppPointer);
-  var integerArray = _allocArrayInEmHeap(Int32Array, size);
+  var integerArray = allocArrayInEmHeap(Int32Array, size);
   _IntegerVectorProperty_getNodeDefaultValue(this.cppPointer, integerArray.byteOffset);
   var ret = Array.prototype.slice.call(integerArray);
-  _freeArrayInEmHeap(integerArray);
+  freeArrayInEmHeap(integerArray);
   return ret;
 };
 tulip.IntegerVectorProperty.prototype.getNodeValue = function tulip_IntegerVectorProperty_prototype_getNodeValue2(node) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Node], 1);
   var size = _IntegerVectorProperty_getNodeVectorSize(this.cppPointer, node.id);
-  var integerArray = _allocArrayInEmHeap(Int32Array, size);
+  var integerArray = allocArrayInEmHeap(Int32Array, size);
   _IntegerVectorProperty_getNodeValue(this.cppPointer, node.id, integerArray.byteOffset);
   var ret = Array.prototype.slice.call(integerArray);
-  _freeArrayInEmHeap(integerArray);
+  freeArrayInEmHeap(integerArray);
   return ret;
 };
 tulip.IntegerVectorProperty.prototype.setNodeValue = function tulip_IntegerVectorProperty_prototype_setNodeValue(node, val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Node, "array"], 2);
   checkArrayOfType(val, "number", 1);
-  var integerArray = _allocArrayInEmHeap(Int32Array, val.length);
+  var integerArray = allocArrayInEmHeap(Int32Array, val.length);
   for (var i = 0 ; i < val.length ; ++i) {
     integerArray[i] = val[i];
   }
   _IntegerVectorProperty_setNodeValue(this.cppPointer, node.id, integerArray.byteOffset, val.length);
-  _freeArrayInEmHeap(integerArray);
+  freeArrayInEmHeap(integerArray);
 };
 tulip.IntegerVectorProperty.prototype.getEdgeDefaultValue = function tulip_IntegerVectorProperty_prototype_getEdgeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
   var size = _IntegerVectorProperty_getEdgeDefaultVectorSize(this.cppPointer);
-  var integerArray = _allocArrayInEmHeap(Int32Array, size);
+  var integerArray = allocArrayInEmHeap(Int32Array, size);
   _IntegerVectorProperty_getEdgeDefaultValue(this.cppPointer, integerArray.byteOffset);
   var ret = Array.prototype.slice.call(integerArray);
-  _freeArrayInEmHeap(integerArray);
+  freeArrayInEmHeap(integerArray);
   return ret;
 };
 tulip.IntegerVectorProperty.prototype.getEdgeValue = function tulip_IntegerVectorProperty_prototype_getEdgeValue(edge) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge], 1);
   var size = _IntegerVectorProperty_getEdgeVectorSize(this.cppPointer, edge.id);
-  var integerArray = _allocArrayInEmHeap(Int32Array, size);
+  var integerArray = allocArrayInEmHeap(Int32Array, size);
   _IntegerVectorProperty_getEdgeValue(this.cppPointer, edge.id, integerArray.byteOffset);
   var ret = Array.prototype.slice.call(integerArray);
-  _freeArrayInEmHeap(integerArray);
+  freeArrayInEmHeap(integerArray);
   return ret;
 };
 tulip.IntegerVectorProperty.prototype.setEdgeValue = function tulip_IntegerVectorProperty_prototype_setEdgeValue(edge, val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge, "array"], 2);
   checkArrayOfType(val, "number", 1);
-  var integerArray = _allocArrayInEmHeap(Int32Array, val.length);
+  var integerArray = allocArrayInEmHeap(Int32Array, val.length);
   for (var i = 0 ; i < val.length ; ++i) {
     integerArray[i] = val[i];
   }
   _IntegerVectorProperty_setEdgeValue(this.cppPointer, edge.id, integerArray.byteOffset, val.length);
-  _freeArrayInEmHeap(integerArray);
+  freeArrayInEmHeap(integerArray);
 };
 tulip.IntegerVectorProperty.prototype.setAllNodeValue = function tulip_IntegerVectorProperty_prototype_setAllNodeValue(val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["array"], 1);
   checkArrayOfType(val, "number", 0);
-  var integerArray = _allocArrayInEmHeap(Int32Array, val.length);
+  var integerArray = allocArrayInEmHeap(Int32Array, val.length);
   for (var i = 0 ; i < val.length ; ++i) {
     integerArray[i] = val[i];
   }
   _IntegerVectorProperty_setAllNodeValue(this.cppPointer, integerArray.byteOffset, val.length);
-  _freeArrayInEmHeap(integerArray);
+  freeArrayInEmHeap(integerArray);
 };
 tulip.IntegerVectorProperty.prototype.setAllEdgeValue = function tulip_IntegerVectorProperty_prototype_setAllEdgeValue(val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["array"], 1);
   checkArrayOfType(val, "number", 0);
-  var integerArray = _allocArrayInEmHeap(Int32Array, val.length);
+  var integerArray = allocArrayInEmHeap(Int32Array, val.length);
   for (var i = 0 ; i < val.length ; ++i) {
     integerArray[i] = val[i];
   }
   _IntegerVectorProperty_setAllEdgeValue(this.cppPointer, integerArray.byteOffset, val.length);
-  _freeArrayInEmHeap(integerArray);
+  freeArrayInEmHeap(integerArray);
 };
 
 // ==================================================================================================================
@@ -869,88 +869,88 @@ tulip.StringVectorProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.StringVectorProperty.prototype.getNodeDefaultValue = function tulip_StringVectorProperty_prototype_getNodeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
   var nbStrings = _StringVectorProperty_getNodeDefaultVectorSize(this.cppPointer);
-  var uintArray = _allocArrayInEmHeap(Uint32Array, nbStrings);
+  var uintArray = allocArrayInEmHeap(Uint32Array, nbStrings);
   var nbBytes = _StringVectorProperty_getNodeDefaultStringsLengths(this.cppPointer, uintArray.byteOffset);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, nbBytes);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, nbBytes);
   _StringVectorProperty_getNodeDefaultValue(this.cppPointer, ucharArray.byteOffset);
-  var ret = _bytesTypedArrayToStringArray(ucharArray, uintArray, nbStrings);
-  _freeArrayInEmHeap(uintArray);
-  _freeArrayInEmHeap(ucharArray);
+  var ret = bytesTypedArrayToStringArray(ucharArray, uintArray, nbStrings);
+  freeArrayInEmHeap(uintArray);
+  freeArrayInEmHeap(ucharArray);
   return ret;
 };
 tulip.StringVectorProperty.prototype.getNodeValue = function tulip_StringVectorProperty_prototype_getNodeValue(node) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Node]);
   var nbStrings = _StringVectorProperty_getNodeVectorSize(this.cppPointer, node.id);
-  var uintArray = _allocArrayInEmHeap(Uint32Array, nbStrings);
+  var uintArray = allocArrayInEmHeap(Uint32Array, nbStrings);
   var nbBytes = _StringVectorProperty_getNodeStringsLengths(this.cppPointer, node.id, uintArray.byteOffset);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, nbBytes);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, nbBytes);
   _StringVectorProperty_getNodeValue(this.cppPointer, node.id, ucharArray.byteOffset);
-  var ret = _bytesTypedArrayToStringArray(ucharArray, uintArray, nbStrings);
-  _freeArrayInEmHeap(uintArray);
-  _freeArrayInEmHeap(ucharArray);
+  var ret = bytesTypedArrayToStringArray(ucharArray, uintArray, nbStrings);
+  freeArrayInEmHeap(uintArray);
+  freeArrayInEmHeap(ucharArray);
   return ret;
 };
 tulip.StringVectorProperty.prototype.setNodeValue = function tulip_StringVectorProperty_prototype_setNodeValue(node, val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Node, "array"]);
   checkArrayOfType(val, "string", 1);
-  var data = _stringArrayToBytesAndOffsetsTypedArray(val);
+  var data = stringArrayToBytesAndOffsetsTypedArray(val);
   _StringVectorProperty_setNodeValue(this.cppPointer, node.id, data.bytesArray.byteOffset, data.offsetsArray.byteOffset, val.length);
-  _freeArrayInEmHeap(data.bytesArray);
-  _freeArrayInEmHeap(data.offsetsArray);
+  freeArrayInEmHeap(data.bytesArray);
+  freeArrayInEmHeap(data.offsetsArray);
 };
 tulip.StringVectorProperty.prototype.getEdgeDefaultValue = function tulip_StringVectorProperty_prototype_getEdgeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
   var nbStrings = _StringVectorProperty_getEdgeDefaultVectorSize(this.cppPointer);
-  var uintArray = _allocArrayInEmHeap(Uint32Array, nbStrings);
+  var uintArray = allocArrayInEmHeap(Uint32Array, nbStrings);
   var nbBytes = _StringVectorProperty_getEdgeDefaultStringsLengths(this.cppPointer, uintArray.byteOffset);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, nbBytes);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, nbBytes);
   _StringVectorProperty_getEdgeDefaultValue(this.cppPointer, ucharArray.byteOffset);
-  var ret = _bytesTypedArrayToStringArray(ucharArray, uintArray, nbStrings);
-  _freeArrayInEmHeap(uintArray);
-  _freeArrayInEmHeap(ucharArray);
+  var ret = bytesTypedArrayToStringArray(ucharArray, uintArray, nbStrings);
+  freeArrayInEmHeap(uintArray);
+  freeArrayInEmHeap(ucharArray);
   return ret;
 };
 tulip.StringVectorProperty.prototype.getEdgeValue = function tulip_StringVectorProperty_prototype_getEdgeValue(edge) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge]);
   var nbStrings = _StringVectorProperty_getEdgeVectorSize(this.cppPointer, edge.id);
-  var uintArray = _allocArrayInEmHeap(Uint32Array, nbStrings);
+  var uintArray = allocArrayInEmHeap(Uint32Array, nbStrings);
   var nbBytes = _StringVectorProperty_getEdgeStringsLengths(this.cppPointer, edge.id, uintArray.byteOffset);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, nbBytes);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, nbBytes);
   _StringVectorProperty_getEdgeValue(this.cppPointer, edge.id, ucharArray.byteOffset);
-  var ret = _bytesTypedArrayToStringArray(ucharArray, uintArray, nbStrings);
-  _freeArrayInEmHeap(uintArray);
-  _freeArrayInEmHeap(ucharArray);
+  var ret = bytesTypedArrayToStringArray(ucharArray, uintArray, nbStrings);
+  freeArrayInEmHeap(uintArray);
+  freeArrayInEmHeap(ucharArray);
   return ret;
 };
 tulip.StringVectorProperty.prototype.setEdgeValue = function tulip_StringVectorProperty_prototype_setEdgeValue(edge, val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge, "array"]);
   checkArrayOfType(val, "string", 1);
-  var data = _stringArrayToBytesAndOffsetsTypedArray(val);
+  var data = stringArrayToBytesAndOffsetsTypedArray(val);
   _StringVectorProperty_setEdgeValue(this.cppPointer, edge.id, data.bytesArray.byteOffset, data.offsetsArray.byteOffset, val.length);
-  _freeArrayInEmHeap(data.bytesArray);
-  _freeArrayInEmHeap(data.offsetsArray);
+  freeArrayInEmHeap(data.bytesArray);
+  freeArrayInEmHeap(data.offsetsArray);
 };
 tulip.StringVectorProperty.prototype.setAllNodeValue = function tulip_StringVectorProperty_prototype_setAllNodeValue(val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["array"]);
   checkArrayOfType(val, "string", 0);
-  var data = _stringArrayToBytesAndOffsetsTypedArray(val);
+  var data = stringArrayToBytesAndOffsetsTypedArray(val);
   _StringVectorProperty_setAllNodeValue(this.cppPointer, data.bytesArray.byteOffset, data.offsetsArray.byteOffset, val.length);
-  _freeArrayInEmHeap(data.bytesArray);
-  _freeArrayInEmHeap(data.offsetsArray);
+  freeArrayInEmHeap(data.bytesArray);
+  freeArrayInEmHeap(data.offsetsArray);
 };
 tulip.StringVectorProperty.prototype.setAllEdgeValue = function tulip_StringVectorProperty_prototype_setAllEdgeValue(val) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["array"]);
   checkArrayOfType(val, "string", 0);
-  var data = _stringArrayToBytesAndOffsetsTypedArray(val);
+  var data = stringArrayToBytesAndOffsetsTypedArray(val);
   _StringVectorProperty_setAllEdgeValue(this.cppPointer, data.bytesArray.byteOffset, data.offsetsArray.byteOffset, val.length);
-  _freeArrayInEmHeap(data.bytesArray);
-  _freeArrayInEmHeap(data.offsetsArray);
+  freeArrayInEmHeap(data.bytesArray);
+  freeArrayInEmHeap(data.offsetsArray);
 };
 
 // ==================================================================================================================
@@ -1003,19 +1003,19 @@ tulip.ColorProperty = function tulip_ColorProperty() {
 tulip.ColorProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.ColorProperty.prototype.getNodeDefaultValue = function tulip_ColorProperty_prototype_getNodeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, 4);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, 4);
   _ColorProperty_getNodeDefaultValue(this.cppPointer, ucharArray.byteOffset);
   var ret = tulip.Color(ucharArray[0], ucharArray[1], ucharArray[2], ucharArray[3]);
-  _freeArrayInEmHeap(ucharArray);
+  freeArrayInEmHeap(ucharArray);
   return ret;
 };
 tulip.ColorProperty.prototype.getNodeValue = function tulip_ColorProperty_prototype_getNodeValue(node) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Node], 1);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, 4);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, 4);
   _ColorProperty_getNodeValue(this.cppPointer, node.id, ucharArray.byteOffset);
   var ret = tulip.Color(ucharArray[0], ucharArray[1], ucharArray[2], ucharArray[3]);
-  _freeArrayInEmHeap(ucharArray);
+  freeArrayInEmHeap(ucharArray);
   return ret;
 };
 tulip.ColorProperty.prototype.setNodeValue = function tulip_ColorProperty_prototype_setNodeValue(node, color) {
@@ -1024,19 +1024,19 @@ tulip.ColorProperty.prototype.setNodeValue = function tulip_ColorProperty_protot
 };
 tulip.ColorProperty.prototype.getEdgeDefaultValue = function tulip_ColorProperty_prototype_getEdgeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, 4);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, 4);
   _ColorProperty_getEdgeDefaultValue(this.cppPointer, ucharArray.byteOffset);
   var ret = tulip.Color(ucharArray[0], ucharArray[1], ucharArray[2], ucharArray[3]);
-  _freeArrayInEmHeap(ucharArray);
+  freeArrayInEmHeap(ucharArray);
   return ret;
 };
 tulip.ColorProperty.prototype.getEdgeValue = function tulip_ColorProperty_prototype_getEdgeValue(edge) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge], 1);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, 4);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, 4);
   _ColorProperty_getEdgeValue(this.cppPointer, edge.id, ucharArray.byteOffset);
   var ret = tulip.Color(ucharArray[0], ucharArray[1], ucharArray[2], ucharArray[3]);
-  _freeArrayInEmHeap(ucharArray);
+  freeArrayInEmHeap(ucharArray);
   return ret;
 };
 tulip.ColorProperty.prototype.setEdgeValue = function tulip_ColorProperty_prototype_setEdgeValue(edge, color) {
@@ -1413,19 +1413,19 @@ tulip.LayoutProperty = function tulip_LayoutProperty() {
 tulip.LayoutProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.LayoutProperty.prototype.getNodeDefaultValue = function tulip_LayoutProperty_prototype_getNodeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
-  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  var floatArray = allocArrayInEmHeap(Float32Array, 3);
   _LayoutProperty_getNodeDefaultValue(this.cppPointer, floatArray.byteOffset);
   var ret = tulip.Coord(floatArray[0], floatArray[1], floatArray[2]);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 tulip.LayoutProperty.prototype.getNodeValue = function tulip_LayoutProperty_prototype_getNodeValue(node) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Node], 1);
-  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  var floatArray = allocArrayInEmHeap(Float32Array, 3);
   _LayoutProperty_getNodeValue(this.cppPointer, node.id, floatArray.byteOffset);
   var ret = tulip.Coord(floatArray[0], floatArray[1], floatArray[2]);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 tulip.LayoutProperty.prototype.setNodeValue = function tulip_LayoutProperty_prototype_setNodeValue(node, coord) {
@@ -1441,13 +1441,13 @@ tulip.LayoutProperty.prototype.setAllNodeValue = function tulip_LayoutProperty_p
 tulip.LayoutProperty.prototype.getEdgeDefaultValue = function tulip_LayoutProperty_prototype_getEdgeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
   var nbBends = _LayoutProperty_getEdgeDefaultNumberOfBends(this.cppPointer);
-  var floatArray = _allocArrayInEmHeap(Float32Array, nbBends*3);
+  var floatArray = allocArrayInEmHeap(Float32Array, nbBends*3);
   _LayoutProperty_getEdgeDefaultValue(this.cppPointer, floatArray.byteOffset);
   var ret = [];
   for (var i = 0 ; i < nbBends ; ++i) {
     ret.push(tulip.Coord(floatArray[3*i], floatArray[3*i+1], floatArray[3*i+2]));
   }
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 
@@ -1455,40 +1455,40 @@ tulip.LayoutProperty.prototype.getEdgeValue = function tulip_LayoutProperty_prot
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge], 1);
   var nbBends = _LayoutProperty_getEdgeNumberOfBends(this.cppPointer, edge.id);
-  var floatArray = _allocArrayInEmHeap(Float32Array, nbBends*3);
+  var floatArray = allocArrayInEmHeap(Float32Array, nbBends*3);
   _LayoutProperty_getEdgeValue(this.cppPointer, edge.id, floatArray.byteOffset);
   var ret = [];
   for (var i = 0 ; i < nbBends ; ++i) {
     ret.push(tulip.Coord(floatArray[3*i], floatArray[3*i+1], floatArray[3*i+2]));
   }
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 tulip.LayoutProperty.prototype.setEdgeValue = function tulip_LayoutProperty_prototype_setEdgeValue(edge, bends) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge, "array"]);
   checkArrayOfType(bends, tulip.Coord, 1);
-  var floatArray = _allocArrayInEmHeap(Float32Array, bends.length*3);
+  var floatArray = allocArrayInEmHeap(Float32Array, bends.length*3);
   for (var i = 0 ; i < bends.length ; ++i) {
     floatArray[3*i] = bends[i].x;
     floatArray[3*i+1] = bends[i].y;
     floatArray[3*i+2] = bends[i].z;
   }
   _LayoutProperty_setEdgeValue(this.cppPointer, edge.id, floatArray.byteOffset, bends.length);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
 };
 tulip.LayoutProperty.prototype.setAllEdgeValue = function tulip_LayoutProperty_prototype_setAllEdgeValue(bends) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["array"]);
   checkArrayOfType(bends, tulip.Coord, 0);
-  var floatArray = _allocArrayInEmHeap(Float32Array, bends.length*3);
+  var floatArray = allocArrayInEmHeap(Float32Array, bends.length*3);
   for (var i = 0 ; i < bends.length ; ++i) {
     floatArray[3*i] = bends[i].x;
     floatArray[3*i+1] = bends[i].y;
     floatArray[3*i+2] = bends[i].z;
   }
   _LayoutProperty_setAllEdgeValue(this.cppPointer, floatArray.byteOffset, bends.length);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
 };
 tulip.LayoutProperty.prototype.getMin = function tulip_LayoutProperty_prototype_getMin(subgraph) {
   checkWrappedCppPointer(this.cppPointer);
@@ -1497,10 +1497,10 @@ tulip.LayoutProperty.prototype.getMin = function tulip_LayoutProperty_prototype_
   if (arguments.length == 1) {
     sgPointer = subgraph.cppPointer;
   }
-  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  var floatArray = allocArrayInEmHeap(Float32Array, 3);
   _LayoutProperty_getMin(this.cppPointer, sgPointer, floatArray.byteOffset);
   var ret = tulip.Coord(floatArray[0], floatArray[1], floatArray[2]);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 tulip.LayoutProperty.prototype.getMax = function tulip_LayoutProperty_prototype_getMax(subgraph) {
@@ -1510,10 +1510,10 @@ tulip.LayoutProperty.prototype.getMax = function tulip_LayoutProperty_prototype_
   if (arguments.length == 1) {
     sgPointer = subgraph.cppPointer;
   }
-  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  var floatArray = allocArrayInEmHeap(Float32Array, 3);
   _LayoutProperty_getMax(this.cppPointer, sgPointer, floatArray.byteOffset);
   var ret = tulip.Coord(floatArray[0], floatArray[1], floatArray[2]);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 tulip.LayoutProperty.prototype.translate = function tulip_LayoutProperty_prototype_translate(move, subgraph) {
@@ -1627,19 +1627,19 @@ tulip.SizeProperty = function tulip_SizeProperty() {
 tulip.SizeProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.SizeProperty.prototype.getNodeDefaultValue = function tulip_SizeProperty_prototype_getNodeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
-  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  var floatArray = allocArrayInEmHeap(Float32Array, 3);
   _SizeProperty_getNodeDefaultValue(this.cppPointer, floatArray.byteOffset);
   var ret = tulip.Size(floatArray[0], floatArray[1], floatArray[2]);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 tulip.SizeProperty.prototype.getNodeValue = function tulip_SizeProperty_prototype_getNodeValue(node) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Node], 1);
-  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  var floatArray = allocArrayInEmHeap(Float32Array, 3);
   _SizeProperty_getNodeValue(this.cppPointer, node.id, floatArray.byteOffset);
   var ret = tulip.Size(floatArray[0], floatArray[1], floatArray[2]);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 tulip.SizeProperty.prototype.setNodeValue = function tulip_SizeProperty_prototype_setNodeValue(node, size) {
@@ -1654,19 +1654,19 @@ tulip.SizeProperty.prototype.setAllNodeValue = function tulip_SizeProperty_proto
 };
 tulip.SizeProperty.prototype.getEdgeDefaultValue = function tulip_SizeProperty_prototype_getEdgeDefaultValue() {
   checkWrappedCppPointer(this.cppPointer);
-  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  var floatArray = allocArrayInEmHeap(Float32Array, 3);
   _SizeProperty_getEdgeDefaultValue(this.cppPointer, floatArray.byteOffset);
   var ret = tulip.Size(floatArray[0], floatArray[1], floatArray[2]);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 tulip.SizeProperty.prototype.getEdgeValue = function tulip_SizeProperty_prototype_getEdgeValue(edge) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge], 1);
-  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  var floatArray = allocArrayInEmHeap(Float32Array, 3);
   _SizeProperty_getEdgeValue(this.cppPointer, edge.id, floatArray.byteOffset);
   var ret = tulip.Size(floatArray[0], floatArray[1], floatArray[2]);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 tulip.SizeProperty.prototype.setEdgeValue = function tulip_SizeProperty_prototype_setEdgeValue(edge, size) {
@@ -1693,10 +1693,10 @@ tulip.SizeProperty.prototype.getMin = function tulip_SizeProperty_prototype_getM
   if (arguments.length == 1) {
     sgPointer = subgraph.cppPointer;
   }
-  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  var floatArray = allocArrayInEmHeap(Float32Array, 3);
   _SizeProperty_getMin(this.cppPointer, sgPointer, floatArray.byteOffset);
   var ret = tulip.Size(floatArray[0], floatArray[1], floatArray[2]);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 tulip.SizeProperty.prototype.getMax = function tulip_SizeProperty_prototype_getMax(subgraph) {
@@ -1706,10 +1706,10 @@ tulip.SizeProperty.prototype.getMax = function tulip_SizeProperty_prototype_getM
   if (arguments.length == 1) {
     sgPointer = subgraph.cppPointer;
   }
-  var floatArray = _allocArrayInEmHeap(Float32Array, 3);
+  var floatArray = allocArrayInEmHeap(Float32Array, 3);
   _SizeProperty_getMax(this.cppPointer, sgPointer, floatArray.byteOffset);
   var ret = tulip.Size(floatArray[0], floatArray[1], floatArray[2]);
-  _freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(floatArray);
   return ret;
 };
 
@@ -1897,25 +1897,25 @@ var _importPluginExists = Module.cwrap('importPluginExists', 'number', ['string'
 
 tulip.pluginsList = function() {
   var nbPlugins = _numberOfPlugins();
-  var uintArray = _allocArrayInEmHeap(Uint32Array, nbPlugins);
+  var uintArray = allocArrayInEmHeap(Uint32Array, nbPlugins);
   var nbBytes = _pluginsNamesLengths(uintArray.byteOffset);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, nbBytes);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, nbBytes);
   _pluginsList(ucharArray.byteOffset);
-  var ret = _bytesTypedArrayToStringArray(ucharArray, uintArray, nbPlugins);
-  _freeArrayInEmHeap(ucharArray);
-  _freeArrayInEmHeap(uintArray);
+  var ret = bytesTypedArrayToStringArray(ucharArray, uintArray, nbPlugins);
+  freeArrayInEmHeap(ucharArray);
+  freeArrayInEmHeap(uintArray);
   return ret;
 };
 
 tulip.algorithmsList = function() {
   var nbAlgorithms = _numberOfAlgorithms();
-  var uintArray = _allocArrayInEmHeap(Uint32Array, nbAlgorithms);
+  var uintArray = allocArrayInEmHeap(Uint32Array, nbAlgorithms);
   var nbBytes = _pluginsNamesLengths(uintArray.byteOffset);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, nbBytes);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, nbBytes);
   _algorithmsList(ucharArray.byteOffset);
-  var ret = _bytesTypedArrayToStringArray(ucharArray, uintArray, nbAlgorithms);
-  _freeArrayInEmHeap(ucharArray);
-  _freeArrayInEmHeap(uintArray);
+  var ret = bytesTypedArrayToStringArray(ucharArray, uintArray, nbAlgorithms);
+  freeArrayInEmHeap(ucharArray);
+  freeArrayInEmHeap(uintArray);
   return ret;
 };
 
@@ -2079,7 +2079,7 @@ tulip.Graph = function tulip_Graph(cppPointer) {
     tulip.CppObjectWrapper.call(newObject, cppPointer, "tlp::Graph");
   }
   if (!workerMode) {
-    _graphIdToWrapper[newObject.getCppPointer()] = newObject;
+    graphIdToWrapper[newObject.getCppPointer()] = newObject;
   }
   return newObject;
 };
@@ -2128,13 +2128,13 @@ tulip.Graph.prototype.inducedSubGraph = function tulip_Graph_prototype_inducedSu
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["array", tulip.Graph]);
   checkArrayOfType(nodes, tulip.Node, 0);
-  var nodesIdsArray = _allocArrayInEmHeap(Uint32Array, nodes.length+1);
+  var nodesIdsArray = allocArrayInEmHeap(Uint32Array, nodes.length+1);
   for (var i = 0 ; i < nodes.length ; ++i) {
     nodesIdsArray[i] = nodes[i].id;
   }
   nodesIdsArray[nodes.length] = UINT_MAX;
   var sg = tulip.Graph(_Graph_inducedSubGraph(this.cppPointer, nodesIdsArray.byteOffset, parentSubGraph ? parentSubGraph.cppPointer : 0));
-  _freeArrayInEmHeap(nodesIdsArray);
+  freeArrayInEmHeap(nodesIdsArray);
   return sg;
 };
 tulip.Graph.prototype.delSubGraph = function tulip_Graph_prototype_delSubGraph(sg) {
@@ -2228,12 +2228,12 @@ tulip.Graph.prototype.addNodes = function tulip_Graph_prototype_addNodes() {
   } else {
     var nodes = arguments[0];
     checkArrayOfType(nodes, tulip.Node, 0);
-    var nodesIdsArray = _allocArrayInEmHeap(Uint32Array, nodes.length);
+    var nodesIdsArray = allocArrayInEmHeap(Uint32Array, nodes.length);
     for (var i = 0 ; i < nodes.length ; ++i) {
       nodesIdsArray[i] = nodes[i].id;
     }
     _Graph_addNodes2(this.cppPointer, nodes.length, nodesIdsArray.byteOffset);
-    _freeArrayInEmHeap(nodesIdsArray);
+    freeArrayInEmHeap(nodesIdsArray);
   }
 };
 tulip.Graph.prototype.delNode = function tulip_Graph_prototype_delNode(node, deleteInAllGraphs) {
@@ -2251,12 +2251,12 @@ tulip.Graph.prototype.delNodes = function tulip_Graph_prototype_delNodes(nodes, 
   if (arguments.length == 1) {
     deleteInAllGraphs = false;
   }
-  var nodesIdsArray = _allocArrayInEmHeap(Uint32Array, nodes.length);
+  var nodesIdsArray = allocArrayInEmHeap(Uint32Array, nodes.length);
   for (var i = 0 ; i < nodes.length ; ++i) {
     nodesIdsArray[i] = nodes[i].id;
   }
   _Graph_delNodes(this.cppPointer, nodes.length, nodesIdsArray.byteOffset, deleteInAllGraphs);
-  _freeArrayInEmHeap(nodesIdsArray);
+  freeArrayInEmHeap(nodesIdsArray);
 };
 /**
 * Adds a new edge in the graph
@@ -2296,14 +2296,14 @@ tulip.Graph.prototype.addEdges = function tulip_Graph_prototype_addEdges() {
           checkArrayOfType(nodes[i], tulip.Node);
         }
       }
-      var nodesIdsArray = _allocArrayInEmHeap(Uint32Array, nodes.length*2);
+      var nodesIdsArray = allocArrayInEmHeap(Uint32Array, nodes.length*2);
       for (var i = 0 ; i < nodes.length ; ++i) {
         nodesIdsArray[2*i] = nodes[i][0].id;
         nodesIdsArray[2*i+1] = nodes[i][1].id;
       }
       var graphObject = this;
       var edges = getArrayOfTulipType(nodes.length, function(byteOffset){_Graph_addEdges1(graphObject.cppPointer, nodes.length, nodesIdsArray.byteOffset, byteOffset)}, tulip.Edge);
-      _freeArrayInEmHeap(nodesIdsArray);
+      freeArrayInEmHeap(nodesIdsArray);
       return edges;
     } catch (err) {
       throw new TypeError("Error when calling function 'tulip.Graph.prototype.addEdges', parameter 0 must be an array of arrays containing two instances of tulip.Node objects");
@@ -2312,12 +2312,12 @@ tulip.Graph.prototype.addEdges = function tulip_Graph_prototype_addEdges() {
     // addEdge(array of tulip.Edge)
     checkArrayOfType(arguments[0], tulip.Edge);
     var edges = arguments[0];
-    var edgesIdsArray = _allocArrayInEmHeap(Uint32Array, edges.length);
+    var edgesIdsArray = allocArrayInEmHeap(Uint32Array, edges.length);
     for (var i = 0 ; i < edges.length ; ++i) {
       edgesIdsArray[i] = edges[i].id;
     }
     _Graph_addEdges2(this.cppPointer, edges.length, edgesIdsArray.byteOffset);
-    _freeArrayInEmHeap(edgesIdsArray);
+    freeArrayInEmHeap(edgesIdsArray);
   }
 };
 tulip.Graph.prototype.delEdge = function tulip_Graph_prototype_delEdge(edge, deleteInAllGraphs) {
@@ -2335,23 +2335,23 @@ tulip.Graph.prototype.delEdges = function tulip_Graph_prototype_delEdges(edges, 
   if (arguments.length == 1) {
     deleteInAllGraphs = false;
   }
-  var edgesIdsArray = _allocArrayInEmHeap(Uint32Array, edges.length);
+  var edgesIdsArray = allocArrayInEmHeap(Uint32Array, edges.length);
   for (var i = 0 ; i < edges.length ; ++i) {
     edgesIdsArray[i] = edges[i].id;
   }
   _Graph_delEdges(this.cppPointer, edges.length, edgesIdsArray.byteOffset, deleteInAllGraphs);
-  _freeArrayInEmHeap(edgesIdsArray);
+  freeArrayInEmHeap(edgesIdsArray);
 };
 tulip.Graph.prototype.setEdgeOrder = function tulip_Graph_prototype_setEdgeOrder(node, edges) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Node, "array"], 2);
   checkArrayOfType(edges, tulip.Edge);
-  var edgesIdsArray = _allocArrayInEmHeap(Uint32Array, edges.length);
+  var edgesIdsArray = allocArrayInEmHeap(Uint32Array, edges.length);
   for (var i = 0 ; i < edges.length ; ++i) {
     edgesIdsArray[i] = edges[i].id;
   }
   _Graph_setEdgeOrder(this.cppPointer, node.id, edges.length, edgesIdsArray.byteOffset);
-  _freeArrayInEmHeap(edgesIdsArray);
+  freeArrayInEmHeap(edgesIdsArray);
 };
 tulip.Graph.prototype.swapEdgeOrder = function tulip_Graph_prototype_swapEdgeOrder(node, edge1, edge2) {
   checkWrappedCppPointer(this.cppPointer);
@@ -2548,13 +2548,13 @@ tulip.Graph.prototype.setName = function tulip_Graph_prototype_setName(name) {
 tulip.Graph.prototype.getProperties = function tulip_Graph_prototype_getProperties() {
   checkWrappedCppPointer(this.cppPointer);
   var nbProperties = _Graph_numberOfProperties(this.cppPointer);
-  var uintArray = _allocArrayInEmHeap(Uint32Array, nbProperties);
+  var uintArray = allocArrayInEmHeap(Uint32Array, nbProperties);
   var nbBytes = _Graph_propertiesNamesLengths(this.cppPointer, uintArray.byteOffset);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, nbBytes);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, nbBytes);
   _Graph_getProperties(this.cppPointer, ucharArray.byteOffset);
-  var ret = _bytesTypedArrayToStringArray(ucharArray, uintArray, nbProperties);
-  _freeArrayInEmHeap(uintArray);
-  _freeArrayInEmHeap(ucharArray);
+  var ret = bytesTypedArrayToStringArray(ucharArray, uintArray, nbProperties);
+  freeArrayInEmHeap(uintArray);
+  freeArrayInEmHeap(ucharArray);
   return ret;
 };
 tulip.Graph.prototype.getProperty = function tulip_Graph_prototype_getPropery(name) {
@@ -2828,7 +2828,7 @@ tulip.ColorScale.prototype.setColorScale = function tulip_ColorScale_prototype_s
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["array"], 1);
   checkArrayOfType(colors, tulip.Color, 0);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, colors.length * 4);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, colors.length * 4);
   for (var i = 0 ; i < colors.length ; ++i) {
     ucharArray[4*i] = colors[i].r;
     ucharArray[4*i+1] = colors[i].g;
@@ -2836,7 +2836,7 @@ tulip.ColorScale.prototype.setColorScale = function tulip_ColorScale_prototype_s
     ucharArray[4*i+3] = colors[i].a;
   }
   _ColorScale_setColorScale(this.cppPointer, ucharArray.byteOffset, colors.length);
-  _freeArrayInEmHeap(ucharArray);
+  freeArrayInEmHeap(ucharArray);
 };
 
 tulip.ColorScale.prototype.setColorAtPos = function tulip_ColorScale_prototype_setColorAtPos(pos, color) {
@@ -2848,26 +2848,26 @@ tulip.ColorScale.prototype.setColorAtPos = function tulip_ColorScale_prototype_s
 tulip.ColorScale.prototype.getColorAtPos = function tulip_ColorScale_prototype_setColorAtPos(pos) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["number"], 1);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, 4);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, 4);
   _ColorScale_getColorAtPos(this.cppPointer, pos, ucharArray.byteOffset);
   var ret = tulip.Color(ucharArray[0], ucharArray[1], ucharArray[2], ucharArray[3]);
-  _freeArrayInEmHeap(ucharArray);
+  freeArrayInEmHeap(ucharArray);
   return ret;
 };
 
 tulip.ColorScale.prototype.getColorMap = function() {
   checkWrappedCppPointer(this.cppPointer);
   var nbColors = _ColorScale_numberOfColors(this.cppPointer);
-  var floatArray = _allocArrayInEmHeap(Float32Array, nbColors);
-  var ucharArray = _allocArrayInEmHeap(Uint8Array, nbColors*4);
+  var floatArray = allocArrayInEmHeap(Float32Array, nbColors);
+  var ucharArray = allocArrayInEmHeap(Uint8Array, nbColors*4);
   _ColorScale_getOffsets(this.cppPointer, floatArray.byteOffset);
   _ColorScale_getColors(this.cppPointer, ucharArray.byteOffset);
   var ret = {};
   for (var i = 0 ; i < nbColors ; ++i) {
     ret[floatArray[i]] = tulip.Color(ucharArray[4*i], ucharArray[4*i+1], ucharArray[4*i+2], ucharArray[4*i+3]);
   }
-  _freeArrayInEmHeap(floatArray);
-  _freeArrayInEmHeap(ucharArray);
+  freeArrayInEmHeap(floatArray);
+  freeArrayInEmHeap(ucharArray);
   return ret;
 };
 
@@ -3793,27 +3793,27 @@ tulip.PropertyEvent.prototype.getEdge = function() {
 
 // ==================================================================================================================
 
-var _tulipListeners = {};
-var _tulipObservers = {};
+var tulipListeners = {};
+var tulipObservers = {};
 
 tulip.addListener = function(sender, listener) {
   checkArgumentsTypes(arguments, [[tulip.Graph, tulip.PropertyInterface], ["function", "object"]], 2);
-  if (!_tulipListeners.hasOwnProperty(sender.cppPointer)) {
-    _tulipListeners[sender.cppPointer] = [];
+  if (!tulipListeners.hasOwnProperty(sender.cppPointer)) {
+    tulipListeners[sender.cppPointer] = [];
   }
-  _tulipListeners[sender.cppPointer].push(listener);
+  tulipListeners[sender.cppPointer].push(listener);
 };
 
 tulip.removeListener = function(sender, listener) {
   checkArgumentsTypes(arguments, [[tulip.Graph, tulip.PropertyInterface], ["function", "object"]], 2);
-  if (!_tulipListeners.hasOwnProperty(sender.cppPointer)) {
+  if (!tulipListeners.hasOwnProperty(sender.cppPointer)) {
     return;
   }
-  for (var i = 0, len = _tulipListeners[sender.cppPointer].length ; i < len ; i++) {
-    if (_tulipListeners[sender.cppPointer][i] === listener) {
-      _tulipListeners[sender.cppPointer].splice(i, 1);
-      if (_tulipListeners[sender.cppPointer].length == 0) {
-        delete _tulipListeners[sender.cppPointer];
+  for (var i = 0, len = tulipListeners[sender.cppPointer].length ; i < len ; i++) {
+    if (tulipListeners[sender.cppPointer][i] === listener) {
+      tulipListeners[sender.cppPointer].splice(i, 1);
+      if (tulipListeners[sender.cppPointer].length == 0) {
+        delete tulipListeners[sender.cppPointer];
       }
       break;
     }
@@ -3821,27 +3821,27 @@ tulip.removeListener = function(sender, listener) {
 };
 
 tulip.hasListener = function(senderId) {
-  return _tulipListeners.hasOwnProperty(senderId);
+  return tulipListeners.hasOwnProperty(senderId);
 };
 
 tulip.addObserver = function(sender, observer) {
   checkArgumentsTypes(arguments, [[tulip.Graph, tulip.PropertyInterface], ["function", "object"]], 2);
-  if (!_tulipObservers.hasOwnProperty(sender.cppPointer)) {
-    _tulipObservers[sender.cppPointer] = [];
+  if (!tulipObservers.hasOwnProperty(sender.cppPointer)) {
+    tulipObservers[sender.cppPointer] = [];
   }
-  _tulipObservers[sender.cppPointer].push(observer);
+  tulipObservers[sender.cppPointer].push(observer);
 };
 
 tulip.removeObserver = function(sender, observer) {
   checkArgumentsTypes(arguments, [[tulip.Graph, tulip.PropertyInterface], ["function", "object"]], 2);
-  if (!_tulipObservers.hasOwnProperty(sender.cppPointer)) {
+  if (!tulipObservers.hasOwnProperty(sender.cppPointer)) {
     return;
   }
-  for (var i = 0, len = _tulipObservers[sender.cppPointer].length ; i < len ; i++) {
-    if (_tulipObservers[sender.cppPointer][i] === observer) {
-      _tulipObservers[sender.cppPointer].splice(i, 1);
-      if (_tulipObservers[sender.cppPointer].length == 0) {
-        delete _tulipObservers[sender.cppPointer];
+  for (var i = 0, len = tulipObservers[sender.cppPointer].length ; i < len ; i++) {
+    if (tulipObservers[sender.cppPointer][i] === observer) {
+      tulipObservers[sender.cppPointer].splice(i, 1);
+      if (tulipObservers[sender.cppPointer].length == 0) {
+        delete tulipObservers[sender.cppPointer];
       }
       break;
     }
@@ -3849,18 +3849,18 @@ tulip.removeObserver = function(sender, observer) {
 };
 
 tulip.hasObserver = function(senderId) {
-  return _tulipObservers.hasOwnProperty(senderId);
+  return tulipObservers.hasOwnProperty(senderId);
 };
 
 tulip.sendEventToListeners = function(senderId, event) {
-  if (!_tulipListeners.hasOwnProperty(senderId)) {
+  if (!tulipListeners.hasOwnProperty(senderId)) {
     return;
   }
-  for (var i = 0, len = _tulipListeners[senderId].length ; i < len ; i++) {
-    if (typeOf(_tulipListeners[senderId][i]) == "function") {
-      _tulipListeners[senderId][i](event);
-    } else if (typeOf(_tulipListeners[senderId][i]) == "object" && typeOf(_tulipListeners[senderId][i].treatEvent) == "function") {
-      _tulipListeners[senderId][i].treatEvent(event);
+  for (var i = 0, len = tulipListeners[senderId].length ; i < len ; i++) {
+    if (typeOf(tulipListeners[senderId][i]) == "function") {
+      tulipListeners[senderId][i](event);
+    } else if (typeOf(tulipListeners[senderId][i]) == "object" && typeOf(tulipListeners[senderId][i].treatEvent) == "function") {
+      tulipListeners[senderId][i].treatEvent(event);
     }
   }
 };
@@ -3869,10 +3869,10 @@ tulip.sendEventsToObservers = function(events) {
   var observerEvents = {};
   var observers = [];
 
-  for (var senderId in _tulipObservers) {
-    if (_tulipObservers.hasOwnProperty(senderId)) {
-      for (var j = 0 ; j < _tulipObservers[senderId].length ; ++j) {
-        var observer = _tulipObservers[senderId][j];
+  for (var senderId in tulipObservers) {
+    if (tulipObservers.hasOwnProperty(senderId)) {
+      for (var j = 0 ; j < tulipObservers[senderId].length ; ++j) {
+        var observer = tulipObservers[senderId][j];
         if (observers.indexOf(observer) == -1) {
           observers.push(observer);
         }
@@ -3881,10 +3881,10 @@ tulip.sendEventsToObservers = function(events) {
   }
 
   for (var i = 0 ; i < events.length ; ++i) {
-    for (var senderId in _tulipObservers) {
-      if (_tulipObservers.hasOwnProperty(senderId)) {
-        for (var j = 0 ; j < _tulipObservers[senderId].length ; ++j) {
-          var key = observers.indexOf(_tulipObservers[senderId][j]);
+    for (var senderId in tulipObservers) {
+      if (tulipObservers.hasOwnProperty(senderId)) {
+        for (var j = 0 ; j < tulipObservers[senderId].length ; ++j) {
+          var key = observers.indexOf(tulipObservers[senderId][j]);
           if (events[i].getSender().cppPointer.toString() == senderId) {
             if (!observerEvents.hasOwnProperty(key)) {
               observerEvents[key] = [];
@@ -4287,18 +4287,23 @@ if (workerMode) {
     self.postMessage({eventType: 'progressComment', graphId : graphId, comment: text});
   }
 
-  self.postMessage({eventType : 'tulipWorkerInit'});
-
 } else {
 
   // ===================================================================================================================
 
-  var _graphLoadedCallback = {};
-  var _algorithmFinishedCallback = {};
-  var _algorithmSucceed = {};
-  var _graphIdToWrapper = {};
+  var graphLoadedCallbacks = {};
+  var algorithmFinishedCallbacks = {};
+  var algorithmSucceed = {};
+  var graphIdToWrapper = {};
 
-  function _createGraphProperties(graphId, properties) {
+  var _fillMetaGraphInfos = Module.cwrap('fillMetaGraphInfos', null, ['number']);
+  var _parseGraphAttributesJSONData =  Module.cwrap('parseGraphAttributesJSONData', null, ['number', 'string']);
+  var _createGraphProperty = Module.cwrap('createGraphProperty', null, ['number', 'string', 'string', 'string', 'string']);
+  var _addSubGraph = Module.cwrap('addSubGraph', 'number', ['number', 'number', 'number', 'string', 'string', 'string', 'string']);
+  var _parseNodesJSONData = Module.cwrap('parseNodesJSONData', null, ['number', 'string']);
+  var _parseEdgesJSONData = Module.cwrap('parseEdgesJSONData', null, ['number', 'string']);
+
+  tulip.Graph.prototype._createGraphProperties = function(properties) {
     var propertiesNames = Object.keys(properties);
     for (var i = 0 ; i < propertiesNames.length ; ++i) {
       var propertyName = propertiesNames[i];
@@ -4306,17 +4311,38 @@ if (workerMode) {
       var propertyType = propertyData.type;
       var propertyNodeDefaultValue = propertyData.nodeDefault;
       var propertyEdgeDefaultValue = propertyData.edgeDefault;
-      _createGraphProperty(graphId, propertyType, propertyName, propertyNodeDefaultValue, propertyEdgeDefaultValue);
+      _createGraphProperty(this.cppPointer, propertyType, propertyName, propertyNodeDefaultValue, propertyEdgeDefaultValue);
     }
-  }
+  };
 
-  var _fillMetaGraphInfos = Module.cwrap('fillMetaGraphInfos', null, ['number']);
-  var _parseGraphAttributesJSONData =  Module.cwrap('parseGraphAttributesJSONData', null, ['number', 'string']);
-  var _createGraphProperty = Module.cwrap('createGraphProperty', null, ['number', 'string', 'string', 'string', 'string']);
-  var _addSubGraph = Module.cwrap('addSubGraph', 'number', ['number', 'number', 'number', 'string', 'string', 'string', 'string']);
+  tulip.Graph.prototype._fillMetaGraphInfos = function() {
+    _fillMetaGraphInfos(this.cppPointer);
+  };
 
-  var _parseNodesJSONData = Module.cwrap('parseNodesJSONData', null, ['number', 'string']);
-  var _parseEdgesJSONData = Module.cwrap('parseEdgesJSONData', null, ['number', 'string']);
+  tulip.Graph.prototype._parseGraphAttributesJSONData = function(graphAttributesJSONData) {
+    if (graphAttributesJSONData) {
+      _parseGraphAttributesJSONData(this.cppPointer, graphAttributesJSONData);
+    }
+  };
+
+  tulip.Graph.prototype._parseNodesJSONData = function(nodesJSONData) {
+    if (nodesJSONData) {
+      _parseNodesJSONData(this.cppPointer, nodesJSONData);
+    }
+  };
+
+  tulip.Graph.prototype._parseEdgesJSONData = function(edgesJSONData) {
+    if (edgesJSONData) {
+      _parseEdgesJSONData(this.cppPointer, edgesJSONData);
+    }
+  };
+
+  tulip.Graph.prototype._addSubGraph = function(subGraphData) {
+    if (subGraphData) {
+      _addSubGraph(this.cppPointer, subGraphData.parentGraphId, subGraphData.subGraphId, subGraphData.nodesIds, subGraphData.edgesIds, subGraphData.attributes, subGraphData.properties);
+    }
+  };
+
 
   if (tulip.vizFeatures) {
 
@@ -4337,7 +4363,6 @@ if (workerMode) {
     var _setCurrentCanvas = Module.cwrap('setCurrentCanvas', null, ['string']);
     var _getCurrentCanvas = Module.cwrap('getCurrentCanvas', 'string', []);
     var _resizeCanvas = Module.cwrap('resizeCanvas', null, ['string', 'number', 'number', 'number']);
-    var _draw = Module.cwrap('draw', null, []);
     var _fullScreen = Module.cwrap('fullScreen', null, ['string']);
     var _updateGlScene = Module.cwrap('updateGlScene', null, ['string']);
     var _subGraphHasHull = Module.cwrap('subGraphHasHull', 'number', ['string', 'number']);
@@ -4350,201 +4375,164 @@ if (workerMode) {
     var _selectEdges = Module.cwrap('selectEdges', 'number', ['string', 'number', 'number', 'number', 'number']);
     var _getSelectedEdges = Module.cwrap('getSelectedEdges', null, ['number']);
 
-    var _nextCanvasId = 0;
-    var _graphIdToView = {};
-    var _canvasIdToView = {};
-    var busyAnimations = {};
-
-    function _startBusyAnimation(canvasId) {
-
-      if (busyAnimations.hasOwnProperty(canvasId) && busyAnimations[canvasId]) {
-        return;
-      }
-
-      function busyAnimation() {
-        if (busyAnimations[canvasId]) {
-          _setProgressBarPercent(canvasId, -1);
-          _updateGlScene(canvasId);
-          Browser.requestAnimationFrame(busyAnimation);
-        }
-      }
-
-      busyAnimations[canvasId] = true;
-      Browser.requestAnimationFrame(busyAnimation);
-    }
-
-    function _stopBusyAnimation(canvasId) {
-      busyAnimations[canvasId] = false;
-    }
-
+    var graphIdToView = {};
     var graphData = {};
 
   }
 
-  var _tulipWorkerInit = true;
+  var tulipWorkerInit = true;
 
   if (!nodejs) {
 
-    _tulipWorkerInit = false;
+    tulipWorkerInit = false;
 
     var _tulipWorker = new Worker(scriptPath + scriptName);
 
     _tulipWorker.addEventListener('message', function (event) {
       var delay = 0;
       var view = null;
-      var canvasId = "";
       var graphId = null;
+      var graph = null;
       if ('graphId' in event.data) {
         graphId = event.data.graphId;
+        graph = graphIdToWrapper[graphId];
       }
-      if (tulip.vizFeatures) {
-        if (graphId) {
-          view = _graphIdToView[graphId];
-          canvasId = view.canvasId;
-        }
+      if (tulip.vizFeatures && graphId) {
+        view = graphIdToView[graphId];
       }
       switch (event.data.eventType) {
-      case 'tulipWorkerInit':
-        _tulipWorkerInit = true;
-        break;
-      case 'print':
-        console.log(event.data.text);
-        break;
-      case 'progressValue':
-        if (tulip.vizFeatures && canvasId) {
-          _stopBusyAnimation(canvasId);
-          _setProgressBarPercent(canvasId, event.data.value);
-          if (event.data.value >= 0) {
-            _draw();
-          } else {
-            _startBusyAnimation(canvasId);
+        case 'tulipWorkerInit':
+          tulipWorkerInit = true;
+          break;
+        case 'print':
+          console.log(event.data.text);
+          break;
+        case 'progressValue':
+          if (tulip.vizFeatures && view) {
+            view.stopBusyAnimation();
+            view.setProgressBarPercent(event.data.value);
+            if (event.data.value >= 0) {
+              view.draw();
+            } else {
+              view.startBusyAnimation();
+            }
           }
-        }
-        break;
-      case 'progressComment':
-        if (tulip.vizFeatures && canvasId) {
-          _setProgressBarComment(canvasId, event.data.comment);
-        }
-        break;
-      case 'startGraphData':
-        setTimeout(function() {
-          tulip.holdObservers();
-          _parseGraphAttributesJSONData(_graphIdToWrapper[graphId].cppPointer, event.data.graphAttributes);
-          if (tulip.vizFeatures && canvasId) {
-            _stopBusyAnimation(canvasId);
-            _setCurrentCanvas(canvasId);
-            _setProgressBarComment(canvasId, "Initializing graph visualization ...");
-            _setProgressBarPercent(canvasId, 0);
-            _startGraphViewData(canvasId);
-            graphData[canvasId] = event.data;
-            _draw();
+          break;
+        case 'progressComment':
+          if (tulip.vizFeatures && view) {
+            view.setProgressBarComment(event.data.comment);
           }
-        }, delay);
-        break;
-      case 'endGraphData':
-        _fillMetaGraphInfos(_graphIdToWrapper[graphId].cppPointer);
-        tulip.unholdObservers();
-        setTimeout(function() {
-          if (tulip.vizFeatures && canvasId) {
-            _setProgressBarComment(canvasId, "Finalizing graph rendering data ...");
-            _draw();
-            _setCurrentCanvas(canvasId);
-            _endGraphViewData(canvasId);
-            _setGraphRenderingDataReady(canvasId, true);
-            _centerScene(canvasId);
-          }
-          if (graphId in _graphLoadedCallback) {
-            _graphLoadedCallback[graphId](_graphIdToWrapper[graphId]);
-          }
-          tulip.unholdObservers();
-        }, delay);
-        break;
-      case 'startGraphUpdate':
-        tulip.holdObservers();
-        _algorithmSucceed[graphId] = event.data.algoSucceed;
-        if (tulip.vizFeatures && canvasId) {
-          _stopBusyAnimation(canvasId);
+          break;
+        case 'startGraphData':
           setTimeout(function() {
-            _setCurrentCanvas(canvasId);
-            _setProgressBarComment(canvasId, "Updating graph visualization ...");
-            _startGraphViewUpdate(canvasId, event.data.clearGraph);
-            graphData[canvasId] = event.data;
-            _draw();
+            tulip.holdObservers();
+            graph._parseGraphAttributesJSONData(event.data.graphAttributes);
+            if (tulip.vizFeatures && view) {
+              view.stopBusyAnimation();
+              view.setProgressBarComment("Initializing graph visualization ...");
+              view.setProgressBarPercent(0);
+              view.startGraphViewData();
+              graphData[graphId] = event.data;
+              view.draw();
+            }
           }, delay);
-        }
-        break;
-      case 'endGraphUpdate':
-        _fillMetaGraphInfos(_graphIdToWrapper[graphId].cppPointer);
-        if (graphId in _algorithmFinishedCallback) {
-          _algorithmFinishedCallback[graphId](_algorithmSucceed[graphId], _graphIdToWrapper[graphId]);
-        }
-
-        if (tulip.vizFeatures && canvasId) {
+          break;
+        case 'endGraphData':
+          graph._fillMetaGraphInfos();
+          tulip.unholdObservers();
           setTimeout(function() {
-            _setCurrentCanvas(canvasId);
-            _endGraphViewUpdate(canvasId);
-            _setGraphRenderingDataReady(canvasId, true);
-            _centerScene(canvasId);
+            if (tulip.vizFeatures && view) {
+              view.setProgressBarComment("Finalizing graph rendering data ...");
+              view.draw();
+              view.endGraphViewData();
+              view.setGraphRenderingDataReady(true);
+              view.centerScene();
+            }
+            if (graphId in graphLoadedCallbacks) {
+              graphLoadedCallbacks[graphId](graph);
+            }
             tulip.unholdObservers();
           }, delay);
-        } else {
-          tulip.unholdObservers();
-        }
+          break;
+        case 'startGraphUpdate':
+          tulip.holdObservers();
+          algorithmSucceed[graphId] = event.data.algoSucceed;
+          if (tulip.vizFeatures && view) {
+            view.stopBusyAnimation();
+            setTimeout(function() {
+              view.setProgressBarComment("Updating graph visualization ...");
+              view.startGraphViewUpdate(event.data.clearGraph);
+              graphData[graphId] = event.data;
+              view.draw();
+            }, delay);
+          }
+          break;
+        case 'endGraphUpdate':
+          graph._fillMetaGraphInfos();
+          if (graphId in algorithmFinishedCallbacks) {
+            algorithmFinishedCallbacks[graphId](algorithmSucceed[graphId], graph);
+          }
 
-        break;
-      case 'createGraphProperties':
-        setTimeout(function() {
-          _createGraphProperties(graphId, event.data.properties);
-        }, delay);
-        break;
-      case 'addNodes':
-        setTimeout(function() {
-          var nodesJson =  event.data.nodesJson;
-          _parseNodesJSONData(graphId, nodesJson);
-          if (tulip.vizFeatures && canvasId) {
-            var nodeId = event.data.lastNodeId;
-            var percent = (nodeId / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
-            _setProgressBarComment(canvasId, "Importing graph nodes data (" + nodeId + " / " + graphData[canvasId].numberOfNodes + ") ...");
-            _setProgressBarPercent(canvasId, percent);
-            _draw();
+          if (tulip.vizFeatures && view) {
+            setTimeout(function() {
+              view.endGraphViewUpdate();
+              view.setGraphRenderingDataReady(true);
+              view.centerScene();
+              tulip.unholdObservers();
+            }, delay);
+          } else {
+            tulip.unholdObservers();
           }
-          _tulipWorker.postMessage({eventType : 'sendNextNodes', graphId : graphId});
-        }, delay);
-        break;
-      case 'addEdges':
-        setTimeout(function() {
-          var edgesJson = event.data.edgesJson;
-          if (edgesJson) {
-            _parseEdgesJSONData(graphId, edgesJson);
-          }
-          if (tulip.vizFeatures && canvasId) {
-            var edgeId = event.data.lastEdgeId;
-            var percent = ((graphData[canvasId].numberOfNodes + edgeId) / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
-            _setProgressBarComment(canvasId, "Importing graph edges data (" + edgeId + " / " + graphData[canvasId].numberOfEdges + ") ...");
-            _setProgressBarPercent(canvasId, percent);
-            _draw();
-          }
-          _tulipWorker.postMessage({eventType : 'sendNextEdges' , graphId : graphId});
-        }, delay);
-        break;
-      case 'addSubGraph':
-        setTimeout(function() {
-          var subGraphData = event.data.subGraphData;
-          _addSubGraph(graphId, subGraphData.parentGraphId, subGraphData.subGraphId, subGraphData.nodesIds, subGraphData.edgesIds, subGraphData.attributes, subGraphData.properties);
-          if (tulip.vizFeatures && canvasId) {
-            var sgId = _graphIdToWrapper[graphId].numberOfDescendantGraphs();
-            var percent = ((graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + sgId) / (graphData[canvasId].numberOfNodes + graphData[canvasId].numberOfEdges + graphData[canvasId].numberOfSubgraphs - 1)) * 100;
-            _setProgressBarComment(canvasId, "Importing subgraphs data (" + sgId + " / " + graphData[canvasId].numberOfSubgraphs + ") ...");
-            _setProgressBarPercent(canvasId, percent);
-            _draw();
-          }
-          _tulipWorker.postMessage({eventType : 'sendNextSubGraph', graphId : event.data.graphId});
-        }, delay);
-        break;
+
+          break;
+        case 'createGraphProperties':
+          setTimeout(function() {
+            graph._createGraphProperties(event.data.properties);
+          }, delay);
+          break;
+        case 'addNodes':
+          setTimeout(function() {
+            graph._parseNodesJSONData(event.data.nodesJson);
+            if (tulip.vizFeatures && view) {
+              var nodeId = event.data.lastNodeId;
+              var percent = (nodeId / (graphData[graphId].numberOfNodes + graphData[graphId].numberOfEdges + graphData[graphId].numberOfSubgraphs - 1)) * 100;
+              view.setProgressBarComment("Importing graph nodes data (" + nodeId + " / " + graphData[graphId].numberOfNodes + ") ...");
+              view.setProgressBarPercent(percent);
+              view.draw();
+            }
+            _tulipWorker.postMessage({eventType : 'sendNextNodes', graphId : graphId});
+          }, delay);
+          break;
+        case 'addEdges':
+          setTimeout(function() {
+            graph._parseEdgesJSONData(event.data.edgesJson);
+            if (tulip.vizFeatures && view) {
+              var edgeId = event.data.lastEdgeId;
+              var percent = ((graphData[graphId].numberOfNodes + edgeId) / (graphData[graphId].numberOfNodes + graphData[graphId].numberOfEdges + graphData[graphId].numberOfSubgraphs - 1)) * 100;
+              view.setProgressBarComment("Importing graph edges data (" + edgeId + " / " + graphData[graphId].numberOfEdges + ") ...");
+              view.setProgressBarPercent(percent);
+              view.draw();
+            }
+            _tulipWorker.postMessage({eventType : 'sendNextEdges' , graphId : graphId});
+          }, delay);
+          break;
+        case 'addSubGraph':
+          setTimeout(function() {
+            graph._addSubGraph(event.data.subGraphData);
+            if (tulip.vizFeatures && view) {
+              var sgId = graph.numberOfDescendantGraphs();
+              var percent = ((graphData[graphId].numberOfNodes + graphData[graphId].numberOfEdges + sgId) / (graphData[graphId].numberOfNodes + graphData[graphId].numberOfEdges + graphData[graphId].numberOfSubgraphs - 1)) * 100;
+              view.setProgressBarComment("Importing subgraphs data (" + sgId + " / " + graphData[graphId].numberOfSubgraphs + ") ...");
+              view.setProgressBarPercent(percent);
+              view.draw();
+            }
+            _tulipWorker.postMessage({eventType : 'sendNextSubGraph', graphId : event.data.graphId});
+          }, delay);
+          break;
       };
     }, false);
 
-    function _sendGraphToWorker(graph, graphFilePath, graphFileData, sendDataBack) {
+    function sendGraphToWorker(graph, graphFilePath, graphFileData, sendDataBack) {
       if (arguments.length == 1) {
         var file = FS.findObject("/graph.tlpb.gz");
         if (!file) {
@@ -4552,7 +4540,7 @@ if (workerMode) {
         }
         var saved = tulip.saveGraph(graph, "/graph.tlpb.gz");
         var graphData = FS.readFile("/graph.tlpb.gz");
-        _sendGraphToWorker(graph, "graph.tlpb.gz", graphData.buffer, false);
+        sendGraphToWorker(graph, "graph.tlpb.gz", graphData.buffer, false);
       } else {
         var messageData = {
           eventType: 'loadGraph',
@@ -4578,13 +4566,7 @@ if (workerMode) {
     var _setCanvasGraph = Module.cwrap('setCanvasGraph', null, ['string', 'number']);
     var _getViewRenderingParameters = Module.cwrap('getViewRenderingParameters', 'number', ['string']);
 
-    tulip.getViewForCanvasId = function(canvasId) {
-      if (canvasId in _canvasIdToView) {
-        return _canvasIdToView[canvasId];
-      } else {
-        return null;
-      }
-    };
+    var nextCanvasId = 0;
 
     tulip.View = function(container, width, height) {
       var newObject = createObject(tulip.View, this);
@@ -4595,7 +4577,7 @@ if (workerMode) {
           newObject.container = container;
         }
 
-        var currentId = _nextCanvasId++;
+        var currentId = nextCanvasId++;
 
         newObject.canvasId = 'tulip-canvas-' + currentId;
         newObject.canvas = document.createElement("canvas");
@@ -4613,14 +4595,21 @@ if (workerMode) {
         }
         _initCanvas(newObject.canvasId, width, height, newObject.sizeRelativeToContainer);
         newObject.graph = null;
-        _canvasIdToView[newObject.canvasId] = newObject;
-
         newObject.graphDrawingChanged = false;
 
       }
       newObject.fullScreenActivated = false;
+      newObject.busyAnimationStarted = false;
       return newObject;
     };
+
+    tulip.View.prototype.makeCurrent = function() {
+      _setCurrentCanvas(this.canvasId);
+    }
+
+    tulip.View.prototype.updateGlScene = function() {
+      _updateGlScene(this.canvasId);
+    }
 
     tulip.View.prototype.draw = function() {
       if (this.sizeRelativeToContainer) {
@@ -4628,12 +4617,39 @@ if (workerMode) {
       }
       var view = this;
       Browser.requestAnimationFrame(function() {
-        _updateGlScene(view.canvasId);
+        view.makeCurrent();
+        view.updateGlScene();
       });
     };
 
-    tulip.View.prototype.setCurrent = function() {
-      _setCurrentCanvas(this.canvasId);
+    tulip.View.prototype.setProgressBarComment = function(comment) {
+      _setProgressBarComment(this.canvasId, comment);
+    };
+
+    tulip.View.prototype.setProgressBarPercent = function(percent) {
+      _setProgressBarPercent(this.canvasId, percent);
+    };
+
+    tulip.View.prototype.startBusyAnimation = function() {
+
+      if (this.busyAnimationStarted) {
+        return;
+      }
+
+      function busyAnimation() {
+        if (this.busyAnimationStarted) {
+          this.setProgressBarPercent(-1);
+          this.updateGlScene();
+          Browser.requestAnimationFrame(busyAnimation);
+        }
+      }
+
+      this.busyAnimationStarted = true;
+      Browser.requestAnimationFrame(busyAnimation);
+    };
+
+    tulip.View.prototype.stopBusyAnimation = function(canvasId) {
+      this.busyAnimationStarted = false;
     };
 
     tulip.View.prototype.activateInteractor = function(interactorName) {
@@ -4674,8 +4690,8 @@ if (workerMode) {
 //      tulip.addListener(this.graph.getSizeProperty("viewSize"), this);
 //      tulip.addObserver(this.graph.getSizeProperty("viewSize"), this);
       _setCanvasGraph(this.canvasId, graph.cppPointer);
-      _graphIdToView[graph.getCppPointer()] = this;
-      _graphIdToWrapper[graph.getCppPointer()] = graph;
+      graphIdToView[graph.getCppPointer()] = this;
+      graphIdToWrapper[graph.getCppPointer()] = graph;
     };
 
     tulip.View.prototype.getGraph = function() {
@@ -4721,10 +4737,10 @@ if (workerMode) {
         var graph = tulip.Graph();
         view.setGraph(graph);
         if (graphLoadedCallback) {
-          _graphLoadedCallback[view.graph.getCppPointer()] = graphLoadedCallback;
+          graphLoadedCallbacks[view.graph.getCppPointer()] = graphLoadedCallback;
         }
-        _setGraphRenderingDataReady(view.canvasId, false);
-        _sendGraphToWorker(view.graph, graphFilePath, graphFileData, true);
+        this.setGraphRenderingDataReady(false);
+        sendGraphToWorker(view.graph, graphFilePath, graphFileData, true);
       } else {
         var file = FS.findObject(graphFilePath);
         if (!file) {
@@ -4744,6 +4760,10 @@ if (workerMode) {
           graphLoadedCallback(view.graph);
         }
       }
+    };
+
+    tulip.View.prototype.setGraphRenderingDataReady = function(ready) {
+      _setGraphRenderingDataReady(this.canvasId, ready);
     };
 
     tulip.View.prototype.selectNodesEdges = function(x, y, w, h) {
@@ -4859,6 +4879,22 @@ if (workerMode) {
 
     tulip.View.prototype.getViewSnapshotBlob = function() {
       return dataURItoBlob(this.canvas.toDataURL());
+    };
+
+    tulip.View.prototype.startGraphViewData = function() {
+      _startGraphViewData(this.canvasId);
+    };
+
+    tulip.View.prototype.endGraphViewData = function() {
+      _endGraphViewData(this.canvasId);
+    };
+
+    tulip.View.prototype.startGraphViewUpdate = function(clearGraph) {
+      _startGraphViewUpdate(this.canvasId, clearGraph);
+    };
+
+    tulip.View.prototype.endGraphViewUpdate = function() {
+      _endGraphViewUpdate(this.canvasId);
     };
 
     // ==================================================================================================
@@ -5052,7 +5088,7 @@ if (workerMode) {
 
 
   tulip.isLoaded = function() {
-    return tulip.mainCalled && _tulipWorkerInit;
+    return tulip.mainCalled && tulipWorkerInit;
   }
 
   if (!nodejs) {
@@ -5066,13 +5102,13 @@ if (workerMode) {
         algoParameters = {};
       }
       var graphId = this.getCppPointer();
-      if (tulip.vizFeatures && graphId in _graphIdToView) {
-        var canvasId = _graphIdToView[graphId].canvasId;
-        _setGraphRenderingDataReady(canvasId, false);
-        _startBusyAnimation(canvasId);
-        _setProgressBarComment(canvasId, "Applying " + algorithmName + " algorithm ...");
+      if (tulip.vizFeatures && graphId in graphIdToView) {
+        var view = graphIdToView[graphId];
+        view.setGraphRenderingDataReady(false);
+        view.startBusyAnimation();
+        view.setProgressBarComment("Applying " + algorithmName + " algorithm ...");
       }
-      _sendGraphToWorker(this);
+      sendGraphToWorker(this);
       var messageData = {
         graphId : graphId,
         eventType: 'algorithm',
@@ -5080,7 +5116,7 @@ if (workerMode) {
         parameters : JSON.stringify(algoParameters)
       };
       if (algoFinishedCallback) {
-        _algorithmFinishedCallback[graphId] = algoFinishedCallback;
+        algorithmFinishedCallbacks[graphId] = algoFinishedCallback;
       }
       _tulipWorker.postMessage(messageData);
     };
@@ -5090,7 +5126,7 @@ if (workerMode) {
         algoParameters = {};
       }
       var graphId = graph.getCppPointer();
-      _sendGraphToWorker(graph);
+      sendGraphToWorker(graph);
       var messageData = {
         graphId : graphId,
         eventType: 'propertyAlgorithm',
@@ -5099,14 +5135,14 @@ if (workerMode) {
         parameters : JSON.stringify(algoParameters)
       };
       if (algoFinishedCallback) {
-        _algorithmFinishedCallback[graphId] = algoFinishedCallback;
+        algorithmFinishedCallbacks[graphId] = algoFinishedCallback;
       }
       _tulipWorker.postMessage(messageData);
-      if (tulip.vizFeatures && graphId in _graphIdToView) {
-        var canvasId = _graphIdToView[graphId].canvasId;
-        _setGraphRenderingDataReady(canvasId, false);
-        _startBusyAnimation(canvasId);
-        _setProgressBarComment(canvasId, "Applying " + algorithmName + " " + resultProperty.getTypename() + " algorithm ...");
+      if (tulip.vizFeatures && graphId in graphIdToView) {
+        var view = graphIdToView[graphId];
+        view.setGraphRenderingDataReady(false);
+        view.startBusyAnimation();
+        view.setProgressBarComment("Applying " + algorithmName + " " + resultProperty.getTypename() + " algorithm ...");
       }
     }
 
@@ -5148,15 +5184,15 @@ if (workerMode) {
 
     tulip.Graph.prototype.executeScriptInWorker = function(graphFunction, scriptExecutedCallback) {
       var graphId = this.getCppPointer();
-      _sendGraphToWorker(this);
+      sendGraphToWorker(this);
       if (scriptExecutedCallback) {
-        _algorithmFinishedCallback[graphId] = scriptExecutedCallback;
+        algorithmFinishedCallbacks[graphId] = scriptExecutedCallback;
       }
-      if (tulip.vizFeatures && graphId in _graphIdToView) {
-        var canvasId = _graphIdToView[graphId].canvasId;
-        _setGraphRenderingDataReady(canvasId, false);
-        _startBusyAnimation(canvasId);
-        _setProgressBarComment(canvasId, "Executing script on graph ...");
+      if (tulip.vizFeatures && graphId in graphIdToView) {
+        var view = graphIdToView[graphId];
+        view.setGraphRenderingDataReady(canvasId, false);
+        view.startBusyAnimation(canvasId);
+        view.setProgressBarComment("Executing script on graph ...");
       }
       _tulipWorker.postMessage({
                                  graphId: this.getCppPointer(),

@@ -198,7 +198,7 @@ void FisheyeInteractor::draw() {
   for (std::set<GlEntity*>::iterator it = glEntities.begin() ; it != glEntities.end() ; ++it) {
     GlGraph *glGraph = dynamic_cast<GlGraph*>(*it);
     if (glGraph) {
-      glGraph->getRenderingParameters().setMinSizeOfLabels(glGraph->getRenderingParameters().minSizeOfLabels()+factor*2);
+      glGraph->getRenderingParameters().setMinSizeOfLabels(glGraph->getRenderingParameters().minSizeOfLabels()+factor*4);
     }
   }
 
@@ -213,7 +213,7 @@ void FisheyeInteractor::draw() {
   for (std::set<GlEntity*>::iterator it = glEntities.begin() ; it != glEntities.end() ; ++it) {
     GlGraph *glGraph = dynamic_cast<GlGraph*>(*it);
     if (glGraph) {
-      glGraph->getRenderingParameters().setMinSizeOfLabels(glGraph->getRenderingParameters().minSizeOfLabels()-factor*2);
+      glGraph->getRenderingParameters().setMinSizeOfLabels(glGraph->getRenderingParameters().minSizeOfLabels()-factor*4);
     }
   }
 

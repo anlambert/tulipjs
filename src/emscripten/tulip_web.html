@@ -11,6 +11,9 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
     <script type="text/javascript" src="FileSaver.js"></script>
+    <link rel="stylesheet" href="jstree/themes/default/style.min.css" />
+    <script type="text/javascript" src="jstree/jstree.min.js"></script>
+    <script type="text/javascript" src="jstree/jstreegrid.js"></script>
 
     <style type="text/css">
      .ui-icon-interactor-navigation,
@@ -132,6 +135,11 @@
           <div data-role="controlgroup">
             <input type="file" id="graph_file"/>
           </div>
+        </div>
+
+        <div data-role = "collapsible" data-theme = "a" align="left" data-mini="true" data-content-theme ="a">
+          <h3> Graphs hierarchy </h3>
+          <div id="jstree_div" style="overflow: scroll;"></div>
         </div>
 
         <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
@@ -278,6 +286,30 @@
     tulip.unholdObservers();
   }
 
+  function getSubgraphsHierarchyJsTreeData(rootGraph, sgHierarchyData) {
+    var ret = {};
+    if (!sgHierarchyData) {
+      ret["text"] = rootGraph.getName();
+      ret["data"] = {nodes: rootGraph.numberOfNodes().toString(), edges: rootGraph.numberOfEdges().toString()};
+      ret["id"] = rootGraph.getId();
+      ret["children"] = [];
+      sgHierarchyData = ret["children"];
+    }
+    rootGraph.getSubGraphs().forEach(function(sg) {
+      var sgData = {};
+      sgData["text"] = sg.getName();
+      sgData["data"] = {nodes: sg.numberOfNodes().toString(), edges: sg.numberOfEdges().toString()};
+      sgData["id"] = sg.getId();
+      if (sg.numberOfSubGraphs() > 0) {
+        sgData["children"] = [];
+        getSubgraphsHierarchyJsTreeData(sg, sgData["children"]);
+      }
+      sgHierarchyData.push(sgData);
+    });
+
+    return ret;
+  }
+
   function setGlobalVars(g) {
     var end = new Date().getTime();
     var time = (end - start) / 1000;
@@ -288,6 +320,39 @@
     graph.getProperties().forEach(function(propName) {
      graphProperties[propName] = graph.getProperty(propName);
     });
+
+    var tree = $('#jstree_div').jstree(true);
+
+    if (tree) tree.destroy();
+
+    var treeData = getSubgraphsHierarchyJsTreeData(graph.getRoot());
+
+    $('#jstree_div').jstree({
+      plugins: ["grid"],
+      grid: {
+        columns: [
+          {header: "Name", title:"_DATA_"},
+          {cellClass: "col1", value: "nodes", header: "Nodes", title:"nodes", valueClass:"spanclass"},
+          {cellClass: "col2", value: "edges", header: "Edges", title:"edges",valueClass:"spanclass"}
+        ],
+        resizable:true
+      },
+      core : {
+        themes: {icons : false},
+        data : [treeData]
+      }
+    }).on('changed.jstree', function (e, data) {
+      if (data.action = "select_node") {
+        var sgId = parseInt(data.node.id);
+        if (isNaN(sgId)) {
+          tulipView.setGraph(graph);
+        } else {
+          var sg = graph.getRoot().getDescendantGraph(sgId);
+          tulipView.setGraph(sg);
+        }
+      }
+    });
+
   }
 
   function setHTMailsNetworkOrderingProperty(graph) {

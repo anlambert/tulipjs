@@ -1079,11 +1079,11 @@ tlp::Graph *EMSCRIPTEN_KEEPALIVE Graph_getNthSubGraph(tlp::Graph *graph, unsigne
   return graph->getNthSubGraph(n);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_numberOfSubGraphs(tlp::Graph *graph) {
+double EMSCRIPTEN_KEEPALIVE Graph_numberOfSubGraphs(tlp::Graph *graph) {
   return graph->numberOfSubGraphs();
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_numberOfDescendantGraphs(tlp::Graph *graph) {
+double EMSCRIPTEN_KEEPALIVE Graph_numberOfDescendantGraphs(tlp::Graph *graph) {
   return graph->numberOfDescendantGraphs();
 }
 
@@ -1118,7 +1118,7 @@ void EMSCRIPTEN_KEEPALIVE Graph_getDescendantGraphs(tlp::Graph *graph, unsigned 
   }
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_addNode1(tlp::Graph *graph) {
+double EMSCRIPTEN_KEEPALIVE Graph_addNode1(tlp::Graph *graph) {
   return graph->addNode().id;
 }
 
@@ -1154,7 +1154,7 @@ void EMSCRIPTEN_KEEPALIVE Graph_delNodes(tlp::Graph *graph, unsigned int nbNodes
   graph->delNodes(nodesToRemove, deleteInAllGraphs);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_addEdge1(tlp::Graph *graph, unsigned int srcId, unsigned int tgtId) {
+double EMSCRIPTEN_KEEPALIVE Graph_addEdge1(tlp::Graph *graph, unsigned int srcId, unsigned int tgtId) {
   return graph->addEdge(tlp::node(srcId), tlp::node(tgtId)).id;
 }
 
@@ -1222,7 +1222,7 @@ void EMSCRIPTEN_KEEPALIVE Graph_reverse(tlp::Graph *graph, unsigned int edgeId) 
   graph->reverse(tlp::edge(edgeId));
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_getSource(tlp::Graph *graph) {
+double EMSCRIPTEN_KEEPALIVE Graph_getSource(tlp::Graph *graph) {
   return graph->getSource().id;
 }
 
@@ -1296,35 +1296,35 @@ void EMSCRIPTEN_KEEPALIVE Graph_getInEdges(tlp::Graph *graph, unsigned int nodeI
   fillEdgesIds(graph->getInEdges(tlp::node(nodeId)), edgesIds);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_getId(tlp::Graph *graph) {
+double EMSCRIPTEN_KEEPALIVE Graph_getId(tlp::Graph *graph) {
   return graph->getId();
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_numberOfNodes(tlp::Graph *graph) {
+double EMSCRIPTEN_KEEPALIVE Graph_numberOfNodes(tlp::Graph *graph) {
   return graph->numberOfNodes();
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_numberOfEdges(tlp::Graph *graph) {
+double EMSCRIPTEN_KEEPALIVE Graph_numberOfEdges(tlp::Graph *graph) {
   return graph->numberOfEdges();
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_deg(tlp::Graph *graph, unsigned int nodeId) {
+double EMSCRIPTEN_KEEPALIVE Graph_deg(tlp::Graph *graph, unsigned int nodeId) {
   return graph->deg(tlp::node(nodeId));
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_indeg(tlp::Graph *graph, unsigned int nodeId) {
+double EMSCRIPTEN_KEEPALIVE Graph_indeg(tlp::Graph *graph, unsigned int nodeId) {
   return graph->indeg(tlp::node(nodeId));
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_outdeg(tlp::Graph *graph, unsigned int nodeId) {
+double EMSCRIPTEN_KEEPALIVE Graph_outdeg(tlp::Graph *graph, unsigned int nodeId) {
   return graph->outdeg(tlp::node(nodeId));
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_source(tlp::Graph *graph, unsigned int edgeId) {
+double EMSCRIPTEN_KEEPALIVE Graph_source(tlp::Graph *graph, unsigned int edgeId) {
   return graph->source(tlp::edge(edgeId)).id;
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_target(tlp::Graph *graph, unsigned int edgeId) {
+double EMSCRIPTEN_KEEPALIVE Graph_target(tlp::Graph *graph, unsigned int edgeId) {
   return graph->target(tlp::edge(edgeId)).id;
 }
 
@@ -1334,7 +1334,7 @@ void EMSCRIPTEN_KEEPALIVE Graph_ends(tlp::Graph *graph, unsigned int edgeId, uns
   array[1] = ends.second.id;
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_opposite(tlp::Graph *graph, unsigned int edgeId, unsigned int nodeId) {
+double EMSCRIPTEN_KEEPALIVE Graph_opposite(tlp::Graph *graph, unsigned int edgeId, unsigned int nodeId) {
   return graph->opposite(tlp::edge(edgeId), tlp::node(nodeId)).id;
 }
 
@@ -1350,7 +1350,7 @@ bool EMSCRIPTEN_KEEPALIVE Graph_hasEdge(tlp::Graph *graph, unsigned int sourceNo
   return graph->hasEdge(tlp::node(sourceNodeId), tlp::node(targetNodeId), directed);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_existEdge(tlp::Graph *graph, unsigned int sourceNodeId, unsigned int targetNodeId, bool directed) {
+double EMSCRIPTEN_KEEPALIVE Graph_existEdge(tlp::Graph *graph, unsigned int sourceNodeId, unsigned int targetNodeId, bool directed) {
   return graph->existEdge(tlp::node(sourceNodeId), tlp::node(targetNodeId), directed).id;
 }
 
@@ -1374,7 +1374,7 @@ const char *EMSCRIPTEN_KEEPALIVE Graph_getName(tlp::Graph *graph) {
   return s.c_str();
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_numberOfProperties(tlp::Graph *graph) {
+double EMSCRIPTEN_KEEPALIVE Graph_numberOfProperties(tlp::Graph *graph) {
   unsigned int ret = 0;
   std::string propName;
   forEach(propName, graph->getProperties()) {
@@ -1383,7 +1383,7 @@ unsigned int EMSCRIPTEN_KEEPALIVE Graph_numberOfProperties(tlp::Graph *graph) {
   return ret;
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE Graph_propertiesNamesLengths(tlp::Graph *graph, unsigned int *array) {
+double EMSCRIPTEN_KEEPALIVE Graph_propertiesNamesLengths(tlp::Graph *graph, unsigned int *array) {
   return getStringsNumberOfBytesFromStringIterator(graph->getProperties(), array);
 }
 
@@ -1608,11 +1608,11 @@ bool EMSCRIPTEN_KEEPALIVE algorithmExists(const char *algoName) {
   return pluginExists<tlp::Algorithm>(algoName);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE numberOfPlugins() {
+double EMSCRIPTEN_KEEPALIVE numberOfPlugins() {
   return tlp::PluginLister::instance()->availablePlugins().size();
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE pluginsNamesLengths(unsigned int *array) {
+double EMSCRIPTEN_KEEPALIVE pluginsNamesLengths(unsigned int *array) {
   return getStringsNumberOfBytesFromContainer(tlp::PluginLister::instance()->availablePlugins(), array);
 }
 
@@ -1620,11 +1620,11 @@ void EMSCRIPTEN_KEEPALIVE pluginsList(unsigned char *array) {
   fillBytesArrayFromStringsContainer(tlp::PluginLister::instance()->availablePlugins(), array);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE numberOfAlgorithms() {
+double EMSCRIPTEN_KEEPALIVE numberOfAlgorithms() {
   return getTulipPluginsList<tlp::Algorithm>().size();
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE algorithmsNamesLengths(unsigned int *array) {
+double EMSCRIPTEN_KEEPALIVE algorithmsNamesLengths(unsigned int *array) {
   return getStringsNumberOfBytesFromContainer(getTulipPluginsList<tlp::Algorithm>(), array);
 }
 
@@ -1855,7 +1855,7 @@ void EMSCRIPTEN_KEEPALIVE LayoutProperty_setAllNodeValue(tlp::LayoutProperty *la
   layoutProperty->setAllNodeValue(tlp::Coord(x, y, z));
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE LayoutProperty_getEdgeDefaultNumberOfBends(tlp::LayoutProperty *layoutProperty) {
+double EMSCRIPTEN_KEEPALIVE LayoutProperty_getEdgeDefaultNumberOfBends(tlp::LayoutProperty *layoutProperty) {
   const std::vector<tlp::Coord> &vc = layoutProperty->getEdgeDefaultValue();
   return vc.size();
 }
@@ -1870,7 +1870,7 @@ void EMSCRIPTEN_KEEPALIVE LayoutProperty_getEdgeDefaultValue(tlp::LayoutProperty
   }
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE LayoutProperty_getEdgeNumberOfBends(tlp::LayoutProperty *layoutProperty, unsigned int edgeId) {
+double EMSCRIPTEN_KEEPALIVE LayoutProperty_getEdgeNumberOfBends(tlp::LayoutProperty *layoutProperty, unsigned int edgeId) {
   const std::vector<tlp::Coord> &vc = layoutProperty->getEdgeValue(tlp::edge(edgeId));
   return vc.size();
 }
@@ -2181,11 +2181,11 @@ void EMSCRIPTEN_KEEPALIVE StringVectorProperty_setEdgeValue(tlp::StringVectorPro
   stringVectorProperty->setEdgeValue(tlp::edge(e), vs);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE StringVectorProperty_getNodeDefaultVectorSize(tlp::StringVectorProperty *stringVectorProperty) {
+double EMSCRIPTEN_KEEPALIVE StringVectorProperty_getNodeDefaultVectorSize(tlp::StringVectorProperty *stringVectorProperty) {
   return stringVectorProperty->getNodeDefaultValue().size();
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE StringVectorProperty_getNodeDefaultStringsLengths(tlp::StringVectorProperty *stringVectorProperty, unsigned int *array) {
+double EMSCRIPTEN_KEEPALIVE StringVectorProperty_getNodeDefaultStringsLengths(tlp::StringVectorProperty *stringVectorProperty, unsigned int *array) {
   return getStringsNumberOfBytesFromContainer(stringVectorProperty->getNodeDefaultValue(), array);
 }
 
@@ -2193,11 +2193,11 @@ void EMSCRIPTEN_KEEPALIVE StringVectorProperty_getNodeDefaultValue(tlp::StringVe
   fillBytesArrayFromStringsContainer(stringVectorProperty->getNodeDefaultValue(), array);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE StringVectorProperty_getNodeVectorSize(tlp::StringVectorProperty *stringVectorProperty, unsigned int n) {
+double EMSCRIPTEN_KEEPALIVE StringVectorProperty_getNodeVectorSize(tlp::StringVectorProperty *stringVectorProperty, unsigned int n) {
   return stringVectorProperty->getNodeValue(tlp::node(n)).size();
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE StringVectorProperty_getNodeStringsLengths(tlp::StringVectorProperty *stringVectorProperty, unsigned int n, unsigned int *array) {
+double EMSCRIPTEN_KEEPALIVE StringVectorProperty_getNodeStringsLengths(tlp::StringVectorProperty *stringVectorProperty, unsigned int n, unsigned int *array) {
   return getStringsNumberOfBytesFromContainer(stringVectorProperty->getNodeValue(tlp::node(n)), array);
 }
 
@@ -2205,11 +2205,11 @@ void EMSCRIPTEN_KEEPALIVE StringVectorProperty_getNodeValue(tlp::StringVectorPro
   fillBytesArrayFromStringsContainer(stringVectorProperty->getNodeValue(tlp::node(n)), array);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE StringVectorProperty_getEdgeDefaultVectorSize(tlp::StringVectorProperty *stringVectorProperty) {
+double EMSCRIPTEN_KEEPALIVE StringVectorProperty_getEdgeDefaultVectorSize(tlp::StringVectorProperty *stringVectorProperty) {
   return stringVectorProperty->getEdgeDefaultValue().size();
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE StringVectorProperty_getEdgeDefaultStringsLengths(tlp::StringVectorProperty *stringVectorProperty, unsigned int *array) {
+double EMSCRIPTEN_KEEPALIVE StringVectorProperty_getEdgeDefaultStringsLengths(tlp::StringVectorProperty *stringVectorProperty, unsigned int *array) {
   return getStringsNumberOfBytesFromContainer(stringVectorProperty->getEdgeDefaultValue(), array);
 }
 
@@ -2217,11 +2217,11 @@ void EMSCRIPTEN_KEEPALIVE StringVectorProperty_getEdgeDefaultValue(tlp::StringVe
   fillBytesArrayFromStringsContainer(stringVectorProperty->getEdgeDefaultValue(), array);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE StringVectorProperty_getEdgeVectorSize(tlp::StringVectorProperty *stringVectorProperty, unsigned int e) {
+double EMSCRIPTEN_KEEPALIVE StringVectorProperty_getEdgeVectorSize(tlp::StringVectorProperty *stringVectorProperty, unsigned int e) {
   return stringVectorProperty->getEdgeValue(tlp::edge(e)).size();
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE StringVectorProperty_getEdgeStringsLengths(tlp::StringVectorProperty *stringVectorProperty, unsigned int e, unsigned int *array) {
+double EMSCRIPTEN_KEEPALIVE StringVectorProperty_getEdgeStringsLengths(tlp::StringVectorProperty *stringVectorProperty, unsigned int e, unsigned int *array) {
   return getStringsNumberOfBytesFromContainer(stringVectorProperty->getEdgeValue(tlp::edge(e)), array);
 }
 
@@ -2269,7 +2269,7 @@ void EMSCRIPTEN_KEEPALIVE DoubleVectorProperty_setEdgeValue(tlp::DoubleVectorPro
   doubleVectorProperty->setEdgeValue(tlp::edge(e), v);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE DoubleVectorProperty_getNodeDefaultVectorSize(tlp::DoubleVectorProperty *doubleVectorProperty) {
+double EMSCRIPTEN_KEEPALIVE DoubleVectorProperty_getNodeDefaultVectorSize(tlp::DoubleVectorProperty *doubleVectorProperty) {
   const std::vector<double> &value = doubleVectorProperty->getNodeDefaultValue();
   return value.size();
 }
@@ -2281,7 +2281,7 @@ void EMSCRIPTEN_KEEPALIVE DoubleVectorProperty_getNodeDefaultValue(tlp::DoubleVe
   }
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE DoubleVectorProperty_getNodeVectorSize(tlp::DoubleVectorProperty *doubleVectorProperty, unsigned int n) {
+double EMSCRIPTEN_KEEPALIVE DoubleVectorProperty_getNodeVectorSize(tlp::DoubleVectorProperty *doubleVectorProperty, unsigned int n) {
   const std::vector<double> &value = doubleVectorProperty->getNodeValue(tlp::node(n));
   return value.size();
 }
@@ -2305,7 +2305,7 @@ void EMSCRIPTEN_KEEPALIVE DoubleVectorProperty_getEdgeDefaultValue(tlp::DoubleVe
   }
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE DoubleVectorProperty_getEdgeVectorSize(tlp::DoubleVectorProperty *doubleVectorProperty, unsigned int e) {
+double EMSCRIPTEN_KEEPALIVE DoubleVectorProperty_getEdgeVectorSize(tlp::DoubleVectorProperty *doubleVectorProperty, unsigned int e) {
   const std::vector<double> &value = doubleVectorProperty->getEdgeValue(tlp::edge(e));
   return value.size();
 }
@@ -2358,7 +2358,7 @@ void EMSCRIPTEN_KEEPALIVE IntegerVectorProperty_setEdgeValue(tlp::IntegerVectorP
   intVectorProperty->setEdgeValue(tlp::edge(e), v);
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE IntegerVectorProperty_getNodeDefaultVectorSize(tlp::IntegerVectorProperty *intVectorProperty) {
+double EMSCRIPTEN_KEEPALIVE IntegerVectorProperty_getNodeDefaultVectorSize(tlp::IntegerVectorProperty *intVectorProperty) {
   const std::vector<int> &value = intVectorProperty->getNodeDefaultValue();
   return value.size();
 }
@@ -2370,7 +2370,7 @@ void EMSCRIPTEN_KEEPALIVE IntegerVectorProperty_getNodeDefaultValue(tlp::Integer
   }
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE IntegerVectorProperty_getNodeVectorSize(tlp::IntegerVectorProperty *intVectorProperty, unsigned int n) {
+double EMSCRIPTEN_KEEPALIVE IntegerVectorProperty_getNodeVectorSize(tlp::IntegerVectorProperty *intVectorProperty, unsigned int n) {
   const std::vector<int> &value = intVectorProperty->getNodeValue(tlp::node(n));
   return value.size();
 }
@@ -2394,7 +2394,7 @@ void EMSCRIPTEN_KEEPALIVE IntegerVectorProperty_getEdgeDefaultValue(tlp::Integer
   }
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE IntegerVectorProperty_getEdgeVectorSize(tlp::IntegerVectorProperty *intVectorProperty, unsigned int e) {
+double EMSCRIPTEN_KEEPALIVE IntegerVectorProperty_getEdgeVectorSize(tlp::IntegerVectorProperty *intVectorProperty, unsigned int e) {
   const std::vector<int> &value = intVectorProperty->getEdgeValue(tlp::edge(e));
   return value.size();
 }
@@ -2431,7 +2431,7 @@ void EMSCRIPTEN_KEEPALIVE ColorScale_getColorAtPos(tlp::ColorScale *colorScale, 
   }
 }
 
-unsigned int EMSCRIPTEN_KEEPALIVE ColorScale_numberOfColors(tlp::ColorScale *colorScale) {
+double EMSCRIPTEN_KEEPALIVE ColorScale_numberOfColors(tlp::ColorScale *colorScale) {
   auto colorMap = colorScale->getColorMap();
   return colorMap.size();
 }

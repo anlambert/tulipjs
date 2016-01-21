@@ -222,6 +222,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s USE_ZLIB=1 -s USE_FREETYPE=1")
 
 SET(TULIPJS_CORE_SRCS
     src/emscripten/TulipBindings.cpp
+    src/emscripten/CurveBuilder.cpp
     src/emscripten/main.cpp
 )
 
@@ -229,6 +230,7 @@ SET(TULIPJS_SRCS
     ${GRAPH_RENDERER_SRCS}
     src/emscripten/TulipHtml5.cpp
     src/emscripten/TulipBindings.cpp
+    src/emscripten/CurveBuilder.cpp
     src/emscripten/main.cpp
 )
 

@@ -102,6 +102,10 @@ public:
     return _modelviewMatrix;
   }
 
+  void setModelViewMatrix(const tlp::MatrixGL &mdvMat);
+
+  tlp::MatrixGL rotationMatrix() const;
+
   const tlp::MatrixGL &projectionMatrix() const {
     return _projectionMatrix;
   }

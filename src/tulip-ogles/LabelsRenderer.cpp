@@ -238,7 +238,7 @@ static void adjustTextBoundingBox(BoundingBox &textBB, const Camera &camera, flo
   textBB[1][1] = ((textBB[1][1] - center[1]) / scale[1]) * scaleY + center[1];
 }
 
-void LabelsRenderer::renderGraphNodesLabels(Graph *graph, const Camera &camera, const Color &selectionColor, bool billboarded) {
+void LabelsRenderer::renderGraphNodesLabels(Graph *graph, const Camera &camera, const Color &selectionColor) {
 
   initFont();
 
@@ -274,7 +274,7 @@ void LabelsRenderer::renderGraphNodesLabels(Graph *graph, const Camera &camera, 
 
     if (_occlusionTest) {
 
-      if (billboarded || !camera.hasRotation()) {
+      if (!camera.hasRotation()) {
         BoundingBox textScrBB;
         textScrBB.expand(Vec3f(computeScreenPos(camera.transformMatrixBillboard(), viewport, textBB[0]), 0));
         textScrBB.expand(Vec3f(computeScreenPos(camera.transformMatrixBillboard(), viewport, textBB[1]), 0));

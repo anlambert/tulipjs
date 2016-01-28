@@ -216,7 +216,6 @@
           <h3> Nodes Labels </h3>
           <label><input id="display-nodes-labels" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Display </label>
           <label><input id="scale-nodes-labels" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="false"> Scale to Nodes Sizes </label>
-          <label><input id="billboard-nodes-labels" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="false"> Billboard </label>
           <div data-role="rangeslider">
             <label for="range-1a">Sizes range:</label>
             <input name="range-1a" id="labels-min-size" class="rendering-params-modifier" min="0" max="100" value="12" type="range" />
@@ -272,7 +271,6 @@
     renderingParameters.setBillboardedNodes($('#billboard-nodes').prop('checked'));
     renderingParameters.setDisplayNodesLabels($('#display-nodes-labels').prop('checked'));
     renderingParameters.setLabelsScaled($('#scale-nodes-labels').prop('checked'));
-    renderingParameters.setBillboardedLabels($('#billboard-nodes-labels').prop('checked'));
     renderingParameters.setDisplayEdges($('#display-edges').prop('checked'));
     renderingParameters.setInterpolateEdgesColors($('#color-interpolation').prop('checked'));
     renderingParameters.setInterpolateEdgesSizes($('#size-interpolation').prop('checked'));
@@ -544,7 +542,6 @@
     $('#color-interpolation').prop('checked', false).checkboxradio('refresh');
     $('#scale-nodes-labels').prop('checked', false).checkboxradio('refresh');
     $('#billboard-nodes').prop('checked', false).checkboxradio('refresh');
-    $('#billboard-nodes-labels').prop('checked', false).checkboxradio('refresh');
     $('#glow-nodes').prop('checked', false).checkboxradio('refresh');
 
     $(".rendering-params-modifier").change(function(){

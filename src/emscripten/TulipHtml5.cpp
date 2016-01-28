@@ -653,14 +653,6 @@ bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_labelsScaled(GlGraphRenderi
   return glgrp->labelsScaled();
 }
 
-void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setBillboardedLabels(GlGraphRenderingParameters *glgrp, bool state) {
-  glgrp->setBillboardedLabels(state);
-}
-
-bool EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_billboardedLabels(GlGraphRenderingParameters *glgrp) {
-  return glgrp->billboardedLabels();
-}
-
 void EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_setDisplayEdges(GlGraphRenderingParameters *glgrp, bool state) {
   glgrp->setDisplayEdges(state);
 }

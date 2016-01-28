@@ -28,7 +28,6 @@ GlGraphRenderingParameters::GlGraphRenderingParameters() :
   _labelsMaxSize(72),
   _labelsDensity(0),
   _billboardedNodes(false),
-  _billboardedLabels(false),
   _maxEdgesSizesToNodesSizes(true),
   _selectionColor(Color(255,0,255)),
   _displayFilteringProperty(NULL),
@@ -281,16 +280,6 @@ void GlGraphRenderingParameters::setBillboardedNodes(bool billboardedNodes) {
 }
 bool GlGraphRenderingParameters::billboardedNodes() const {
   return _billboardedNodes;
-}
-//====================================================
-void GlGraphRenderingParameters::setBillboardedLabels(bool billboarded) {
-  if (billboarded != _billboardedLabels) {
-    _billboardedLabels=billboarded;
-    sendEvent(GlGraphRenderingParametersEvent(this, GlGraphRenderingParametersEvent::RENDERING_PARAMETERS_MODIFIED));
-  }
-}
-bool GlGraphRenderingParameters::billboardedLabels() const {
-  return _billboardedLabels;
 }
 //====================================================
 void GlGraphRenderingParameters::setDisplayFilteringProperty(tlp::BooleanProperty *filteringProperty) {

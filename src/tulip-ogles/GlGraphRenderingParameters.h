@@ -105,9 +105,6 @@ public:
   void setBillboardedNodes(bool billboardedNodes);
   bool billboardedNodes() const;
 
-  void setBillboardedLabels(bool billboarded);
-  bool billboardedLabels() const;
-
   void setDisplayFilteringProperty(tlp::BooleanProperty* filteringProperty);
   tlp::BooleanProperty* displayFilteringProperty() const;
 
@@ -141,7 +138,6 @@ private:
   float _labelsMaxSize;
   int _labelsDensity;
   bool _billboardedNodes;
-  bool _billboardedLabels;
   bool _maxEdgesSizesToNodesSizes;
   tlp::Color _selectionColor;
   tlp::BooleanProperty *_displayFilteringProperty;

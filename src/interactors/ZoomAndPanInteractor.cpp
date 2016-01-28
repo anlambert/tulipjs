@@ -110,7 +110,6 @@ bool ZoomAndPanInteractor::keyboardCallback(const std::string &keyStr, const int
       bool edge3d = glGraph->getRenderingParameters().edges3D();
       glGraph->getRenderingParameters().setEdges3D(!edge3d);
       glGraph->getRenderingParameters().setBillboardedNodes(!edge3d);
-      glGraph->getRenderingParameters().setBillboardedLabels(!edge3d);
       _glScene->requestDraw();
       return true;
     }

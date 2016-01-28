@@ -970,7 +970,7 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
       std::reverse(nodesLabelsToRender.begin(), itN);
     }
     _labelsRenderer->setGraphNodesLabelsToRender(_graph, nodesLabelsToRender);
-    _labelsRenderer->renderGraphNodesLabels(_graph, camera, _renderingParameters.selectionColor(), _renderingParameters.billboardedLabels());
+    _labelsRenderer->renderGraphNodesLabels(_graph, camera, _renderingParameters.selectionColor());
   }
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_STENCIL_TEST);

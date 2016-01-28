@@ -64,7 +64,7 @@ public :
     _occlusionTest = occlusionTest;
   }
 
-  void renderGraphNodesLabels(tlp::Graph *graph, const Camera &camera, const tlp::Color &selectionColor, bool billboarded = false);
+  void renderGraphNodesLabels(tlp::Graph *graph, const Camera &camera, const tlp::Color &selectionColor);
 
   void renderOneLabel(const Camera &camera, const std::string &text, const tlp::BoundingBox &renderingBox,
                       const tlp::Color &labelColor = tlp::Color::Black);

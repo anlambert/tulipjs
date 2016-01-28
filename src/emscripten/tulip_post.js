@@ -4907,8 +4907,6 @@ if (workerMode) {
     var _GlGraphRenderingParameters_displayNodesLabels = Module.cwrap('GlGraphRenderingParameters_displayNodesLabels', 'number', ['number']);
     var _GlGraphRenderingParameters_setLabelsScaled = Module.cwrap('GlGraphRenderingParameters_setLabelsScaled', null, ['number', 'number']);
     var _GlGraphRenderingParameters_labelsScaled = Module.cwrap('GlGraphRenderingParameters_labelsScaled', 'number', ['number']);
-    var _GlGraphRenderingParameters_setBillboardedLabels = Module.cwrap('GlGraphRenderingParameters_setBillboardedLabels', null, ['number', 'number']);
-    var _GlGraphRenderingParameters_billboardedLabels = Module.cwrap('GlGraphRenderingParameters_billboardedLabels', 'number', ['number']);
     var _GlGraphRenderingParameters_setDisplayEdges = Module.cwrap('GlGraphRenderingParameters_setDisplayEdges', null, ['number', 'number']);
     var _GlGraphRenderingParameters_displayEdges = Module.cwrap('GlGraphRenderingParameters_displayEdges', 'number', ['number']);
     var _GlGraphRenderingParameters_setInterpolateEdgesColors = Module.cwrap('GlGraphRenderingParameters_setInterpolateEdgesColors', null, ['number', 'number']);
@@ -4971,15 +4969,6 @@ if (workerMode) {
 
     tulip.GlGraphRenderingParameters.prototype.labelsScaled = function tulip_GlGraphRenderingParameters_prototype_labelsScaled() {
       return _GlGraphRenderingParameters_labelsScaled(this.cppPointer) > 0;
-    };
-
-    tulip.GlGraphRenderingParameters.prototype.setBillboardedLabels = function tulip_GlGraphRenderingParameters_prototype_setBillboardedLabels(state) {
-      checkArgumentsTypes(arguments, ["boolean"], 1);
-      _GlGraphRenderingParameters_setBillboardedLabels(this.cppPointer, state);
-    };
-
-    tulip.GlGraphRenderingParameters.prototype.billboardedLabels = function tulip_GlGraphRenderingParameters_prototype_billboardedLabels() {
-      return _GlGraphRenderingParameters_billboardedLabels(this.cppPointer) > 0;
     };
 
     tulip.GlGraphRenderingParameters.prototype.setDisplayEdges = function tulip_GlGraphRenderingParameters_prototype_setDisplayEdges(state) {

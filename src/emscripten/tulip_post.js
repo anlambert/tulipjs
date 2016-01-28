@@ -4636,10 +4636,12 @@ if (workerMode) {
         return;
       }
 
+      var view = this;
+
       function busyAnimation() {
-        if (this.busyAnimationStarted) {
-          this.setProgressBarPercent(-1);
-          this.updateGlScene();
+        if (view.busyAnimationStarted) {
+          view.setProgressBarPercent(-1);
+          view.updateGlScene();
           Browser.requestAnimationFrame(busyAnimation);
         }
       }

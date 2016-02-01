@@ -219,6 +219,7 @@ void GlConcavePolygon::draw(const Camera &camera, const Light &, bool pickingMod
   }
 
   shader->setUniformBool("u_textureActivated", false);
+  shader->disableAttributesArrays();
 
   if (_outlined) {
     float lineWidth=_outlineSize;

@@ -72,7 +72,7 @@ public:
 
   void draw();
 
-  void centerScene();
+  void centerScene(tlp::BoundingBox boundingBox = tlp::BoundingBox());
 
   void setViewport(const tlp::Vec4i &viewport);
 

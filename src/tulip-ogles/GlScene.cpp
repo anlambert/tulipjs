@@ -417,8 +417,11 @@ BoundingBox GlScene::getBoundingBox() {
   return glBBSceneVisitor.getBoundingBox();
 }
 
-void GlScene::centerScene() {
-  BoundingBox sceneBB = getBoundingBox();
+void GlScene::centerScene(BoundingBox boundingBox) {
+  BoundingBox sceneBB = boundingBox;
+  if (!sceneBB.isValid()) {
+    sceneBB = getBoundingBox();
+  }
   for(vector<pair<string,GlLayer*> >::iterator it=_layersList.begin(); it!=_layersList.end(); ++it) {
     if (it->second->getCamera()->is3d() && !it->second->useSharedCamera()) {
       it->second->getCamera()->setViewport(_viewport);

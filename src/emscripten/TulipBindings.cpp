@@ -504,7 +504,12 @@ std::string convertDataSetToJSON(const tlp::DataSet &dataSet) {
         oss << "null";
       }
     } else if (serializer) {
-      oss << serializer->toString(dt);
+      std::string s = serializer->toString(dt);
+      if (dt->getTypeName() != std::string(typeid(std::string).name())) {
+        replaceStringInPlace(s, "(", "[");
+        replaceStringInPlace(s, ")", "]");
+      }
+      oss << s;
     } else {
       oss << "null";
     }

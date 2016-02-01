@@ -172,7 +172,7 @@ static vector<Coord> genNodePolygon(Graph *graph, node n, const tlp::LayoutPrope
   return nodeShape;
 }
 
-std::vector<std::vector<tlp::Coord> > computeGraphHullVertices(Graph *graph, const float z, const bool withHoles, const float spacing) {
+std::vector<std::vector<tlp::Coord> > ConcaveHullBuilder::computeGraphHullVertices(Graph *graph, const bool withHoles, const float spacing, const float z) {
 
   LayoutProperty *viewLayout = graph->getProperty<LayoutProperty>("viewLayout");
   SizeProperty *viewSize = graph->getProperty<SizeProperty>("viewSize");

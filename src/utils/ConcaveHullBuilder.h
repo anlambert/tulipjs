@@ -33,6 +33,8 @@ public:
 
   void clear();
 
+  static std::vector<std::vector<tlp::Coord> > computeGraphHullVertices(tlp::Graph *graph, const bool withHoles = true, const float spacing = 0.1f, const float z=0);
+
 private:
 
   float _scalingFactor;
@@ -47,6 +49,6 @@ private:
 
 };
 
-std::vector<std::vector<tlp::Coord> > computeGraphHullVertices(tlp::Graph *graph, const float z, const bool withHoles = true, const float spacing = 0.1f);
+
 
 #endif // CONCAVEHULLBUILDER_H

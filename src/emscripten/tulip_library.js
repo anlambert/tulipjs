@@ -138,7 +138,7 @@ var LibraryTulipUtils = {
       Module._free(imageDataHeap.byteOffset);
     }
     img.onerror = function() {
-      Runtime.dynCall('vii', errorCallback, [0, url, 0]);
+      Runtime.dynCall('viii', errorCallback, [0, url, 0]);
     };
     img.src = src;
     if (img.complete || img.complete === undefined) {

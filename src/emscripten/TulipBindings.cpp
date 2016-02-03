@@ -381,6 +381,12 @@ public:
         _dataSet.set(_curParamName, reinterpret_cast<tlp::PropertyInterface*>(_pointer));
       }
 
+      if ((_typename == "tlp::DoubleProperty" ||
+           _typename == "tlp::IntegerProperty")
+          && dt->getTypeName() == std::string(typeid(tlp::NumericProperty*).name())) {
+        _dataSet.set(_curParamName, reinterpret_cast<tlp::NumericProperty*>(_pointer));
+      }
+
       if (_typename == "tlp::ColorScale" && dt->getTypeName() == std::string(typeid(tlp::ColorScale).name())) {
         _dataSet.set(_curParamName, *reinterpret_cast<tlp::ColorScale*>(_pointer));
       }

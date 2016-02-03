@@ -416,6 +416,10 @@ public:
       _dataSet.set(_curParamName, static_cast<long>(integerVal));
     } else if (dt->getTypeName() == std::string(typeid(unsigned long).name())) {
       _dataSet.set(_curParamName, static_cast<unsigned long>(integerVal));
+    } else if (dt->getTypeName() == std::string(typeid(double).name())) {
+      _dataSet.set(_curParamName, static_cast<double>(integerVal));
+    } else if (dt->getTypeName() == std::string(typeid(float).name())) {
+      _dataSet.set(_curParamName, static_cast<float>(integerVal));
     }
   }
 
@@ -426,6 +430,14 @@ public:
       _dataSet.set(_curParamName, static_cast<float>(doubleVal));
     } else if (dt->getTypeName() == std::string(typeid(double).name())) {
       _dataSet.set(_curParamName, doubleVal);
+    } else if (dt->getTypeName() == std::string(typeid(int).name())) {
+      _dataSet.set(_curParamName, static_cast<int>(doubleVal));
+    } else if (dt->getTypeName() == std::string(typeid(unsigned int).name())) {
+      _dataSet.set(_curParamName, static_cast<unsigned int>(doubleVal));
+    } else if (dt->getTypeName() == std::string(typeid(long).name())) {
+      _dataSet.set(_curParamName, static_cast<long>(doubleVal));
+    } else if (dt->getTypeName() == std::string(typeid(unsigned long).name())) {
+      _dataSet.set(_curParamName, static_cast<unsigned long>(doubleVal));
     }
   }
 

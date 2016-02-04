@@ -1073,6 +1073,17 @@ static void glnvg__renderFlush(void* uptr)
 		// Save origin GL Shader
 		GLint oldProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &oldProgram);
+
+    // save off current state of blend enabled
+    GLboolean blendEnabled;
+    glGetBooleanv(GL_BLEND, &blendEnabled);
+
+    // save off current state of src / dst blend functions
+    GLint blendSrc;
+    GLint blendDst;
+    glGetIntegerv(GL_BLEND_SRC_ALPHA, &blendSrc);
+    glGetIntegerv(GL_BLEND_DST_ALPHA, &blendDst);
+
 		// Setup require GL state.
 		glUseProgram(gl->shader.prog);
 
@@ -1140,10 +1151,20 @@ static void glnvg__renderFlush(void* uptr)
 		glBindVertexArray(0);
 #endif	
 		glDisable(GL_CULL_FACE);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glUseProgram(0);
 		glUseProgram(oldProgram);
 		glnvg__bindTexture(gl, 0);
+
+    // restore saved state of blend enabled and blend functions
+    if (blendEnabled) {
+      glEnable(GL_BLEND);
+    } else {
+      glDisable(GL_BLEND);
+    }
+
+    glBlendFunc(blendSrc, blendDst);
+
 	}
 
 	// Reset calls

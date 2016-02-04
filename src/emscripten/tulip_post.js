@@ -221,6 +221,7 @@ var _PropertyInterface_getTypename = Module.cwrap('PropertyInterface_getTypename
 var _PropertyInterface_getGraph = Module.cwrap('PropertyInterface_getGraph', 'number', ['number']);
 var _PropertyInterface_getNodeStringValue = Module.cwrap('PropertyInterface_getNodeStringValue', 'string', ['number', 'number']);
 var _PropertyInterface_getEdgeStringValue = Module.cwrap('PropertyInterface_getEdgeStringValue', 'string', ['number', 'number']);
+var _PropertyInterface_copy = Module.cwrap('PropertyInterface_copy', null, ["number", "number"]);
 
 /**
 * This is the description for the tulip.node class.
@@ -262,6 +263,11 @@ tulip.PropertyInterface.prototype.getEdgeStringValue = function tulip_PropertyIn
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge], 1);
   return _PropertyInterface_getEdgeStringValue(this.cppPointer, edge.id);
+};
+tulip.PropertyInterface.prototype.copy = function tulip_PropertyInterface_prototype_copy(propertyToCopy) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.PropertyInterface], 1);
+  _PropertyInterface_copy(this.cppPointer, propertyToCopy.cppPointer);
 };
 /**
 * Returns the graph that have created that property

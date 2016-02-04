@@ -1731,6 +1731,9 @@ const char *EMSCRIPTEN_KEEPALIVE PropertyInterface_getEdgeStringValue(tlp::Prope
   return s.c_str();
 }
 
+void EMSCRIPTEN_KEEPALIVE PropertyInterface_copy(tlp::PropertyInterface *property, tlp::PropertyInterface *propertyToCopy) {
+  property->copy(propertyToCopy);
+}
 
 // ==================================================================================================================
 

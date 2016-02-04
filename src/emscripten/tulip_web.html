@@ -184,7 +184,7 @@
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Auto-Sizing' algorithm" onclick ="computeAutoSizing()" > Auto-Sizing </a>
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Edge bundling' algorithm" onclick ="computeEdgeBundling()" > Edge bundling </a>
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="applyGraphScript()" > Magic script </a>
-            <!-- <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="applyLouvainClusteringAndComputeHulls()" > Louvain clustering </a> -->
+            <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="computeLouvainClusteringAndHulls()" > Louvain clustering </a>
           </div>
         </div>
 
@@ -226,7 +226,6 @@
         <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
           <h3> Subgraphs Hulls </h3>
           <label><input id="display-hulls" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Display </label>
-          <a data-role = "button" data-icon = "star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Compute" onclick ="computeSubGraphsHulls()" > Compute </a>
         </div>
       </div>
 
@@ -278,7 +277,7 @@
     renderingParameters.setEdges3D($('#edges-3d').prop('checked'));
     renderingParameters.setMinSizeOfLabels(parseInt($('#labels-min-size').prop('value')));
     renderingParameters.setMaxSizeOfLabels(parseInt($('#labels-max-size').prop('value')));
-    tulipView.setSubGraphsHullsVisible($('#display-hulls').prop('checked'), true);
+    tulipView.setGraphsHullsVisible($('#display-hulls').prop('checked'), true);
     var viewGlow = graph.getBooleanProperty('viewGlow');
     viewGlow.setAllNodeValue($('#glow-nodes').prop('checked'));
     tulip.unholdObservers();
@@ -309,15 +308,21 @@
   }
 
   function setGlobalVars(g) {
-    var end = new Date().getTime();
-    var time = (end - start) / 1000;
-    console.log('Time for loading graph: ' + time + 's');
     graph = g;
-    applyRenderingParameters();
     graphProperties = {};
     graph.getProperties().forEach(function(propName) {
      graphProperties[propName] = graph.getProperty(propName);
     });
+  }
+
+  function initGraphData(g) {
+    var end = new Date().getTime();
+    var time = (end - start) / 1000;
+    console.log('Time for loading graph: ' + time + 's');
+
+    setGlobalVars(g);
+
+    applyRenderingParameters();
 
     var tree = $('#jstree_div').jstree(true);
 
@@ -343,25 +348,26 @@
       if (data.action = "select_node") {
         var sgId = parseInt(data.node.id);
         if (isNaN(sgId)) {
-          tulipView.setGraph(graph);
+          tulipView.setGraph(graph.getRoot());
+          setGlobalVars(graph.getRoot());
         } else {
           var sg = graph.getRoot().getDescendantGraph(sgId);
           tulipView.setGraph(sg);
+          setGlobalVars(sg);
         }
       }
     });
-
   }
 
   function setHTMailsNetworkOrderingProperty(graph) {
-    setGlobalVars(graph);
+    initGraphData(graph);
     tulip.holdObservers();
     renderingParameters.setElementsOrdered(true);
     renderingParameters.setElementsOrderingProperty(graphProperties.count);
     tulip.unholdObservers();
   }
 
-  function algoFinishedCallback(succeed, graph) {
+  function algoFinishedCallback(graph, succeed) {
     var end = new Date().getTime();
     var time = (end - start) / 1000;
     console.log('Time for executing algorithm: ' + time + 's');
@@ -404,19 +410,28 @@
     graph.executeScriptInWorker(graphScript, algoFinishedCallback);
   }
 
-  function computeSubGraphsHulls() {
-    tulipView.setSubGraphsHullsVisible(true);
-    tulipView.computeSubGraphsHulls();
+  function applyLouvainClusteringAndComputeHulls(graph, graphId) {
+    var prevClustering = graph.getSubGraph('louvain clustering');
+    if (prevClustering) {
+      graph.delAllSubGraphs(prevClustering);
+    }
+    var clone = graph.addCloneSubGraph('louvain clustering');
+    var louvainProp = graph.getDoubleProperty('louvain');
+    tulip.sendProgressComment(graphId, 'Applying Louvain clustering ...');
+    clone.applyDoubleAlgorithm('Louvain', louvainProp);
+    clone.applyAlgorithm('Equal Value', {'Property' : louvainProp}, true);
+    var nbClusters = clone.numberOfSubGraphs();
+    var i = 0;
+    tulip.sendProgressComment(graphId, 'Computing subgraphs hulls ...');
+    clone.getSubGraphs().forEach(function(sg) {
+      sg.computeGraphHullVertices();
+      tulip.sendProgressValue(graphId, ((i++/(nbClusters-1))*100)|0);
+    });
   }
 
-  function applyLouvainClusteringAndComputeHulls() {
-    graph.applyDoubleAlgorithm('Louvain', graphProperties.viewMetric);
-    graph.applyAlgorithm('Equal Value', {}, true);
-    computeSubGraphsHulls();
-  }
-
-  function graphScriptEndedCallback(succeed, graph) {
-    console.log(succeed);
+  function computeLouvainClusteringAndHulls() {
+    start = new Date().getTime();
+    graph.executeScriptInWorker(applyLouvainClusteringAndComputeHulls, initGraphData);
   }
 
   function genRandomColor() {
@@ -480,7 +495,7 @@
         return function(e) {
           $('#navigation-button').trigger('click');
           start = new Date().getTime();
-          tulipView.loadGraphFromData(theFile.name, e.target.result, $('#load-in-worker').prop('checked'), setGlobalVars);
+          tulipView.loadGraphFromData(theFile.name, e.target.result, $('#load-in-worker').prop('checked'), initGraphData);
         };
       })(files[0]);
       reader.readAsArrayBuffer(files[0]);
@@ -492,7 +507,7 @@
   function setSubGraphToVisualize(sgName) {
     return function(graph) {
       var sg = graph.getDescendantGraph(sgName);
-      setGlobalVars(sg);
+      initGraphData(sg);
       tulipView.setGraph(sg);
     }
   }
@@ -503,7 +518,7 @@
     if (graphLoadedCallback) {
       tulipView.loadGraphFromFile("data/" + tlpFilename, $('#load-in-worker').prop('checked'), graphLoadedCallback);
     } else {
-      tulipView.loadGraphFromFile("data/" + tlpFilename, $('#load-in-worker').prop('checked'), setGlobalVars);
+      tulipView.loadGraphFromFile("data/" + tlpFilename, $('#load-in-worker').prop('checked'), initGraphData);
     }
   }
 
@@ -543,6 +558,8 @@
     $('#scale-nodes-labels').prop('checked', false).checkboxradio('refresh');
     $('#billboard-nodes').prop('checked', false).checkboxradio('refresh');
     $('#glow-nodes').prop('checked', false).checkboxradio('refresh');
+
+    $('#display-hulls').prop('checked', true).checkboxradio('refresh');
 
     $(".rendering-params-modifier").change(function(){
       applyRenderingParameters();

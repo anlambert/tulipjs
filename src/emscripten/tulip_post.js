@@ -2187,18 +2187,22 @@ tulip.Graph.prototype.getSubGraph = function tulip_Graph_prototype_getSubGraph()
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [["number", "string"]], 1);
   if (typeOf(arguments[0]) == "string") {
-    return tulip.Graph(_Graph_getSubGraph2(this.cppPointer, arguments[0]));
+    var sgPointer = _Graph_getSubGraph2(this.cppPointer, arguments[0]);
+    return sgPointer ? tulip.Graph(sgPointer) : null;
   } else {
-    return tulip.Graph(_Graph_getSubGraph1(this.cppPointer, arguments[0]));
+    var sgPointer = _Graph_getSubGraph1(this.cppPointer, arguments[0]);
+    return sgPointer ? tulip.Graph(sgPointer) : null;
   }
 };
 tulip.Graph.prototype.getDescendantGraph = function tulip_Graph_prototype_getDescendantGraph() {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [["number", "string"]], 1);
   if (typeOf(arguments[0]) == "string") {
-    return tulip.Graph(_Graph_getDescendantGraph2(this.cppPointer, arguments[0]));
+    var sgPointer = _Graph_getDescendantGraph2(this.cppPointer, arguments[0]);
+    return sgPointer ? tulip.Graph(sgPointer) : null;
   } else {
-    return tulip.Graph(_Graph_getDescendantGraph1(this.cppPointer, arguments[0]));
+    var sgPointer = _Graph_getDescendantGraph1(this.cppPointer, arguments[0]);
+    return sgPointer ? tulip.Graph(sgPointer) : null;
   }
 };
 tulip.Graph.prototype.getDescendantGraphs = function tulip_Graph_prototype_getDescendantGraphs() {
@@ -2790,7 +2794,7 @@ tulip.Graph.prototype.setEventsActivated = function tulip_Graph_prototype_setEve
 tulip.Graph.prototype.getAttributes = function tulip_Graph_prototype_getAttributes() {
   checkWrappedCppPointer(this.cppPointer);
   return JSON.parse(_Graph_getAttributesJSON(this.cppPointer));
-}
+};
 
 tulip.Graph.prototype.getAttribute = function tulip_Graph_prototype_getAttribute(name) {
   checkWrappedCppPointer(this.cppPointer);
@@ -2800,7 +2804,16 @@ tulip.Graph.prototype.getAttribute = function tulip_Graph_prototype_getAttribute
   } else {
     return undefined;
   }
-}
+};
+
+var _computeGraphHullVertices = Module.cwrap('computeGraphHullVertices', null, ['number', 'number']);
+
+tulip.Graph.prototype.computeGraphHullVertices = function(withHoles) {
+  if (!withHoles) {
+    withHoles = false;
+  }
+  _computeGraphHullVertices(this.cppPointer, withHoles);
+};
 
 // ==================================================================================================================
 
@@ -4230,7 +4243,8 @@ if (workerMode) {
                            algoSucceed : algoSucceed,
                            numberOfNodes : graphObject[data.graphId].nodesNumber,
                            numberOfEdges : graphObject[data.graphId].edgesNumber,
-                           numberOfSubgraphs : subGraphsData[data.graphId].length});
+                           numberOfSubgraphs : subGraphsData[data.graphId].length,
+                           graphAttributes : JSON.stringify(graphObject[data.graphId].attributes)});
         sendGraphData(data.graphId);
       });
       break;
@@ -4248,7 +4262,8 @@ if (workerMode) {
                            algoSucceed : algoSucceed,
                            numberOfNodes : graphObject[data.graphId].nodesNumber,
                            numberOfEdges : graphObject[data.graphId].edgesNumber,
-                           numberOfSubgraphs : subGraphsData[data.graphId].length});
+                           numberOfSubgraphs : subGraphsData[data.graphId].length,
+                           graphAttributes : JSON.stringify(graphObject[data.graphId].attributes)});
         sendGraphData(data.graphId);
       });
       break;
@@ -4257,7 +4272,7 @@ if (workerMode) {
       var graph = graphs[data.graphId];
       var scriptSucceed = true;
       try {
-        eval("f = " + data.scriptCode + "; f(graph);");
+        eval("f = " + data.scriptCode + "; f(graph, data.graphId);");
       } catch (e) {
         console.log("exception caught");
         console.log(e);
@@ -4272,7 +4287,8 @@ if (workerMode) {
                            algoSucceed : scriptSucceed,
                            numberOfNodes : graphObject[data.graphId].nodesNumber,
                            numberOfEdges : graphObject[data.graphId].edgesNumber,
-                           numberOfSubgraphs : subGraphsData[data.graphId].length});
+                           numberOfSubgraphs : subGraphsData[data.graphId].length,
+                           graphAttributes : JSON.stringify(graphObject[data.graphId].attributes)});
         sendGraphData(data.graphId);
       });
       break;
@@ -4343,7 +4359,6 @@ if (workerMode) {
     }
   };
 
-
   if (tulip.vizFeatures) {
 
     var _centerScene = Module.cwrap('centerScene', null, ['string']);
@@ -4365,10 +4380,10 @@ if (workerMode) {
     var _resizeCanvas = Module.cwrap('resizeCanvas', null, ['string', 'number', 'number', 'number']);
     var _fullScreen = Module.cwrap('fullScreen', null, ['string']);
     var _updateGlScene = Module.cwrap('updateGlScene', null, ['string']);
-    var _subGraphHasHull = Module.cwrap('subGraphHasHull', 'number', ['string', 'number']);
-    var _addSubGraphHull = Module.cwrap('addSubGraphHull', null, ['string', 'number']);
-    var _setSubGraphsHullsVisible = Module.cwrap('setSubGraphsHullsVisible', null, ['string', 'number', 'number']);
-    var _clearSubGraphsHulls = Module.cwrap('clearSubGraphsHulls', null, ['string']);
+    var _graphHasHull = Module.cwrap('graphHasHull', 'number', ['string', 'number']);
+    var _addGraphHull = Module.cwrap('addGraphHull', null, ['string', 'number']);
+    var _setGraphsHullsVisible = Module.cwrap('setGraphsHullsVisible', null, ['string', 'number', 'number']);
+    var _clearGraphsHulls = Module.cwrap('clearGraphsHulls', null, ['string']);
 
     var _selectNodes = Module.cwrap('selectNodes', 'number', ['string', 'number', 'number', 'number', 'number']);
     var _getSelectedNodes = Module.cwrap('getSelectedNodes', null, ['number']);
@@ -4376,7 +4391,12 @@ if (workerMode) {
     var _getSelectedEdges = Module.cwrap('getSelectedEdges', null, ['number']);
 
     var graphIdToView = {};
+    var canvasIdToView = {};
     var graphData = {};
+
+    tulip.getViewForCanvasId = function(canvasId) {
+      return canvasIdToView[canvasId];
+    };
 
   }
 
@@ -4421,6 +4441,7 @@ if (workerMode) {
         case 'progressComment':
           if (tulip.vizFeatures && view) {
             view.setProgressBarComment(event.data.comment);
+            view.draw();
           }
           break;
         case 'startGraphData':
@@ -4457,6 +4478,7 @@ if (workerMode) {
         case 'startGraphUpdate':
           tulip.holdObservers();
           algorithmSucceed[graphId] = event.data.algoSucceed;
+          graph._parseGraphAttributesJSONData(event.data.graphAttributes);
           if (tulip.vizFeatures && view) {
             view.stopBusyAnimation();
             setTimeout(function() {
@@ -4470,7 +4492,7 @@ if (workerMode) {
         case 'endGraphUpdate':
           graph._fillMetaGraphInfos();
           if (graphId in algorithmFinishedCallbacks) {
-            algorithmFinishedCallbacks[graphId](algorithmSucceed[graphId], graph);
+            algorithmFinishedCallbacks[graphId](graph, algorithmSucceed[graphId]);
           }
 
           if (tulip.vizFeatures && view) {
@@ -4596,6 +4618,7 @@ if (workerMode) {
         _initCanvas(newObject.canvasId, width, height, newObject.sizeRelativeToContainer);
         newObject.graph = null;
         newObject.graphDrawingChanged = false;
+        canvasIdToView[newObject.canvasId] = newObject;
 
       }
       newObject.fullScreenActivated = false;
@@ -4671,6 +4694,12 @@ if (workerMode) {
     };
 
     tulip.View.prototype.resize = function(width, height) {
+      if (!width && this.sizeRelativeToContainer) {
+        width = this.container.clientWidth;
+      }
+      if (!height && this.sizeRelativeToContainer) {
+        height = this.container.clientHeight;
+      }
       _resizeCanvas(this.canvasId, width, height, this.sizeRelativeToContainer);
     };
 
@@ -4794,32 +4823,33 @@ if (workerMode) {
       return tulip.GlGraphRenderingParameters(_getViewRenderingParameters(this.canvasId));
     };
 
-    tulip.View.prototype.subGraphHasHull = function(subgraph) {
+    tulip.View.prototype.graphHasHull = function(graph) {
       checkArgumentsTypes(arguments, [tulip.Graph], 1);
-      return _subGraphHasHull(this.canvasId, subgraph.cppPointer) > 0;
+      return _graphHasHull(this.canvasId, graph.cppPointer) > 0;
     };
 
-    tulip.View.prototype.addSubGraphHull = function(subgraph) {
+    tulip.View.prototype.addGraphHull = function(graph) {
       checkArgumentsTypes(arguments, [tulip.Graph], 1);
-      _addSubGraphHull(this.canvasId, subgraph.cppPointer);
+      _addGraphHull(this.canvasId, graph.cppPointer);
     };
 
-    tulip.View.prototype.clearSubGraphsHulls = function() {
-      _clearSubGraphsHulls(this.canvasId);
+    tulip.View.prototype.clearGraphsHulls = function() {
+      _clearGraphsHulls(this.canvasId);
     };
 
-    tulip.View.prototype.computeSubGraphsHulls = function(updateMode) {
-      if (typeOf(updateMode) == 'undefined') updateMode = false;
-      if (!updateMode) {
-        _clearSubGraphsHulls(this.canvasId);
-      }
+    tulip.View.prototype.computeSubGraphsHulls = function(subgraphsList) {
+      _clearGraphsHulls(this.canvasId);
       var view = this;
-      this.graph.getSubGraphs().forEach(function(sg) {
-        if (!updateMode || view.subGraphHasHull(sg)) {
+      var subgraphs = this.graph.getSubGraphs();
+      if (typeOf(subgraphsList) == "array") {
+        subgraphs = subgraphsList;
+      }
+      subgraphs.forEach(function(sg) {
+        if (!updateMode || view.graphHasHull(sg)) {
           setTimeout(
             function(g) {
               return function() {
-                view.addSubGraphHull(g);
+                view.addGraphHull(g);
                 view.draw();
               }
             }(sg)
@@ -4828,7 +4858,7 @@ if (workerMode) {
       });
     };
 
-    tulip.View.prototype.setSubGraphsHullsVisible = function(visible, onTop) {
+    tulip.View.prototype.setGraphsHullsVisible = function(visible, onTop) {
       checkArgumentsTypes(arguments, ['boolean', 'boolean']);
       if (typeOf(visible) == 'undefined') {
         visible = true;
@@ -4836,27 +4866,8 @@ if (workerMode) {
       if (typeOf(onTop) == 'undefined') {
         onTop = true;
       }
-      _setSubGraphsHullsVisible(this.canvasId, visible, onTop);
+      _setGraphsHullsVisible(this.canvasId, visible, onTop);
       this.draw();
-    };
-
-    tulip.View.prototype.treatEvent = function(event) {
-      if (event instanceof tulip.PropertyEvent) {
-        if ((event.getEventType() == tulip.PropertyEventType.TLP_AFTER_SET_NODE_VALUE ||
-             event.getEventType() == tulip.PropertyEventType.TLP_AFTER_SET_EDGE_VALUE ||
-             event.getEventType() == tulip.PropertyEventType.TLP_AFTER_SET_ALL_NODE_VALUE ||
-             event.getEventType() == tulip.PropertyEventType.TLP_AFTER_SET_ALL_EDGE_VALUE) &&
-            (event.getProperty().getName() == "viewLayout" || event.getProperty().getName() == "viewSize")) {
-          this.graphDrawingChanged = true;
-        }
-      }
-    };
-
-    tulip.View.prototype.treatEvents = function(events) {
-      if (this.graphDrawingChanged) {
-        this.computeSubGraphsHulls(true);
-      }
-      this.graphDrawingChanged = false;
     };
 
     function dataURItoBlob(dataURI) {
@@ -5181,8 +5192,8 @@ if (workerMode) {
       }
       if (tulip.vizFeatures && graphId in graphIdToView) {
         var view = graphIdToView[graphId];
-        view.setGraphRenderingDataReady(canvasId, false);
-        view.startBusyAnimation(canvasId);
+        view.setGraphRenderingDataReady(false);
+        view.startBusyAnimation();
         view.setProgressBarComment("Executing script on graph ...");
       }
       _tulipWorker.postMessage({

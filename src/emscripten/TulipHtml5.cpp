@@ -26,6 +26,7 @@
 #include <tulip/Color.h>
 #include <tulip/PropertyTypes.h>
 #include <tulip/ColorScale.h>
+#include <tulip/DrawingTools.h>
 
 #include "NanoVGManager.h"
 #include "GlGraph.h"
@@ -47,7 +48,6 @@
 #include "GlGraphRenderingParameters.h"
 #include "Interactors.h"
 
-
 #include <sys/stat.h>
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
@@ -63,7 +63,7 @@ static std::map<tlp::Graph *, std::string> graphToCanvas;
 static std::map<std::string, GlSceneInteractor*> currentCanvasInteractor;
 
 static std::map<std::string, GlLayer *> hullsLayer;
-static std::map<std::string, std::map<unsigned int, GlConcavePolygon *> > subgraphsHulls;
+static std::map<std::string, std::map<unsigned int, GlConcavePolygon *> > graphsHulls;
 
 
 static std::string currentCanvasId;
@@ -484,23 +484,23 @@ void EMSCRIPTEN_KEEPALIVE resizeCanvas(const char *canvasId, int width, int heig
   glProgressBar[canvasId]->setHeight(0.1f * viewport[3]);
 }
 
-bool EMSCRIPTEN_KEEPALIVE subGraphHasHull(const char *canvasId, tlp::Graph *sg) {
-  return subgraphsHulls[canvasId].find(sg->getId()) != subgraphsHulls[canvasId].end();
+bool EMSCRIPTEN_KEEPALIVE graphHasHull(const char *canvasId, tlp::Graph *g) {
+  return graphsHulls[canvasId].find(g->getId()) != graphsHulls[canvasId].end();
 }
 
-void EMSCRIPTEN_KEEPALIVE addSubGraphHull(const char *canvasId, tlp::Graph *sg) {
+void EMSCRIPTEN_KEEPALIVE addGraphHull(const char *canvasId, tlp::Graph *g) {
   tlp::Color hullColor = genRandomColor(100);
-  if (subgraphsHulls[canvasId].find(sg->getId()) != subgraphsHulls[canvasId].end()) {
-    hullsLayer[canvasId]->deleteGlEntity(subgraphsHulls[canvasId][sg->getId()]);
-    delete subgraphsHulls[canvasId][sg->getId()];
+  if (graphsHulls[canvasId].find(g->getId()) != graphsHulls[canvasId].end()) {
+    hullsLayer[canvasId]->deleteGlEntity(graphsHulls[canvasId][g->getId()]);
+    delete graphsHulls[canvasId][g->getId()];
   }
   std::ostringstream oss;
-  oss << "hull_" << sg->getId();
-  subgraphsHulls[canvasId][sg->getId()] = new GlConcavePolygon(computeGraphHullVertices(sg, 0, false), hullColor);
-  hullsLayer[canvasId]->addGlEntity(subgraphsHulls[canvasId][sg->getId()], oss.str());
+  oss << "hull_" << g->getId();
+  graphsHulls[canvasId][g->getId()] = new GlConcavePolygon(ConcaveHullBuilder::computeGraphHullVertices(g, false), hullColor);
+  hullsLayer[canvasId]->addGlEntity(graphsHulls[canvasId][g->getId()], oss.str());
 }
 
-void EMSCRIPTEN_KEEPALIVE setSubGraphsHullsVisible(const char *canvasId, bool visible, bool onTop = true) {
+void EMSCRIPTEN_KEEPALIVE setGraphsHullsVisible(const char *canvasId, bool visible, bool onTop = true) {
   glScene[canvasId]->removeLayer(hullsLayer[canvasId]);
   if (visible) {
     if (onTop) {
@@ -511,17 +511,22 @@ void EMSCRIPTEN_KEEPALIVE setSubGraphsHullsVisible(const char *canvasId, bool vi
   }
 }
 
-void EMSCRIPTEN_KEEPALIVE clearSubGraphsHulls(const char *canvasId) {
+void EMSCRIPTEN_KEEPALIVE clearGraphsHulls(const char *canvasId) {
   hullsLayer[canvasId]->clear(true);
-  subgraphsHulls[canvasId].clear();
+  graphsHulls[canvasId].clear();
 }
 
 void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
   setCurrentCanvas(canvasId);
 
-  clearSubGraphsHulls(canvasId);
+  if (graph.find(canvasId) != graph.end() && graph[canvasId]->getRoot() != g->getRoot()) {
+    clearGraphsHulls(canvasId);
+  }
 
   tlp::StringProperty *viewTexture = g->getProperty<tlp::StringProperty>("viewTexture");
+  tlp::LayoutProperty *viewLayout = g->getProperty<tlp::LayoutProperty>("viewLayout");
+  tlp::SizeProperty *viewSize = g->getProperty<tlp::SizeProperty>("viewSize");
+  tlp::DoubleProperty *viewRotation = g->getProperty<tlp::DoubleProperty>("viewRotation");
 
   tlp::node n;
   nbTextureToLoad = 0;
@@ -533,7 +538,7 @@ void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
   graphToCanvas[g] = canvasId;
   glGraph[canvasId]->setGraph(g);
 
-  glScene[canvasId]->centerScene();
+  glScene[canvasId]->centerScene(tlp::computeBoundingBox(g, viewLayout, viewSize, viewRotation));
   glProgressBar[currentCanvasId]->setVisible(false);
   if (nbTextureToLoad == 0) {
     draw();
@@ -607,12 +612,43 @@ void EMSCRIPTEN_KEEPALIVE startGraphViewUpdate(const char *canvasId, bool clearG
   if (clearGraph) {
     graph[canvasId]->clear();
   }
+  clearGraphsHulls(canvasId);
+}
+
+void addSubGraphsHull(const char *canvasId, tlp::Graph *g) {
+  std::ostringstream oss;
+  tlp::Graph *sg = NULL;
+  forEach(sg, g->getSubGraphs()) {
+    std::vector<std::vector<tlp::Coord> > hullVertices;
+    unsigned int i = 0;
+    while (1) {
+      oss.str("");
+      oss << "hullVertices" << i;
+      std::vector<tlp::Coord> vc;
+      if (sg->getAttribute(oss.str(), vc)) {
+        hullVertices.push_back(vc);
+        sg->removeAttribute(oss.str());
+      } else {
+        break;
+      }
+    }
+    if (!hullVertices.empty()) {
+      oss.str("");
+      oss << "hull_" << sg->getId();
+      graphsHulls[canvasId][sg->getId()] = new GlConcavePolygon(hullVertices, genRandomColor(100), tlp::Color::Black);
+      hullsLayer[canvasId]->addGlEntity(graphsHulls[canvasId][sg->getId()], oss.str());
+      setGraphsHullsVisible(canvasId, true);
+    }
+    addSubGraphsHull(canvasId, sg);
+  }
 }
 
 void EMSCRIPTEN_KEEPALIVE endGraphViewUpdate(const char *canvasId) {
   glGraph[canvasId]->prepareEdgesData();
   glGraph[canvasId]->computeGraphBoundingBox();
   glGraph[canvasId]->initObservers();
+
+  addSubGraphsHull(canvasId, graph[canvasId]);
 }
 
 //==============================================================
@@ -753,6 +789,18 @@ void EMSCRIPTEN_KEEPALIVE fullScreen(const char *canvasId) {
   requestFullScreenCanvas(canvasId);
 }
 
+//==============================================================
+
+void EMSCRIPTEN_KEEPALIVE computeGraphHullVertices(tlp::Graph *graph, bool withHoles = false) {
+  std::vector<std::vector<tlp::Coord> > hullVertices = ConcaveHullBuilder::computeGraphHullVertices(graph, withHoles);
+  std::ostringstream oss;
+  for (size_t i = 0 ; i < hullVertices.size() ; ++i) {
+    oss.str("");
+    oss << "hullVertices" << i;
+    graph->setAttribute(oss.str(), hullVertices[i]);
+  }
 }
 
-//==============================================================
+}
+
+

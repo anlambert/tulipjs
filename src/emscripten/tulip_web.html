@@ -420,10 +420,38 @@
     tulip.sendProgressComment(graphId, 'Applying Louvain clustering ...');
     clone.applyDoubleAlgorithm('Louvain', louvainProp);
     clone.applyAlgorithm('Equal Value', {'Property' : louvainProp}, true);
+
+    var quotientClusteringParams = tulip.getDefaultAlgorithmParameters('Quotient Clustering', clone);
+    quotientClusteringParams['layout quotient graph(s)'] = true;
+    quotientClusteringParams['layout clusters'] = true;
+
+    clone.applyAlgorithm('Quotient Clustering', quotientClusteringParams);
+
+    var quotient = null;
+    clone.getRoot().getSubGraphs().forEach(function(sg) {
+      if (sg.getName().startsWith('quotient')) {
+        quotient = sg;
+      }
+    });
+
+    quotient.getNodes().forEach(function(n) {
+      if (quotient.isMetaNode(n)) {
+        quotient.openMetaNode(n);
+      }
+    });
+
+    var mainLayout = clone.getLayoutProperty('viewLayout');
+    var quotientLayout = quotient.getLayoutProperty('viewLayout');
+
+    mainLayout.copy(quotientLayout);
+
+    clone.getRoot().delSubGraph(quotient);
+
     var nbClusters = clone.numberOfSubGraphs();
     var i = 0;
     tulip.sendProgressComment(graphId, 'Computing subgraphs hulls ...');
     clone.getSubGraphs().forEach(function(sg) {
+      sg.delLocalProperty(sg.getLayoutProperty('viewLayout'));
       sg.computeGraphHullVertices();
       tulip.sendProgressValue(graphId, ((i++/(nbClusters-1))*100)|0);
     });

@@ -1625,6 +1625,14 @@ const char *EMSCRIPTEN_KEEPALIVE Graph_getAttributesJSON(tlp::Graph *graph) {
   return ret.c_str();
 }
 
+bool EMSCRIPTEN_KEEPALIVE Graph_isMetaNode(tlp::Graph *graph, unsigned int nodeId) {
+  return graph->isMetaNode(tlp::node(nodeId));
+}
+
+void EMSCRIPTEN_KEEPALIVE Graph_openMetaNode(tlp::Graph *graph, unsigned int nodeId) {
+  graph->openMetaNode(tlp::node(nodeId));
+}
+
 // ==================================================================================================================
 
 bool EMSCRIPTEN_KEEPALIVE algorithmExists(const char *algoName) {

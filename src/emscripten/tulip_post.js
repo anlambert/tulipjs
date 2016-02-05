@@ -2069,7 +2069,8 @@ var _Graph_setEventsActivated = Module.cwrap('Graph_setEventsActivated', null, [
 var _Graph_getNodesPropertiesValuesJSON = Module.cwrap('Graph_getNodesPropertiesValuesJSON', 'string', ['number']);
 var _Graph_getEdgesPropertiesValuesJSON = Module.cwrap('Graph_getEdgesPropertiesValuesJSON', 'string', ['number']);
 var _Graph_getAttributesJSON = Module.cwrap('Graph_getAttributesJSON', 'string', ['number']);
-
+var _Graph_isMetaNode = Module.cwrap('Graph_isMetaNode', 'number', ['number', 'number']);
+var _Graph_openMetaNode = Module.cwrap('Graph_openMetaNode', null, ['number', 'number']);
 
 /**
 * This is the description for the tulip.Graph class.
@@ -2810,6 +2811,18 @@ tulip.Graph.prototype.getAttribute = function tulip_Graph_prototype_getAttribute
   } else {
     return undefined;
   }
+};
+
+tulip.Graph.prototype.isMetaNode = function tulip_Graph_prototype_isMetaNode(n) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Node], 1);
+  return _Graph_isMetaNode(this.cppPointer, n.id) > 0;
+};
+
+tulip.Graph.prototype.openMetaNode = function tulip_Graph_prototype_openMetaNode(n) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Node], 1);
+  _Graph_openMetaNode(this.cppPointer, n.id);
 };
 
 var _computeGraphHullVertices = Module.cwrap('computeGraphHullVertices', null, ['number', 'number']);

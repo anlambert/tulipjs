@@ -193,7 +193,7 @@ void LabelsRenderer::renderOneLabel(const Camera &camera, const string &text, co
 
   NVGcontext* vg = NanoVGManager::instance()->getNanoVGContext();
 
-  nvgBeginFrame(vg, camera.getViewport()[2], camera.getViewport()[3], 1.0);
+  nvgBeginFrame(vg, camera.getViewport()[0], camera.getViewport()[1], camera.getViewport()[2], camera.getViewport()[3], 1.0);
 
   renderText(vg, text, bb, labelColor);
 
@@ -253,7 +253,7 @@ void LabelsRenderer::renderGraphNodesLabels(Graph *graph, const Camera &camera, 
 
   NVGcontext* vg = NanoVGManager::instance()->getNanoVGContext();
 
-  nvgBeginFrame(vg, camera.getViewport()[2], camera.getViewport()[3], 1.0);
+  nvgBeginFrame(vg, camera.getViewport()[0], camera.getViewport()[1], camera.getViewport()[2], camera.getViewport()[3], 1.0);
 
   for (vector<node>::iterator it = _labelsToRender[graph].begin() ; it != _labelsToRender[graph].end() ; ++it) {
 

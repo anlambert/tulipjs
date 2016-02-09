@@ -56,7 +56,7 @@ void GlProgressBar::draw(const Camera &camera, const Light &, bool) {
   tlp::Vec4i viewport = camera.getViewport();
   NVGcontext* vg = NanoVGManager::instance()->getNanoVGContext();
 
-  nvgBeginFrame(vg, viewport[2], viewport[3], 1.0);
+  nvgBeginFrame(vg, viewport[0], viewport[1], viewport[2], viewport[3], 1.0);
 
   NVGpaint bg;
   float cornerRadius = _height/2-1;

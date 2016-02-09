@@ -144,8 +144,7 @@ const vector<Coord> &ConcaveHullBuilder::getHullOuterContour(const unsigned int 
   return _computedHulls[hullId][0];
 }
 
-static vector<Coord> genNodePolygon(Graph *graph, node n, const tlp::LayoutProperty* viewLayout, const tlp::SizeProperty* viewSize, const float spacing) {
-  IntegerProperty *viewShape = graph->getProperty<IntegerProperty>("viewShape");
+static vector<Coord> genNodePolygon(node n, const tlp::LayoutProperty* viewLayout, const tlp::SizeProperty* viewSize, const tlp::IntegerProperty *viewShape, const float spacing) {
 
   const Coord &nCoord = viewLayout->getNodeValue(n);
 
@@ -174,9 +173,9 @@ static vector<Coord> genNodePolygon(Graph *graph, node n, const tlp::LayoutPrope
 
 std::vector<std::vector<tlp::Coord> > ConcaveHullBuilder::computeGraphHullVertices(Graph *graph, const bool withHoles, const float spacing, const float z) {
 
-  LayoutProperty *viewLayout = graph->getProperty<LayoutProperty>("viewLayout");
-  SizeProperty *viewSize = graph->getProperty<SizeProperty>("viewSize");
-  IntegerProperty *viewShape = graph->getProperty<IntegerProperty>("viewShape");
+  LayoutProperty *viewLayout = graph->getSuperGraph()->getProperty<LayoutProperty>("viewLayout");
+  SizeProperty *viewSize = graph->getSuperGraph()->getProperty<SizeProperty>("viewSize");
+  IntegerProperty *viewShape = graph->getSuperGraph()->getProperty<IntegerProperty>("viewShape");
 
   ConcaveHullBuilder chb;
   chb.setHullWithHoles(withHoles);
@@ -195,7 +194,7 @@ std::vector<std::vector<tlp::Coord> > ConcaveHullBuilder::computeGraphHullVertic
       const Size &tgtSize = viewSize->getNodeValue(tgt);
 
       if (visitedNodes.find(src) == visitedNodes.end()) {
-        chb.addPolygon(genNodePolygon(graph, src, viewLayout, viewSize, spacing));
+        chb.addPolygon(genNodePolygon(src, viewLayout, viewSize, viewShape, spacing));
         visitedNodes.insert(src);
       }
 
@@ -245,7 +244,7 @@ std::vector<std::vector<tlp::Coord> > ConcaveHullBuilder::computeGraphHullVertic
       chb.addPolygon(extrusionPoly);
 
       if (visitedNodes.find(tgt) == visitedNodes.end()) {
-        chb.addPolygon(genNodePolygon(graph, tgt, viewLayout, viewSize, spacing));
+        chb.addPolygon(genNodePolygon(tgt, viewLayout, viewSize, viewShape, spacing));
         visitedNodes.insert(tgt);
       }
     }
@@ -254,7 +253,7 @@ std::vector<std::vector<tlp::Coord> > ConcaveHullBuilder::computeGraphHullVertic
   node n;
   forEach(n, graph->getNodes()) {
     if (graph->deg(n) == 0) {
-      chb.addPolygon(genNodePolygon(graph, n, viewLayout, viewSize, spacing));
+      chb.addPolygon(genNodePolygon(n, viewLayout, viewSize, viewShape, spacing));
     }
   }
 

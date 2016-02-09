@@ -2097,7 +2097,7 @@ tulip.Graph = function tulip_Graph(cppPointer) {
     tulip.CppObjectWrapper.call(newObject, cppPointer, "tlp::Graph");
   }
   if (!workerMode) {
-    graphIdToWrapper[newObject.getCppPointer()] = newObject;
+    graphHierarchyIdToWrapper[newObject.getCppPointer()] = newObject;
   }
   return newObject;
 };
@@ -3986,14 +3986,14 @@ if (workerMode) {
     return Math.max(Math.min(val, max), min);
   }
 
-  function getNodeObject(graphId, nodeId) {
-    var graph = graphObject[graphId];
+  function getNodeObject(graphHierarchyId, nodeId) {
+    var graph = graphObject[graphHierarchyId];
     var nodeDataObj = {};
     nodeDataObj.nodeId = nodeId;
     nodeDataObj.properties = {};
-    for (var j = 0 ; j < propertiesNames[graphId].length ; ++j) {
-      var propertyName = propertiesNames[graphId][j];
-      if (!propertiesFilter[graphId] || propertiesFilter[graphId].indexOf(propertyName) != -1) {
+    for (var j = 0 ; j < propertiesNames[graphHierarchyId].length ; ++j) {
+      var propertyName = propertiesNames[graphHierarchyId][j];
+      if (!propertiesFilter[graphHierarchyId] || propertiesFilter[graphHierarchyId].indexOf(propertyName) != -1) {
         var propertyData = graph.properties[propertyName];
         if (propertyData.nodesValues != undefined) {
           if (propertyData.nodesValues[nodeId] != undefined) {
@@ -4009,8 +4009,8 @@ if (workerMode) {
     return nodeDataObj;
   }
 
-  function getEdgeObject(graphId, edgeId) {
-    var graph = graphObject[graphId];
+  function getEdgeObject(graphHierarchyId, edgeId) {
+    var graph = graphObject[graphHierarchyId];
     if (graph.edgesNumber == 0) {
       return null;
     }
@@ -4019,9 +4019,9 @@ if (workerMode) {
     edgeDataObj.srcNodeId = graph.edges[edgeId][0];
     edgeDataObj.tgtNodeId = graph.edges[edgeId][1];
     edgeDataObj.properties = {};
-    for (var j = 0 ; j < propertiesNames[graphId].length ; ++j) {
-      var propertyName = propertiesNames[graphId][j];
-      if (!propertiesFilter[graphId] || propertiesFilter[graphId].indexOf(propertyName) != -1) {
+    for (var j = 0 ; j < propertiesNames[graphHierarchyId].length ; ++j) {
+      var propertyName = propertiesNames[graphHierarchyId][j];
+      if (!propertiesFilter[graphHierarchyId] || propertiesFilter[graphHierarchyId].indexOf(propertyName) != -1) {
         var propertyData = graph.properties[propertyName];
         if (propertyData.edgesValues != undefined) {
           if (propertyData.edgesValues[edgeId] != undefined) {
@@ -4037,49 +4037,49 @@ if (workerMode) {
     return edgeDataObj;
   }
 
-  function fetchNextNodesData(graphId) {
-    curNodeId[graphId] = curNodeId[graphId] + 1;
-    nodesData[graphId] = [];
-    if (curNodeId[graphId] == graphObject[graphId].nodesNumber) {
+  function fetchNextNodesData(graphHierarchyId) {
+    curNodeId[graphHierarchyId] = curNodeId[graphHierarchyId] + 1;
+    nodesData[graphHierarchyId] = [];
+    if (curNodeId[graphHierarchyId] == graphObject[graphHierarchyId].nodesNumber) {
       return;
     }
-    var boundNodeId = curNodeId[graphId] + graphElementsBatchSize[graphId];
-    if (boundNodeId >= graphObject[graphId].nodesNumber) {
-      boundNodeId = graphObject[graphId].nodesNumber;
+    var boundNodeId = curNodeId[graphHierarchyId] + graphElementsBatchSize[graphHierarchyId];
+    if (boundNodeId >= graphObject[graphHierarchyId].nodesNumber) {
+      boundNodeId = graphObject[graphHierarchyId].nodesNumber;
     }
-    for (var i = curNodeId[graphId] ; i < boundNodeId ; ++i) {
-      nodesData[graphId].push(getNodeObject(graphId, i));
+    for (var i = curNodeId[graphHierarchyId] ; i < boundNodeId ; ++i) {
+      nodesData[graphHierarchyId].push(getNodeObject(graphHierarchyId, i));
     }
-    curNodeId[graphId] = boundNodeId - 1;
+    curNodeId[graphHierarchyId] = boundNodeId - 1;
   }
 
-  function fetchNextEdgesData(graphId) {
-    curEdgeId[graphId] = curEdgeId[graphId] + 1;
-    edgesData[graphId] = [];
-    if (curEdgeId[graphId] == graphObject[graphId].edgesNumber) {
+  function fetchNextEdgesData(graphHierarchyId) {
+    curEdgeId[graphHierarchyId] = curEdgeId[graphHierarchyId] + 1;
+    edgesData[graphHierarchyId] = [];
+    if (curEdgeId[graphHierarchyId] == graphObject[graphHierarchyId].edgesNumber) {
       return;
     }
-    var boundEdgeId = curEdgeId[graphId] + graphElementsBatchSize[graphId];
-    if (boundEdgeId >= graphObject[graphId].edgesNumber) {
-      boundEdgeId = graphObject[graphId].edgesNumber;
+    var boundEdgeId = curEdgeId[graphHierarchyId] + graphElementsBatchSize[graphHierarchyId];
+    if (boundEdgeId >= graphObject[graphHierarchyId].edgesNumber) {
+      boundEdgeId = graphObject[graphHierarchyId].edgesNumber;
     }
-    for (var i = curEdgeId[graphId] ; i < boundEdgeId ; ++i) {
-      edgesData[graphId].push(getEdgeObject(graphId, i));
+    for (var i = curEdgeId[graphHierarchyId] ; i < boundEdgeId ; ++i) {
+      edgesData[graphHierarchyId].push(getEdgeObject(graphHierarchyId, i));
     }
-    curEdgeId[graphId] = boundEdgeId - 1;
+    curEdgeId[graphHierarchyId] = boundEdgeId - 1;
   }
 
   var _setPluginProgressGraphId = Module.cwrap('setPluginProgressGraphId', null, ['number']);
 
-  function sendGraphData(graphId) {
-    curNodeId[graphId] = 0;
-    curEdgeId[graphId] = 0;
-    self.postMessage({eventType : 'addNodes', graphId : graphId,
-                       nodesJson : JSON.stringify([getNodeObject(graphId, 0)]),
+  function sendGraphData(graphHierarchyId) {
+    curNodeId[graphHierarchyId] = 0;
+    curEdgeId[graphHierarchyId] = 0;
+    self.postMessage({eventType : 'addNodes', graphHierarchyId : graphHierarchyId,
+                       nodesJson : JSON.stringify([getNodeObject(graphHierarchyId, 0)]),
                        lastNodeId : 0});
   }
 
-  function prepareSubGraphsData(graphId, graphObj) {
+  function prepareSubGraphsData(graphHierarchyId, graphObj) {
     for (var i = 0 ; i < graphObj.subgraphs.length ; ++i) {
       var subGraphObj = graphObj.subgraphs[i];
       var subGraphDataObj = {};
@@ -4121,53 +4121,53 @@ if (workerMode) {
       subGraphDataObj.edgesIds += ")";
       subGraphDataObj.attributes = JSON.stringify(subGraphObj.attributes);
       subGraphDataObj.properties = JSON.stringify(subGraphObj.properties);
-      subGraphsData[graphId].push(subGraphDataObj);
-      prepareSubGraphsData(graphId, subGraphObj);
+      subGraphsData[graphHierarchyId].push(subGraphDataObj);
+      prepareSubGraphsData(graphHierarchyId, subGraphObj);
     }
   }
 
-  function getGraphData(graphId, graphDataLoadedCallback) {
-    tulip.sendProgressComment(graphId, "Exporting graph to JSON format ...");
-    tulip.sendProgressValue(graphId, -1);
+  function getGraphData(graphHierarchyId, graphDataLoadedCallback) {
+    tulip.sendProgressComment(graphHierarchyId, "Exporting graph to JSON format ...");
+    tulip.sendProgressValue(graphHierarchyId, -1);
     setTimeout(function() {
-      var jsonGraphStr = graphs[graphId].toJSON();
+      var jsonGraphStr = graphs[graphHierarchyId].toJSON();
       var jsonGraph = JSON.parse(jsonGraphStr);
-      graphObject[graphId] = jsonGraph.graph;
-      subGraphsData[graphId] = [];
-      prepareSubGraphsData(graphId, graphObject[graphId]);
-      graphElementsBatchSize[graphId] = clamp(graphObject[graphId].nodesNumber, 1, maxBatchSize) | 0;
-      var propertiesNamesTmp = Object.keys(graphObject[graphId].properties);
-      propertiesNames[graphId] = [];
+      graphObject[graphHierarchyId] = jsonGraph.graph;
+      subGraphsData[graphHierarchyId] = [];
+      prepareSubGraphsData(graphHierarchyId, graphObject[graphHierarchyId]);
+      graphElementsBatchSize[graphHierarchyId] = clamp(graphObject[graphHierarchyId].nodesNumber, 1, maxBatchSize) | 0;
+      var propertiesNamesTmp = Object.keys(graphObject[graphHierarchyId].properties);
+      propertiesNames[graphHierarchyId] = [];
       for (var i = 0 ; i < propertiesNamesTmp.length ; ++i) {
-        propertiesNames[graphId].push(propertiesNamesTmp[i]);
+        propertiesNames[graphHierarchyId].push(propertiesNamesTmp[i]);
       }
       graphDataLoadedCallback();
     }, 0);
   }
 
-  function loadGraph(graphId, graphFilePath, sendData) {
-    _setPluginProgressGraphId(graphId);
-    graphs[graphId] = tulip.loadGraph(graphFilePath, sendData);
+  function loadGraph(graphHierarchyId, graphFilePath, sendData) {
+    _setPluginProgressGraphId(graphHierarchyId);
+    graphs[graphHierarchyId] = tulip.loadGraph(graphFilePath, sendData);
 
     if (!sendData) return;
-    getGraphData(graphId, function() {
-      updateMode[graphId] = false;
+    getGraphData(graphHierarchyId, function() {
+      updateMode[graphHierarchyId] = false;
       self.postMessage({eventType : 'startGraphData',
-                         graphId : graphId,
-                         numberOfNodes : graphObject[graphId].nodesNumber,
-                         numberOfEdges : graphObject[graphId].edgesNumber,
-                         numberOfSubgraphs : subGraphsData[graphId].length,
-                         graphAttributes : JSON.stringify(graphObject[graphId].attributes)
+                         graphHierarchyId : graphHierarchyId,
+                         numberOfNodes : graphObject[graphHierarchyId].nodesNumber,
+                         numberOfEdges : graphObject[graphHierarchyId].edgesNumber,
+                         numberOfSubgraphs : subGraphsData[graphHierarchyId].length,
+                         graphAttributes : JSON.stringify(graphObject[graphHierarchyId].attributes)
                        });
       var propertiesData = {};
-      for (var i = 0 ; i < propertiesNames[graphId].length ; ++i) {
-        propertiesData[propertiesNames[graphId][i]] = {};
-        propertiesData[propertiesNames[graphId][i]].type = graphObject[graphId].properties[propertiesNames[graphId][i]].type;
-        propertiesData[propertiesNames[graphId][i]].nodeDefault = graphObject[graphId].properties[propertiesNames[graphId][i]].nodeDefault;
-        propertiesData[propertiesNames[graphId][i]].edgeDefault = graphObject[graphId].properties[propertiesNames[graphId][i]].edgeDefault;
+      for (var i = 0 ; i < propertiesNames[graphHierarchyId].length ; ++i) {
+        propertiesData[propertiesNames[graphHierarchyId][i]] = {};
+        propertiesData[propertiesNames[graphHierarchyId][i]].type = graphObject[graphHierarchyId].properties[propertiesNames[graphHierarchyId][i]].type;
+        propertiesData[propertiesNames[graphHierarchyId][i]].nodeDefault = graphObject[graphHierarchyId].properties[propertiesNames[graphHierarchyId][i]].nodeDefault;
+        propertiesData[propertiesNames[graphHierarchyId][i]].edgeDefault = graphObject[graphHierarchyId].properties[propertiesNames[graphHierarchyId][i]].edgeDefault;
       }
-      self.postMessage({eventType : 'createGraphProperties', graphId : graphId, properties : propertiesData});
-      sendGraphData(graphId);
+      self.postMessage({eventType : 'createGraphProperties', graphHierarchyId : graphHierarchyId, properties : propertiesData});
+      sendGraphData(graphHierarchyId);
     });
   }
 
@@ -4195,10 +4195,10 @@ if (workerMode) {
           }
           FS.writeFile(data.graphFile, new Uint8Array(arrayBuffer), {'encoding' : 'binary'});
           var graphToDestroy = null;
-          if (data.graphId in graphs) {
-            graphToDestroy = graphs[data.graphId];
+          if (data.graphHierarchyId in graphs) {
+            graphToDestroy = graphs[data.graphHierarchyId];
           }
-          loadGraph(data.graphId, data.graphFile, data.sendDataBack);
+          loadGraph(data.graphHierarchyId, data.graphFile, data.sendDataBack);
           if (graphToDestroy) graphToDestroy.destroy();
         };
         graphReq.send(null);
@@ -4216,133 +4216,146 @@ if (workerMode) {
         }
         FS.writeFile('/' + data.graphFile, new Uint8Array(data.graphFileData), {'encoding' : 'binary'});
         var graphToDestroy = null;
-        if (data.graphId in graphs) {
-          graphToDestroy = graphs[data.graphId];
+        if (data.graphHierarchyId in graphs) {
+          graphToDestroy = graphs[data.graphHierarchyId];
         }
-        loadGraph(data.graphId, data.graphFile, data.sendDataBack);
+        loadGraph(data.graphHierarchyId, data.graphFile, data.sendDataBack);
         if (graphToDestroy) graphToDestroy.destroy();
       }
       break;
     case 'sendNextNodes':
-      fetchNextNodesData(data.graphId);
-      if (nodesData[data.graphId].length > 0) {
-        self.postMessage({eventType : 'addNodes', graphId : data.graphId,
-                           nodesJson : JSON.stringify(nodesData[data.graphId]),
-                           lastNodeId : nodesData[data.graphId][nodesData[data.graphId].length - 1].nodeId});
+      fetchNextNodesData(data.graphHierarchyId);
+      if (nodesData[data.graphHierarchyId].length > 0) {
+        self.postMessage({eventType : 'addNodes', graphHierarchyId : data.graphHierarchyId,
+                           nodesJson : JSON.stringify(nodesData[data.graphHierarchyId]),
+                           lastNodeId : nodesData[data.graphHierarchyId][nodesData[data.graphHierarchyId].length - 1].nodeId});
       } else {
-        graphElementsBatchSize[data.graphId] = clamp(graphObject[data.graphId].edgesNumber, 1, maxBatchSize) | 0;
-        self.postMessage({eventType : 'addEdges', graphId : data.graphId,
-                           edgesJson : JSON.stringify([getEdgeObject(data.graphId, 0)]),
+        graphElementsBatchSize[data.graphHierarchyId] = clamp(graphObject[data.graphHierarchyId].edgesNumber, 1, maxBatchSize) | 0;
+        self.postMessage({eventType : 'addEdges', graphHierarchyId : data.graphHierarchyId,
+                           edgesJson : JSON.stringify([getEdgeObject(data.graphHierarchyId, 0)]),
                            lastEdgeId : 0});
       }
       break;
     case 'sendNextEdges':
-      fetchNextEdgesData(data.graphId);
-      if (edgesData[data.graphId].length == 0) {
-        if (!updateMode[data.graphId]) {
-          if (subGraphsData[data.graphId].length > 0) {
-            curSubGraphIdx[data.graphId] = 0;
-            self.postMessage({eventType : 'addSubGraph', graphId : data.graphId, subGraphData : subGraphsData[data.graphId][0]});
+      fetchNextEdgesData(data.graphHierarchyId);
+      if (edgesData[data.graphHierarchyId].length == 0) {
+        if (!updateMode[data.graphHierarchyId]) {
+          if (subGraphsData[data.graphHierarchyId].length > 0) {
+            curSubGraphIdx[data.graphHierarchyId] = 0;
+            self.postMessage({eventType : 'addSubGraph', graphHierarchyId : data.graphHierarchyId, subGraphData : subGraphsData[data.graphHierarchyId][0]});
           } else {
-            self.postMessage({eventType : 'endGraphData', graphId : data.graphId});
+            self.postMessage({eventType : 'endGraphData', graphHierarchyId : data.graphHierarchyId});
           }
         } else {
-          if (subGraphsData[data.graphId].length > 0) {
-            curSubGraphIdx[data.graphId] = 0;
-            self.postMessage({eventType : 'addSubGraph', graphId : data.graphId, subGraphData : subGraphsData[data.graphId][0]});
+          if (subGraphsData[data.graphHierarchyId].length > 0) {
+            curSubGraphIdx[data.graphHierarchyId] = 0;
+            self.postMessage({eventType : 'addSubGraph', graphHierarchyId : data.graphHierarchyId, subGraphData : subGraphsData[data.graphHierarchyId][0]});
           } else {
-            self.postMessage({eventType : 'endGraphUpdate', graphId : data.graphId});
+            self.postMessage({eventType : 'endGraphUpdate', graphHierarchyId : data.graphHierarchyId});
           }
         }
-        propertiesFilter[data.graphId] = null;
+        propertiesFilter[data.graphHierarchyId] = null;
         return;
       }
-      self.postMessage({eventType : 'addEdges', graphId : data.graphId,
-                         edgesJson : JSON.stringify(edgesData[data.graphId]),
-                         lastEdgeId : edgesData[data.graphId][edgesData[data.graphId].length - 1].edgeId});
+      self.postMessage({eventType : 'addEdges', graphHierarchyId : data.graphHierarchyId,
+                         edgesJson : JSON.stringify(edgesData[data.graphHierarchyId]),
+                         lastEdgeId : edgesData[data.graphHierarchyId][edgesData[data.graphHierarchyId].length - 1].edgeId});
       break;
     case 'sendNextSubGraph':
-      curSubGraphIdx[data.graphId] = curSubGraphIdx[data.graphId] + 1;
-      if (curSubGraphIdx[data.graphId] < subGraphsData[data.graphId].length) {
-        self.postMessage({eventType : 'addSubGraph', graphId : data.graphId, subGraphData : subGraphsData[data.graphId][curSubGraphIdx[data.graphId]]});
+      curSubGraphIdx[data.graphHierarchyId] = curSubGraphIdx[data.graphHierarchyId] + 1;
+      if (curSubGraphIdx[data.graphHierarchyId] < subGraphsData[data.graphHierarchyId].length) {
+        self.postMessage({eventType : 'addSubGraph', graphHierarchyId : data.graphHierarchyId, subGraphData : subGraphsData[data.graphHierarchyId][curSubGraphIdx[data.graphHierarchyId]]});
       } else {
-        if (!updateMode[data.graphId]) {
-          self.postMessage({eventType : 'endGraphData', graphId : data.graphId});
+        if (!updateMode[data.graphHierarchyId]) {
+          self.postMessage({eventType : 'endGraphData', graphHierarchyId : data.graphHierarchyId});
         } else {
-          self.postMessage({eventType : 'endGraphUpdate', graphId : data.graphId});
+          self.postMessage({eventType : 'endGraphUpdate', graphHierarchyId : data.graphHierarchyId});
         }
       }
       break;
     case 'algorithm' :
-      _setPluginProgressGraphId(data.graphId);
-      var algoSucceed = graphs[data.graphId].applyAlgorithm(data.algorithmName, JSON.parse(data.parameters), true);
-      propertiesFilter[data.graphId] = null;
-      updateMode[data.graphId] = true;
-      getGraphData(data.graphId, function() {
+      _setPluginProgressGraphId(data.graphHierarchyId);
+      var graph = graphs[data.graphHierarchyId];
+      if (data.graphId != 0) {
+        graph =  graph.getDescendantGraph(data.graphId);
+      }
+      var algoSucceed = graph.applyAlgorithm(data.algorithmName, JSON.parse(data.parameters), true);
+      propertiesFilter[data.graphHierarchyId] = null;
+      updateMode[data.graphHierarchyId] = true;
+      getGraphData(data.graphHierarchyId, function() {
         self.postMessage({eventType : 'startGraphUpdate',
-                           graphId : data.graphId,
-                           clearGraph : true,
-                           algoSucceed : algoSucceed,
-                           numberOfNodes : graphObject[data.graphId].nodesNumber,
-                           numberOfEdges : graphObject[data.graphId].edgesNumber,
-                           numberOfSubgraphs : subGraphsData[data.graphId].length,
-                           graphAttributes : JSON.stringify(graphObject[data.graphId].attributes)});
-        sendGraphData(data.graphId);
+                          graphHierarchyId : data.graphHierarchyId,
+                          graphId : data.graphId,
+                          clearGraph : true,
+                          algoSucceed : algoSucceed,
+                          numberOfNodes : graphObject[data.graphHierarchyId].nodesNumber,
+                          numberOfEdges : graphObject[data.graphHierarchyId].edgesNumber,
+                          numberOfSubgraphs : subGraphsData[data.graphHierarchyId].length,
+                          graphAttributes : JSON.stringify(graphObject[data.graphHierarchyId].attributes)});
+        sendGraphData(data.graphHierarchyId);
       });
       break;
     case 'propertyAlgorithm' :
-      _setPluginProgressGraphId(data.graphId);
-      var graph = graphs[data.graphId];
+      _setPluginProgressGraphId(data.graphHierarchyId);
+      var graph = graphs[data.graphHierarchyId];
+      if (data.graphId != 0) {
+        graph =  graph.getDescendantGraph(data.graphId);
+      }
       var resultProp = graph.getProperty(data.resultPropertyName);
       var algoSucceed = graph.applyPropertyAlgorithm(data.algorithmName, resultProp, JSON.parse(data.parameters), true);
-      propertiesFilter[data.graphId] = [data.resultPropertyName];
-      updateMode[data.graphId] = true;
-      getGraphData(data.graphId, function() {
+      propertiesFilter[data.graphHierarchyId] = [data.resultPropertyName];
+      updateMode[data.graphHierarchyId] = true;
+      getGraphData(data.graphHierarchyId, function() {
         self.postMessage({eventType : 'startGraphUpdate',
+                           graphHierarchyId : data.graphHierarchyId,
                            graphId : data.graphId,
                            clearGraph : false,
                            algoSucceed : algoSucceed,
-                           numberOfNodes : graphObject[data.graphId].nodesNumber,
-                           numberOfEdges : graphObject[data.graphId].edgesNumber,
-                           numberOfSubgraphs : subGraphsData[data.graphId].length,
-                           graphAttributes : JSON.stringify(graphObject[data.graphId].attributes)});
-        sendGraphData(data.graphId);
+                           numberOfNodes : graphObject[data.graphHierarchyId].nodesNumber,
+                           numberOfEdges : graphObject[data.graphHierarchyId].edgesNumber,
+                           numberOfSubgraphs : subGraphsData[data.graphHierarchyId].length,
+                           graphAttributes : JSON.stringify(graphObject[data.graphHierarchyId].attributes)});
+        sendGraphData(data.graphHierarchyId);
       });
       break;
     case 'executeGraphScript' :
-      _setPluginProgressGraphId(data.graphId);
-      var graph = graphs[data.graphId];
+      _setPluginProgressGraphId(data.graphHierarchyId);
+      var graph = graphs[data.graphHierarchyId];
+      if (data.graphId != 0) {
+        graph =  graph.getDescendantGraph(data.graphId);
+      }
       var scriptSucceed = true;
       try {
-        eval("f = " + data.scriptCode + "; f(graph, data.graphId, " + JSON.stringify(data.scriptParameters) + " );");
+        eval("f = " + data.scriptCode + "; f(graph, data.graphHierarchyId, " + JSON.stringify(data.scriptParameters) + " );");
       } catch (e) {
         console.log("exception caught");
         console.log(e);
         scriptSucceed = false;
       }
-      propertiesFilter[data.graphId] = null;
-      updateMode[data.graphId] = true;
-      getGraphData(data.graphId, function() {
+      propertiesFilter[data.graphHierarchyId] = null;
+      updateMode[data.graphHierarchyId] = true;
+      getGraphData(data.graphHierarchyId, function() {
         self.postMessage({eventType : 'startGraphUpdate',
+                           graphHierarchyId : data.graphHierarchyId,
                            graphId : data.graphId,
                            clearGraph : true,
                            algoSucceed : scriptSucceed,
-                           numberOfNodes : graphObject[data.graphId].nodesNumber,
-                           numberOfEdges : graphObject[data.graphId].edgesNumber,
-                           numberOfSubgraphs : subGraphsData[data.graphId].length,
-                           graphAttributes : JSON.stringify(graphObject[data.graphId].attributes)});
-        sendGraphData(data.graphId);
+                           numberOfNodes : graphObject[data.graphHierarchyId].nodesNumber,
+                           numberOfEdges : graphObject[data.graphHierarchyId].edgesNumber,
+                           numberOfSubgraphs : subGraphsData[data.graphHierarchyId].length,
+                           graphAttributes : JSON.stringify(graphObject[data.graphHierarchyId].attributes)});
+        sendGraphData(data.graphHierarchyId);
       });
       break;
     };
   }, false);
 
-  tulip.sendProgressValue = function(graphId, val) {
-    self.postMessage({eventType: 'progressValue', graphId : graphId, value: val});
+  tulip.sendProgressValue = function(graphHierarchyId, val) {
+    self.postMessage({eventType: 'progressValue', graphHierarchyId : graphHierarchyId, value: val});
   };
 
-  tulip.sendProgressComment = function(graphId, text) {
-    self.postMessage({eventType: 'progressComment', graphId : graphId, comment: text});
+  tulip.sendProgressComment = function(graphHierarchyId, text) {
+    self.postMessage({eventType: 'progressComment', graphHierarchyId : graphHierarchyId, comment: text});
   }
 
 } else {
@@ -4352,7 +4365,8 @@ if (workerMode) {
   var graphLoadedCallbacks = {};
   var algorithmFinishedCallbacks = {};
   var algorithmSucceed = {};
-  var graphIdToWrapper = {};
+  var algorithmGraphId = {};
+  var graphHierarchyIdToWrapper = {};
 
   var _fillMetaGraphInfos = Module.cwrap('fillMetaGraphInfos', null, ['number']);
   var _parseGraphAttributesJSONData =  Module.cwrap('parseGraphAttributesJSONData', null, ['number', 'string']);
@@ -4432,7 +4446,7 @@ if (workerMode) {
     var _selectEdges = Module.cwrap('selectEdges', 'number', ['string', 'number', 'number', 'number', 'number']);
     var _getSelectedEdges = Module.cwrap('getSelectedEdges', null, ['number']);
 
-    var graphIdToView = {};
+    var graphHierarchyIdToView = {};
     var canvasIdToView = {};
     var graphData = {};
 
@@ -4453,14 +4467,14 @@ if (workerMode) {
     _tulipWorker.addEventListener('message', function (event) {
       var delay = 0;
       var view = null;
-      var graphId = null;
+      var graphHierarchyId = null;
       var graph = null;
-      if ('graphId' in event.data) {
-        graphId = event.data.graphId;
-        graph = graphIdToWrapper[graphId];
+      if ('graphHierarchyId' in event.data) {
+        graphHierarchyId = event.data.graphHierarchyId;
+        graph = graphHierarchyIdToWrapper[graphHierarchyId];
       }
-      if (tulip.vizFeatures && graphId) {
-        view = graphIdToView[graphId];
+      if (tulip.vizFeatures && graphHierarchyId) {
+        view = graphHierarchyIdToView[graphHierarchyId];
       }
       switch (event.data.eventType) {
         case 'tulipWorkerInit':
@@ -4495,7 +4509,7 @@ if (workerMode) {
               view.setProgressBarComment("Initializing graph visualization ...");
               view.setProgressBarPercent(0);
               view.startGraphViewData();
-              graphData[graphId] = event.data;
+              graphData[graphHierarchyId] = event.data;
               view.draw();
             }
           }, delay);
@@ -4511,30 +4525,35 @@ if (workerMode) {
               view.setGraphRenderingDataReady(true);
               view.centerScene();
             }
-            if (graphId in graphLoadedCallbacks) {
-              graphLoadedCallbacks[graphId](graph);
+            if (graphHierarchyId in graphLoadedCallbacks) {
+              graphLoadedCallbacks[graphHierarchyId](graph);
             }
             tulip.unholdObservers();
           }, delay);
           break;
         case 'startGraphUpdate':
           tulip.holdObservers();
-          algorithmSucceed[graphId] = event.data.algoSucceed;
+          algorithmSucceed[graphHierarchyId] = event.data.algoSucceed;
+          algorithmGraphId[graphHierarchyId] = event.data.graphId;
           graph._parseGraphAttributesJSONData(event.data.graphAttributes);
           if (tulip.vizFeatures && view) {
             view.stopBusyAnimation();
             setTimeout(function() {
               view.setProgressBarComment("Updating graph visualization ...");
               view.startGraphViewUpdate(event.data.clearGraph);
-              graphData[graphId] = event.data;
+              graphData[graphHierarchyId] = event.data;
               view.draw();
             }, delay);
           }
           break;
         case 'endGraphUpdate':
           graph._fillMetaGraphInfos();
-          if (graphId in algorithmFinishedCallbacks) {
-            algorithmFinishedCallbacks[graphId](graph, algorithmSucceed[graphId]);
+          if (graphHierarchyId in algorithmFinishedCallbacks) {
+            var g = graph;
+            if (algorithmGraphId[graphHierarchyId] != 0) {
+              g = graph.getDescendantGraph(algorithmGraphId[graphHierarchyId]);
+            }
+            algorithmFinishedCallbacks[graphHierarchyId](g, algorithmSucceed[graphHierarchyId]);
           }
 
           if (tulip.vizFeatures && view) {
@@ -4559,12 +4578,12 @@ if (workerMode) {
             graph._parseNodesJSONData(event.data.nodesJson);
             if (tulip.vizFeatures && view) {
               var nodeId = event.data.lastNodeId;
-              var percent = (nodeId / (graphData[graphId].numberOfNodes + graphData[graphId].numberOfEdges + graphData[graphId].numberOfSubgraphs - 1)) * 100;
-              view.setProgressBarComment("Importing graph nodes data (" + nodeId + " / " + graphData[graphId].numberOfNodes + ") ...");
+              var percent = (nodeId / (graphData[graphHierarchyId].numberOfNodes + graphData[graphHierarchyId].numberOfEdges + graphData[graphHierarchyId].numberOfSubgraphs - 1)) * 100;
+              view.setProgressBarComment("Importing graph nodes data (" + nodeId + " / " + graphData[graphHierarchyId].numberOfNodes + ") ...");
               view.setProgressBarPercent(percent);
               view.draw();
             }
-            _tulipWorker.postMessage({eventType : 'sendNextNodes', graphId : graphId});
+            _tulipWorker.postMessage({eventType : 'sendNextNodes', graphHierarchyId : graphHierarchyId});
           }, delay);
           break;
         case 'addEdges':
@@ -4572,12 +4591,12 @@ if (workerMode) {
             graph._parseEdgesJSONData(event.data.edgesJson);
             if (tulip.vizFeatures && view) {
               var edgeId = event.data.lastEdgeId;
-              var percent = ((graphData[graphId].numberOfNodes + edgeId) / (graphData[graphId].numberOfNodes + graphData[graphId].numberOfEdges + graphData[graphId].numberOfSubgraphs - 1)) * 100;
-              view.setProgressBarComment("Importing graph edges data (" + edgeId + " / " + graphData[graphId].numberOfEdges + ") ...");
+              var percent = ((graphData[graphHierarchyId].numberOfNodes + edgeId) / (graphData[graphHierarchyId].numberOfNodes + graphData[graphHierarchyId].numberOfEdges + graphData[graphHierarchyId].numberOfSubgraphs - 1)) * 100;
+              view.setProgressBarComment("Importing graph edges data (" + edgeId + " / " + graphData[graphHierarchyId].numberOfEdges + ") ...");
               view.setProgressBarPercent(percent);
               view.draw();
             }
-            _tulipWorker.postMessage({eventType : 'sendNextEdges' , graphId : graphId});
+            _tulipWorker.postMessage({eventType : 'sendNextEdges' , graphHierarchyId : graphHierarchyId});
           }, delay);
           break;
         case 'addSubGraph':
@@ -4585,12 +4604,12 @@ if (workerMode) {
             graph._addSubGraph(event.data.subGraphData);
             if (tulip.vizFeatures && view) {
               var sgId = graph.numberOfDescendantGraphs();
-              var percent = ((graphData[graphId].numberOfNodes + graphData[graphId].numberOfEdges + sgId) / (graphData[graphId].numberOfNodes + graphData[graphId].numberOfEdges + graphData[graphId].numberOfSubgraphs - 1)) * 100;
-              view.setProgressBarComment("Importing subgraphs data (" + sgId + " / " + graphData[graphId].numberOfSubgraphs + ") ...");
+              var percent = ((graphData[graphHierarchyId].numberOfNodes + graphData[graphHierarchyId].numberOfEdges + sgId) / (graphData[graphHierarchyId].numberOfNodes + graphData[graphHierarchyId].numberOfEdges + graphData[graphHierarchyId].numberOfSubgraphs - 1)) * 100;
+              view.setProgressBarComment("Importing subgraphs data (" + sgId + " / " + graphData[graphHierarchyId].numberOfSubgraphs + ") ...");
               view.setProgressBarPercent(percent);
               view.draw();
             }
-            _tulipWorker.postMessage({eventType : 'sendNextSubGraph', graphId : event.data.graphId});
+            _tulipWorker.postMessage({eventType : 'sendNextSubGraph', graphHierarchyId : event.data.graphHierarchyId});
           }, delay);
           break;
       };
@@ -4608,7 +4627,7 @@ if (workerMode) {
       } else {
         var messageData = {
           eventType: 'loadGraph',
-          graphId: graph.getCppPointer(),
+          graphHierarchyId: graph.getCppPointer(),
           graphFile: graphFilePath,
           graphFileData : graphFileData,
           sendDataBack : sendDataBack
@@ -4751,20 +4770,10 @@ if (workerMode) {
 
     tulip.View.prototype.setGraph = function(graph) {
       if (!graph.cppPointerValid()) return;
-//      if (this.graph) {
-//        tulip.removeListener(this.graph.getLayoutProperty("viewLayout"), this);
-//        tulip.removeObserver(this.graph.getLayoutProperty("viewLayout"), this);
-//        tulip.removeListener(this.graph.getSizeProperty("viewSize"), this);
-//        tulip.removeObserver(this.graph.getSizeProperty("viewSize"), this);
-//      }
       this.graph = graph;
-//      tulip.addListener(this.graph.getLayoutProperty("viewLayout"), this);
-//      tulip.addObserver(this.graph.getLayoutProperty("viewLayout"), this);
-//      tulip.addListener(this.graph.getSizeProperty("viewSize"), this);
-//      tulip.addObserver(this.graph.getSizeProperty("viewSize"), this);
       _setCanvasGraph(this.canvasId, graph.cppPointer);
-      graphIdToView[graph.getCppPointer()] = this;
-      graphIdToWrapper[graph.getCppPointer()] = graph;
+      graphHierarchyIdToView[graph.getRoot().getCppPointer()] = this;
+      graphHierarchyIdToWrapper[graph.getRoot().getCppPointer()] = graph.getRoot();
     };
 
     tulip.View.prototype.getGraph = function() {
@@ -5145,22 +5154,23 @@ if (workerMode) {
       if (algoParameters === undefined) {
         algoParameters = {};
       }
-      var graphId = this.getCppPointer();
-      if (tulip.vizFeatures && graphId in graphIdToView) {
-        var view = graphIdToView[graphId];
+      var graphHierarchyId = this.getRoot().getCppPointer();
+      if (tulip.vizFeatures && graphHierarchyId in graphHierarchyIdToView) {
+        var view = graphHierarchyIdToView[graphHierarchyId];
         view.setGraphRenderingDataReady(false);
         view.startBusyAnimation();
         view.setProgressBarComment("Applying " + algorithmName + " algorithm ...");
       }
-      sendGraphToWorker(this);
+      sendGraphToWorker(this.getRoot());
       var messageData = {
-        graphId : graphId,
+        graphHierarchyId : graphHierarchyId,
+        graphId : this.getId(),
         eventType: 'algorithm',
         algorithmName : algorithmName,
         parameters : JSON.stringify(algoParameters)
       };
       if (algoFinishedCallback) {
-        algorithmFinishedCallbacks[graphId] = algoFinishedCallback;
+        algorithmFinishedCallbacks[graphHierarchyId] = algoFinishedCallback;
       }
       _tulipWorker.postMessage(messageData);
     };
@@ -5169,21 +5179,22 @@ if (workerMode) {
       if (algoParameters === undefined) {
         algoParameters = {};
       }
-      var graphId = graph.getCppPointer();
-      sendGraphToWorker(graph);
+      var graphHierarchyId = graph.getRoot().getCppPointer();
+      sendGraphToWorker(graph.getRoot());
       var messageData = {
-        graphId : graphId,
+        graphHierarchyId : graphHierarchyId,
+        graphId : graph.getId(),
         eventType: 'propertyAlgorithm',
         algorithmName : algorithmName,
         resultPropertyName : resultProperty.getName(),
         parameters : JSON.stringify(algoParameters)
       };
       if (algoFinishedCallback) {
-        algorithmFinishedCallbacks[graphId] = algoFinishedCallback;
+        algorithmFinishedCallbacks[graphHierarchyId] = algoFinishedCallback;
       }
       _tulipWorker.postMessage(messageData);
-      if (tulip.vizFeatures && graphId in graphIdToView) {
-        var view = graphIdToView[graphId];
+      if (tulip.vizFeatures && graphHierarchyId in graphHierarchyIdToView) {
+        var view = graphHierarchyIdToView[graphHierarchyId];
         view.setGraphRenderingDataReady(false);
         view.startBusyAnimation();
         view.setProgressBarComment("Applying " + algorithmName + " " + resultProperty.getTypename() + " algorithm ...");
@@ -5227,19 +5238,20 @@ if (workerMode) {
     };
 
     tulip.Graph.prototype.executeScriptInWorker = function(graphFunction, scriptExecutedCallback, scriptParameters) {
-      var graphId = this.getCppPointer();
-      sendGraphToWorker(this);
+      var graphHierarchyId = this.getRoot().getCppPointer();
+      sendGraphToWorker(this.getRoot());
       if (scriptExecutedCallback) {
-        algorithmFinishedCallbacks[graphId] = scriptExecutedCallback;
+        algorithmFinishedCallbacks[graphHierarchyId] = scriptExecutedCallback;
       }
-      if (tulip.vizFeatures && graphId in graphIdToView) {
-        var view = graphIdToView[graphId];
+      if (tulip.vizFeatures && graphHierarchyId in graphHierarchyIdToView) {
+        var view = graphHierarchyIdToView[graphHierarchyId];
         view.setGraphRenderingDataReady(false);
         view.startBusyAnimation();
         view.setProgressBarComment("Executing script on graph ...");
       }
       _tulipWorker.postMessage({
-                                 graphId: this.getCppPointer(),
+                                 graphHierarchyId: graphHierarchyId,
+                                 graphId : this.getId(),
                                  eventType: 'executeGraphScript',
                                  scriptCode: graphFunction.toString(),
                                  scriptParameters: scriptParameters

@@ -184,8 +184,8 @@
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Auto-Sizing' algorithm" onclick ="computeAutoSizing()" > Auto-Sizing </a>
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Edge bundling' algorithm" onclick ="computeEdgeBundling()" > Edge bundling </a>
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="applyGraphScript()" > Magic script </a>
-            <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="computeLouvainClusteringAndHulls()" > Louvain clustering </a>
-            <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="computeMCLClusteringAndHulls()" > MCL clustering </a>
+            <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="computeLouvainClustering()" > Louvain clustering </a>
+            <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="computeMCLClustering()" > MCL clustering </a>
           </div>
         </div>
 
@@ -371,9 +371,8 @@
   }
 
   function algoFinishedCallback(graph, succeed) {
-    var end = new Date().getTime();
-    var time = (end - start) / 1000;
-    console.log('Time for executing algorithm: ' + time + 's');
+    initGraphData(graph);
+    tulipView.setGraph(graph);
   }
 
   function computeEdgeBundling() {
@@ -384,12 +383,12 @@
 
   function computeLayout(layoutAlgoName) {
     start = new Date().getTime();
-    graph.applyLayoutAlgorithmInWorker(layoutAlgoName, graphProperties.viewLayout, {}, algoFinishedCallback);
+    graph.applyLayoutAlgorithmInWorker(layoutAlgoName, graph.getLocalLayoutProperty('viewLayout'), {}, algoFinishedCallback);
   }
 
   function computeFastOverlapRemoval() {
     start = new Date().getTime();
-    graph.applyLayoutAlgorithmInWorker('Fast Overlap Removal', graphProperties.viewLayout, {'x border' : 2.0, 'y border' : 2.0}, algoFinishedCallback);
+    graph.applyLayoutAlgorithmInWorker('Fast Overlap Removal', graph.getLocalLayoutProperty('viewLayout'), {'x border' : 2.0, 'y border' : 2.0}, algoFinishedCallback);
   }
 
   function computeAutoSizing() {
@@ -413,7 +412,7 @@
     graph.executeScriptInWorker(graphScript, algoFinishedCallback);
   }
 
-  function applyClusteringAndComputeHulls(graph, graphId, parameters) {
+  function applyClustering(graph, graphId, parameters) {
     var clusteringAlgo = parameters['clusteringAlgo']
     var clusteringSgName = clusteringAlgo;
     var prevClustering = graph.getSubGraph(clusteringSgName);
@@ -455,35 +454,31 @@
     clone.getRoot().delSubGraph(quotient);
   }
 
-  function computeLouvainClusteringAndHulls() {
-    tulipView.setGraph(graph.getRoot());
-    setGlobalVars(graph.getRoot());
+  function computeLouvainClustering() {
     start = new Date().getTime();
-    graph.executeScriptInWorker(applyClusteringAndComputeHulls, initGraphData, {clusteringAlgo: 'Louvain'});
+    graph.executeScriptInWorker(applyClustering, algoFinishedCallback, {clusteringAlgo: 'Louvain'});
   }
 
-  function computeMCLClusteringAndHulls() {
-    tulipView.setGraph(graph.getRoot());
-    setGlobalVars(graph.getRoot());
+  function computeMCLClustering() {
     start = new Date().getTime();
-    graph.executeScriptInWorker(applyClusteringAndComputeHulls, initGraphData, {clusteringAlgo: 'MCL Clustering'});
+    graph.executeScriptInWorker(applyClustering, algoFinishedCallback, {clusteringAlgo: 'MCL Clustering'});
   }
 
   function computeSgHulls(graph, graphId) {
     var nbClusters = graph.numberOfSubGraphs();
     var i = 0;
     tulip.sendProgressComment(graphId, 'Computing subgraphs hulls ...');
-    graph.getDescendantGraphs().forEach(function(sg) {
-      if (sg.isConnected()) {
-        sg.computeGraphHullVertices();
-      }
+    graph.getSubGraphs().forEach(function(sg) {
+      sg.computeGraphHullVertices();
       tulip.sendProgressValue(graphId, ((i++/(nbClusters-1))*100)|0);
     });
   }
 
   function computeSubGraphsHulls() {
-    start = new Date().getTime();
-    graph.getRoot().executeScriptInWorker(computeSgHulls, initGraphData);
+    if (graph.numberOfSubGraphs() > 0) {
+      start = new Date().getTime();
+      graph.executeScriptInWorker(computeSgHulls, algoFinishedCallback);
+    }
   }
 
   function genRandomColor() {

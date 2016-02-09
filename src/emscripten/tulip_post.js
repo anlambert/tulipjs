@@ -4291,7 +4291,7 @@ if (workerMode) {
       var graph = graphs[data.graphId];
       var scriptSucceed = true;
       try {
-        eval("f = " + data.scriptCode + "; f(graph, data.graphId);");
+        eval("f = " + data.scriptCode + "; f(graph, data.graphId, " + JSON.stringify(data.scriptParameters) + " );");
       } catch (e) {
         console.log("exception caught");
         console.log(e);
@@ -5203,7 +5203,7 @@ if (workerMode) {
       }
     };
 
-    tulip.Graph.prototype.executeScriptInWorker = function(graphFunction, scriptExecutedCallback) {
+    tulip.Graph.prototype.executeScriptInWorker = function(graphFunction, scriptExecutedCallback, scriptParameters) {
       var graphId = this.getCppPointer();
       sendGraphToWorker(this);
       if (scriptExecutedCallback) {
@@ -5218,7 +5218,8 @@ if (workerMode) {
       _tulipWorker.postMessage({
                                  graphId: this.getCppPointer(),
                                  eventType: 'executeGraphScript',
-                                 scriptCode: graphFunction.toString()
+                                 scriptCode: graphFunction.toString(),
+                                 scriptParameters: scriptParameters
                                });
     };
 

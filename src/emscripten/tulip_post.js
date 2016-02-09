@@ -1869,6 +1869,10 @@ tulip.getDefaultAlgorithmParameters = function tulip_getDefaultAlgorithmParamete
   if (graph) {
     gPointer = graph.cppPointer;
   }
+  if (!tulip.pluginExists(algoName)) {
+    console.log("Error : no Tulip algorithm named '" + algoName + "'");
+    return {};
+  }
   var params = JSON.parse(_getDefaultAlgorithmParametersJSON(algoName, gPointer));
   for (var property in params) {
     if (params.hasOwnProperty(property)) {
@@ -1923,6 +1927,10 @@ tulip.algorithmsList = function() {
   freeArrayInEmHeap(ucharArray);
   freeArrayInEmHeap(uintArray);
   return ret;
+};
+
+tulip.pluginExists = function tulip_pluginExists(pluginName) {
+  return tulip.pluginsList().indexOf(pluginName) != -1;
 };
 
 tulip.algorithmExists = function tulip_algoritmExists(algoName) {

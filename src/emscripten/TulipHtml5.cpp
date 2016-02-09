@@ -488,16 +488,64 @@ bool EMSCRIPTEN_KEEPALIVE graphHasHull(const char *canvasId, tlp::Graph *g) {
   return graphsHulls[canvasId].find(g->getId()) != graphsHulls[canvasId].end();
 }
 
-void EMSCRIPTEN_KEEPALIVE addGraphHull(const char *canvasId, tlp::Graph *g) {
+void EMSCRIPTEN_KEEPALIVE addGraphHull(const char *canvasId, tlp::Graph *g, bool forceHullComputation=false) {
   tlp::Color hullColor = genRandomColor(100);
   if (graphsHulls[canvasId].find(g->getId()) != graphsHulls[canvasId].end()) {
     hullsLayer[canvasId]->deleteGlEntity(graphsHulls[canvasId][g->getId()]);
     delete graphsHulls[canvasId][g->getId()];
   }
+
   std::ostringstream oss;
-  oss << "hull_" << g->getId();
-  graphsHulls[canvasId][g->getId()] = new GlConcavePolygon(ConcaveHullBuilder::computeGraphHullVertices(g, false), hullColor);
-  hullsLayer[canvasId]->addGlEntity(graphsHulls[canvasId][g->getId()], oss.str());
+
+  std::vector<std::vector<tlp::Coord> > hullVertices;
+
+  unsigned int i = 0;
+  while (1) {
+    oss.str("");
+    oss << "hullVertices" << i;
+    std::vector<tlp::Coord> vc;
+    if (g->getAttribute(oss.str(), vc)) {
+      hullVertices.push_back(vc);
+      g->removeAttribute(oss.str());
+    } else {
+      break;
+    }
+  }
+
+  if (hullVertices.empty() && forceHullComputation) {
+    hullVertices = ConcaveHullBuilder::computeGraphHullVertices(g, false);
+  }
+
+  if (!hullVertices.empty()) {
+    oss.str("");
+    oss << "hull_" << g->getId();
+    graphsHulls[canvasId][g->getId()] = new GlConcavePolygon(hullVertices, hullColor, tlp::Color::Black);
+    hullsLayer[canvasId]->addGlEntity(graphsHulls[canvasId][g->getId()], oss.str());
+  }
+
+}
+
+void addSubGraphsHull(const char *canvasId, tlp::Graph *g) {
+  tlp::Graph *sg = NULL;
+  forEach(sg, g->getSubGraphs()) {
+    addGraphHull(canvasId, sg);
+    addSubGraphsHull(canvasId, sg);
+  }
+}
+
+void setGraphHullsToDisplay(const char *canvasId) {
+  tlp::Graph *g = graph[canvasId];
+  std::set<unsigned int> sgIds;
+
+  tlp::Graph *sg = NULL;
+  forEach(sg, g->getSubGraphs()) {
+    sgIds.insert(sg->getId());
+  }
+
+  std::map<unsigned int, GlConcavePolygon *>::iterator it = graphsHulls[canvasId].begin();
+  for (; it != graphsHulls[canvasId].end() ; ++it) {
+    it->second->setVisible(sgIds.find(it->first) != sgIds.end());
+  }
 }
 
 void EMSCRIPTEN_KEEPALIVE setGraphsHullsVisible(const char *canvasId, bool visible, bool onTop = true) {
@@ -540,6 +588,7 @@ void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
 
   glScene[canvasId]->centerScene(tlp::computeBoundingBox(g, viewLayout, viewSize, viewRotation));
   glProgressBar[currentCanvasId]->setVisible(false);
+  setGraphHullsToDisplay(canvasId);
   if (nbTextureToLoad == 0) {
     draw();
   }
@@ -612,43 +661,14 @@ void EMSCRIPTEN_KEEPALIVE startGraphViewUpdate(const char *canvasId, bool clearG
   if (clearGraph) {
     graph[canvasId]->clear();
   }
-  clearGraphsHulls(canvasId);
-}
-
-void addSubGraphsHull(const char *canvasId, tlp::Graph *g) {
-  std::ostringstream oss;
-  tlp::Graph *sg = NULL;
-  forEach(sg, g->getSubGraphs()) {
-    std::vector<std::vector<tlp::Coord> > hullVertices;
-    unsigned int i = 0;
-    while (1) {
-      oss.str("");
-      oss << "hullVertices" << i;
-      std::vector<tlp::Coord> vc;
-      if (sg->getAttribute(oss.str(), vc)) {
-        hullVertices.push_back(vc);
-        sg->removeAttribute(oss.str());
-      } else {
-        break;
-      }
-    }
-    if (!hullVertices.empty()) {
-      oss.str("");
-      oss << "hull_" << sg->getId();
-      graphsHulls[canvasId][sg->getId()] = new GlConcavePolygon(hullVertices, genRandomColor(100), tlp::Color::Black);
-      hullsLayer[canvasId]->addGlEntity(graphsHulls[canvasId][sg->getId()], oss.str());
-      setGraphsHullsVisible(canvasId, true);
-    }
-    addSubGraphsHull(canvasId, sg);
-  }
 }
 
 void EMSCRIPTEN_KEEPALIVE endGraphViewUpdate(const char *canvasId) {
   glGraph[canvasId]->prepareEdgesData();
   glGraph[canvasId]->computeGraphBoundingBox();
   glGraph[canvasId]->initObservers();
-
   addSubGraphsHull(canvasId, graph[canvasId]);
+  setGraphHullsToDisplay(canvasId);
 }
 
 //==============================================================
@@ -783,6 +803,9 @@ void EMSCRIPTEN_KEEPALIVE setGraphRenderingDataReady(const char *canvasId, bool 
   glProgressBar[canvasId]->setVisible(!ready);
   glScene[canvasId]->getMainLayer()->setVisible(ready);
   hullsLayer[canvasId]->setVisible(ready);
+  if (!ready) {
+    clearGraphsHulls(canvasId);
+  }
 }
 
 void EMSCRIPTEN_KEEPALIVE fullScreen(const char *canvasId) {

@@ -2060,6 +2060,7 @@ var _Graph_getColorProperty = Module.cwrap('Graph_getColorProperty', 'number', [
 var _Graph_getDoubleProperty = Module.cwrap('Graph_getDoubleProperty', 'number', ['number', 'string']);
 var _Graph_getIntegerProperty = Module.cwrap('Graph_getIntegerProperty', 'number', ['number', 'string']);
 var _Graph_getLayoutProperty = Module.cwrap('Graph_getLayoutProperty', 'number', ['number', 'string']);
+var _Graph_getLocalLayoutProperty = Module.cwrap('Graph_getLocalLayoutProperty', 'number', ['number', 'string']);
 var _Graph_getSizeProperty = Module.cwrap('Graph_getSizeProperty', 'number', ['number', 'string']);
 var _Graph_getStringProperty = Module.cwrap('Graph_getStringProperty', 'number', ['number', 'string']);
 var _Graph_getBooleanVectorProperty = Module.cwrap('Graph_getBooleanVectorProperty', 'number', ['number', 'string']);
@@ -2079,6 +2080,8 @@ var _Graph_getEdgesPropertiesValuesJSON = Module.cwrap('Graph_getEdgesProperties
 var _Graph_getAttributesJSON = Module.cwrap('Graph_getAttributesJSON', 'string', ['number']);
 var _Graph_isMetaNode = Module.cwrap('Graph_isMetaNode', 'number', ['number', 'number']);
 var _Graph_openMetaNode = Module.cwrap('Graph_openMetaNode', null, ['number', 'number']);
+
+var _Graph_isConnected = Module.cwrap('Graph_isConnected', 'number', ['number']);
 
 /**
 * This is the description for the tulip.Graph class.
@@ -2679,6 +2682,11 @@ tulip.Graph.prototype.getLayoutProperty = function tulip_Graph_prototype_getLayo
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.LayoutProperty(_Graph_getLayoutProperty(this.cppPointer, name));
 };
+tulip.Graph.prototype.getLocalLayoutProperty = function tulip_Graph_prototype_getLocalLayoutProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.LayoutProperty(_Graph_getLocalLayoutProperty(this.cppPointer, name));
+};
 tulip.Graph.prototype.getCoordVectorProperty = function tulip_Graph_prototype_getCoordVectorProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
@@ -2833,6 +2841,11 @@ tulip.Graph.prototype.openMetaNode = function tulip_Graph_prototype_openMetaNode
   _Graph_openMetaNode(this.cppPointer, n.id);
 };
 
+tulip.Graph.prototype.isConnected = function tulip_Graph_prototype_isConnected() {
+  checkWrappedCppPointer(this.cppPointer);
+  return _Graph_isConnected(this.cppPointer) > 0;
+};
+
 var _computeGraphHullVertices = Module.cwrap('computeGraphHullVertices', null, ['number', 'number']);
 
 tulip.Graph.prototype.computeGraphHullVertices = function(withHoles) {
@@ -2841,6 +2854,8 @@ tulip.Graph.prototype.computeGraphHullVertices = function(withHoles) {
   }
   _computeGraphHullVertices(this.cppPointer, withHoles);
 };
+
+
 
 // ==================================================================================================================
 
@@ -4408,7 +4423,7 @@ if (workerMode) {
     var _fullScreen = Module.cwrap('fullScreen', null, ['string']);
     var _updateGlScene = Module.cwrap('updateGlScene', null, ['string']);
     var _graphHasHull = Module.cwrap('graphHasHull', 'number', ['string', 'number']);
-    var _addGraphHull = Module.cwrap('addGraphHull', null, ['string', 'number']);
+    var _addGraphHull = Module.cwrap('addGraphHull', null, ['string', 'number', 'number']);
     var _setGraphsHullsVisible = Module.cwrap('setGraphsHullsVisible', null, ['string', 'number', 'number']);
     var _clearGraphsHulls = Module.cwrap('clearGraphsHulls', null, ['string']);
 
@@ -4857,7 +4872,7 @@ if (workerMode) {
 
     tulip.View.prototype.addGraphHull = function(graph) {
       checkArgumentsTypes(arguments, [tulip.Graph], 1);
-      _addGraphHull(this.canvasId, graph.cppPointer);
+      _addGraphHull(this.canvasId, graph.cppPointer, true);
     };
 
     tulip.View.prototype.clearGraphsHulls = function() {

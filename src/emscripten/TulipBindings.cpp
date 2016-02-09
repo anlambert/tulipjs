@@ -18,6 +18,7 @@
 #include <tulip/PluginContext.h>
 #include <tulip/ColorScale.h>
 #include <tulip/TlpTools.h>
+#include <tulip/ConnectedTest.h>
 
 #include <emscripten/emscripten.h>
 #include <emscripten/val.h>
@@ -1451,6 +1452,13 @@ tlp::LayoutProperty* EMSCRIPTEN_KEEPALIVE Graph_getLayoutProperty(tlp::Graph *gr
   return prop;
 }
 
+tlp::LayoutProperty* EMSCRIPTEN_KEEPALIVE Graph_getLocalLayoutProperty(tlp::Graph *graph, const char *name) {
+  tlp::LayoutProperty *prop = graph->getLocalProperty<tlp::LayoutProperty>(name);
+  if (!workerMode())
+    observeObject(prop);
+  return prop;
+}
+
 tlp::SizeProperty* EMSCRIPTEN_KEEPALIVE Graph_getSizeProperty(tlp::Graph *graph, const char *name) {
   tlp::SizeProperty *prop = graph->getProperty<tlp::SizeProperty>(name);
   observeObject(prop);
@@ -1631,6 +1639,10 @@ bool EMSCRIPTEN_KEEPALIVE Graph_isMetaNode(tlp::Graph *graph, unsigned int nodeI
 
 void EMSCRIPTEN_KEEPALIVE Graph_openMetaNode(tlp::Graph *graph, unsigned int nodeId) {
   graph->openMetaNode(tlp::node(nodeId));
+}
+
+bool EMSCRIPTEN_KEEPALIVE Graph_isConnected(tlp::Graph *graph) {
+  return tlp::ConnectedTest::isConnected(graph);
 }
 
 // ==================================================================================================================

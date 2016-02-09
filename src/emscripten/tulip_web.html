@@ -184,6 +184,7 @@
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="Applying 'Edge bundling' algorithm" onclick ="computeEdgeBundling()" > Edge bundling </a>
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="applyGraphScript()" > Magic script </a>
             <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="computeLouvainClusteringAndHulls()" > Louvain clustering </a>
+            <a data-role = "button" class = "show-page-loading-msg" data-icon ="star" data-mini = "true" data-textonly="false" data-textvisible="true" data-msgtext="" onclick ="computeMCLClusteringAndHulls()" > MCL clustering </a>
           </div>
         </div>
 
@@ -225,6 +226,7 @@
         <div data-role = "collapsible" data-theme = "a" data-mini="true" data-content-theme ="a" >
           <h3> Subgraphs Hulls </h3>
           <label><input id="display-hulls" class="rendering-params-modifier" type="checkbox" data-mini="true" checked="true"> Display </label>
+          <a data-role = "button" data-icon = "refresh" data-mini = "true" onclick ="computeSubGraphsHulls();"> Compute Hulls </a>
         </div>
       </div>
 
@@ -354,6 +356,7 @@
           tulipView.setGraph(sg);
           setGlobalVars(sg);
         }
+        tulipView.setGraphsHullsVisible(graph.numberOfSubGraphs() > 0);
       }
     });
   }
@@ -409,20 +412,24 @@
     graph.executeScriptInWorker(graphScript, algoFinishedCallback);
   }
 
-  function applyLouvainClusteringAndComputeHulls(graph, graphId) {
-    var prevClustering = graph.getSubGraph('louvain clustering');
+  function applyClusteringAndComputeHulls(graph, graphId, parameters) {
+    var clusteringAlgo = parameters['clusteringAlgo']
+    var clusteringSgName = clusteringAlgo;
+    var prevClustering = graph.getSubGraph(clusteringSgName);
     if (prevClustering) {
       graph.delAllSubGraphs(prevClustering);
     }
-    var clone = graph.addCloneSubGraph('louvain clustering');
-    var louvainProp = graph.getDoubleProperty('louvain');
-    tulip.sendProgressComment(graphId, 'Applying Louvain clustering ...');
-    clone.applyDoubleAlgorithm('Louvain', louvainProp);
-    clone.applyAlgorithm('Equal Value', {'Property' : louvainProp}, true);
+    var clone = graph.addCloneSubGraph(clusteringSgName);
+    var clusteringProp = graph.getDoubleProperty(clusteringAlgo);
+    tulip.sendProgressComment(graphId, 'Applying ' + clusteringAlgo + ' ...');
+    clone.applyDoubleAlgorithm(clusteringAlgo, clusteringProp);
+    clone.applyAlgorithm('Equal Value', {'Property' : clusteringProp}, true);
 
     var quotientClusteringParams = tulip.getDefaultAlgorithmParameters('Quotient Clustering', clone);
     quotientClusteringParams['layout quotient graph(s)'] = true;
     quotientClusteringParams['layout clusters'] = true;
+
+    clone.getLocalLayoutProperty('viewLayout');
 
     clone.applyAlgorithm('Quotient Clustering', quotientClusteringParams);
 
@@ -445,20 +452,37 @@
     mainLayout.copy(quotientLayout);
 
     clone.getRoot().delSubGraph(quotient);
+  }
 
-    var nbClusters = clone.numberOfSubGraphs();
+  function computeLouvainClusteringAndHulls() {
+    tulipView.setGraph(graph.getRoot());
+    setGlobalVars(graph.getRoot());
+    start = new Date().getTime();
+    graph.executeScriptInWorker(applyClusteringAndComputeHulls, initGraphData, {clusteringAlgo: 'Louvain'});
+  }
+
+  function computeMCLClusteringAndHulls() {
+    tulipView.setGraph(graph.getRoot());
+    setGlobalVars(graph.getRoot());
+    start = new Date().getTime();
+    graph.executeScriptInWorker(applyClusteringAndComputeHulls, initGraphData, {clusteringAlgo: 'MCL Clustering'});
+  }
+
+  function computeSgHulls(graph, graphId) {
+    var nbClusters = graph.numberOfSubGraphs();
     var i = 0;
     tulip.sendProgressComment(graphId, 'Computing subgraphs hulls ...');
-    clone.getSubGraphs().forEach(function(sg) {
-      sg.delLocalProperty(sg.getLayoutProperty('viewLayout'));
-      sg.computeGraphHullVertices();
+    graph.getDescendantGraphs().forEach(function(sg) {
+      if (sg.isConnected()) {
+        sg.computeGraphHullVertices();
+      }
       tulip.sendProgressValue(graphId, ((i++/(nbClusters-1))*100)|0);
     });
   }
 
-  function computeLouvainClusteringAndHulls() {
+  function computeSubGraphsHulls() {
     start = new Date().getTime();
-    graph.executeScriptInWorker(applyLouvainClusteringAndComputeHulls, initGraphData);
+    graph.getRoot().executeScriptInWorker(computeSgHulls, initGraphData);
   }
 
   function genRandomColor() {

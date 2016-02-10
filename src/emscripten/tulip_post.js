@@ -2056,20 +2056,33 @@ var _Graph_getProperties = Module.cwrap('Graph_getProperties', null, ['number', 
 
 var _Graph_getProperty = Module.cwrap('Graph_getProperty', 'number', ['number', 'string']);
 var _Graph_getBooleanProperty = Module.cwrap('Graph_getBooleanProperty', 'number', ['number', 'string']);
+var _Graph_getLocalBooleanProperty = Module.cwrap('Graph_getLocalBooleanProperty', 'number', ['number', 'string']);
 var _Graph_getColorProperty = Module.cwrap('Graph_getColorProperty', 'number', ['number', 'string']);
+var _Graph_getLocalColorProperty = Module.cwrap('Graph_getLocalColorProperty', 'number', ['number', 'string']);
 var _Graph_getDoubleProperty = Module.cwrap('Graph_getDoubleProperty', 'number', ['number', 'string']);
+var _Graph_getLocalDoubleProperty = Module.cwrap('Graph_getLocalDoubleProperty', 'number', ['number', 'string']);
 var _Graph_getIntegerProperty = Module.cwrap('Graph_getIntegerProperty', 'number', ['number', 'string']);
+var _Graph_getLocalIntegerProperty = Module.cwrap('Graph_getLocalIntegerProperty', 'number', ['number', 'string']);
 var _Graph_getLayoutProperty = Module.cwrap('Graph_getLayoutProperty', 'number', ['number', 'string']);
 var _Graph_getLocalLayoutProperty = Module.cwrap('Graph_getLocalLayoutProperty', 'number', ['number', 'string']);
 var _Graph_getSizeProperty = Module.cwrap('Graph_getSizeProperty', 'number', ['number', 'string']);
+var _Graph_getLocalSizeProperty = Module.cwrap('Graph_getLocalSizeProperty', 'number', ['number', 'string']);
 var _Graph_getStringProperty = Module.cwrap('Graph_getStringProperty', 'number', ['number', 'string']);
+var _Graph_getLocalStringProperty = Module.cwrap('Graph_getLocalStringProperty', 'number', ['number', 'string']);
 var _Graph_getBooleanVectorProperty = Module.cwrap('Graph_getBooleanVectorProperty', 'number', ['number', 'string']);
+var _Graph_getLocalBooleanVectorProperty = Module.cwrap('Graph_getLocalBooleanVectorProperty', 'number', ['number', 'string']);
 var _Graph_getColorVectorProperty = Module.cwrap('Graph_getColorVectorProperty', 'number', ['number', 'string']);
+var _Graph_getLocalColorVectorProperty = Module.cwrap('Graph_getLocalColorVectorProperty', 'number', ['number', 'string']);
 var _Graph_getDoubleVectorProperty = Module.cwrap('Graph_getDoubleVectorProperty', 'number', ['number', 'string']);
+var _Graph_getLocalDoubleVectorProperty = Module.cwrap('Graph_getLocalDoubleVectorProperty', 'number', ['number', 'string']);
 var _Graph_getIntegerVectorProperty = Module.cwrap('Graph_getIntegerVectorProperty', 'number', ['number', 'string']);
+var _Graph_getLocalIntegerVectorProperty = Module.cwrap('Graph_getLocalIntegerVectorProperty', 'number', ['number', 'string']);
 var _Graph_getCoordVectorProperty = Module.cwrap('Graph_getCoordVectorProperty', 'number', ['number', 'string']);
+var _Graph_getLocalCoordVectorProperty = Module.cwrap('Graph_getLocalCoordVectorProperty', 'number', ['number', 'string']);
 var _Graph_getSizeVectorProperty = Module.cwrap('Graph_getSizeVectorProperty', 'number', ['number', 'string']);
+var _Graph_getLocalSizeVectorProperty = Module.cwrap('Graph_getLocalSizeVectorProperty', 'number', ['number', 'string']);
 var _Graph_getStringVectorProperty = Module.cwrap('Graph_getStringVectorProperty', 'number', ['number', 'string']);
+var _Graph_getLocalStringVectorProperty = Module.cwrap('Graph_getLocalStringVectorProperty', 'number', ['number', 'string']);
 var _Graph_delLocalProperty = Module.cwrap('Graph_delLocalProperty', null, ['number', 'string']);
 var _Graph_applyPropertyAlgorithm = Module.cwrap('Graph_applyPropertyAlgorithm', 'number', ['number', 'string', 'number', 'string', 'number']);
 var _Graph_push = Module.cwrap('Graph_push', null, ['number']);
@@ -2642,40 +2655,80 @@ tulip.Graph.prototype.getBooleanProperty = function tulip_Graph_prototype_getBoo
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.BooleanProperty(_Graph_getBooleanProperty(this.cppPointer, name));
 };
+tulip.Graph.prototype.getLocalBooleanProperty = function tulip_Graph_prototype_getLocalBooleanProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.BooleanProperty(_Graph_getLocalBooleanProperty(this.cppPointer, name));
+};
 tulip.Graph.prototype.getBooleanVectorProperty = function tulip_Graph_prototype_getBooleanVectorProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.BooleanVectorProperty(_Graph_getBooleanVectorProperty(this.cppPointer, name));
+};
+tulip.Graph.prototype.getLocalBooleanVectorProperty = function tulip_Graph_prototype_getLocalBooleanVectorProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.BooleanVectorProperty(_Graph_getLocalBooleanVectorProperty(this.cppPointer, name));
 };
 tulip.Graph.prototype.getColorProperty = function tulip_Graph_prototype_getColorProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.ColorProperty(_Graph_getColorProperty(this.cppPointer, name));
 };
+tulip.Graph.prototype.getLocalColorProperty = function tulip_Graph_prototype_getLocalColorProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.ColorProperty(_Graph_getLocalColorProperty(this.cppPointer, name));
+};
 tulip.Graph.prototype.getColorVectorProperty = function tulip_Graph_prototype_getColorVectorProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.ColorVectorProperty(_Graph_getColorVectorProperty(this.cppPointer, name));
+};
+tulip.Graph.prototype.getLocalColorVectorProperty = function tulip_Graph_prototype_getLocalColorVectorProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.ColorVectorProperty(_Graph_getLocalColorVectorProperty(this.cppPointer, name));
 };
 tulip.Graph.prototype.getDoubleProperty = function tulip_Graph_prototype_getDoubleProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.DoubleProperty(_Graph_getDoubleProperty(this.cppPointer, name));
 };
+tulip.Graph.prototype.getLocalDoubleProperty = function tulip_Graph_prototype_getLocalDoubleProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.DoubleProperty(_Graph_getLocalDoubleProperty(this.cppPointer, name));
+};
 tulip.Graph.prototype.getDoubleVectorProperty = function tulip_Graph_prototype_getDoubleVectorProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.DoubleVectorProperty(_Graph_getDoubleVectorProperty(this.cppPointer, name));
+};
+tulip.Graph.prototype.getLocalDoubleVectorProperty = function tulip_Graph_prototype_getLocalDoubleVectorProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.DoubleVectorProperty(_Graph_getLocalDoubleVectorProperty(this.cppPointer, name));
 };
 tulip.Graph.prototype.getIntegerProperty = function tulip_Graph_prototype_getIntegerProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.IntegerProperty(_Graph_getIntegerProperty(this.cppPointer, name));
 };
+tulip.Graph.prototype.getLocalIntegerProperty = function tulip_Graph_prototype_getLocalIntegerProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.IntegerProperty(_Graph_getLocalIntegerProperty(this.cppPointer, name));
+};
 tulip.Graph.prototype.getIntegerVectorProperty = function tulip_Graph_prototype_getIntegerVectorProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.IntegerVectorProperty(_Graph_getIntegerVectorProperty(this.cppPointer, name));
+};
+tulip.Graph.prototype.getLocalIntegerVectorProperty = function tulip_Graph_prototype_getLocalIntegerVectorProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.IntegerVectorProperty(_Graph_getLocalIntegerVectorProperty(this.cppPointer, name));
 };
 tulip.Graph.prototype.getLayoutProperty = function tulip_Graph_prototype_getLayoutProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
@@ -2692,25 +2745,50 @@ tulip.Graph.prototype.getCoordVectorProperty = function tulip_Graph_prototype_ge
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.CoordVectorProperty(_Graph_getCoordVectorProperty(this.cppPointer, name));
 };
+tulip.Graph.prototype.getLocalCoordVectorProperty = function tulip_Graph_prototype_getLocalCoordVectorProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.CoordVectorProperty(_Graph_getLocalCoordVectorProperty(this.cppPointer, name));
+};
 tulip.Graph.prototype.getSizeProperty = function tulip_Graph_prototype_getSizeProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.SizeProperty(_Graph_getSizeProperty(this.cppPointer, name));
+};
+tulip.Graph.prototype.getLocalSizeProperty = function tulip_Graph_prototype_getLocalSizeProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.SizeProperty(_Graph_getLocalSizeProperty(this.cppPointer, name));
 };
 tulip.Graph.prototype.getSizeVectorProperty = function tulip_Graph_prototype_getSizeVectorProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.SizeVectorProperty(_Graph_getSizeVectorProperty(this.cppPointer, name));
 };
+tulip.Graph.prototype.getLocalSizeVectorProperty = function tulip_Graph_prototype_getLocalSizeVectorProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.SizeVectorProperty(_Graph_getLocalSizeVectorProperty(this.cppPointer, name));
+};
 tulip.Graph.prototype.getStringProperty = function tulip_Graph_prototype_getStringProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.StringProperty(_Graph_getStringProperty(this.cppPointer, name));
 };
+tulip.Graph.prototype.getLocalStringProperty = function tulip_Graph_prototype_getLocalStringProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.StringProperty(_Graph_getLocalStringProperty(this.cppPointer, name));
+};
 tulip.Graph.prototype.getStringVectorProperty = function tulip_Graph_prototype_getStringVectorProperty(name) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["string"]);
   return tulip.StringVectorProperty(_Graph_getStringVectorProperty(this.cppPointer, name));
+};
+tulip.Graph.prototype.getLocalStringVectorProperty = function tulip_Graph_prototype_getLocalStringVectorProperty(name) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["string"]);
+  return tulip.StringVectorProperty(_Graph_getLocalStringVectorProperty(this.cppPointer, name));
 };
 tulip.Graph.prototype.delLocalProperty = function tulip_Graph_prototype_delLocalProperty(name) {
   checkWrappedCppPointer(this.cppPointer);

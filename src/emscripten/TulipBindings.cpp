@@ -1425,8 +1425,20 @@ tlp::BooleanProperty* EMSCRIPTEN_KEEPALIVE Graph_getBooleanProperty(tlp::Graph *
   return prop;
 }
 
+tlp::BooleanProperty* EMSCRIPTEN_KEEPALIVE Graph_getLocalBooleanProperty(tlp::Graph *graph, const char *name) {
+  tlp::BooleanProperty *prop = graph->getLocalProperty<tlp::BooleanProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
 tlp::ColorProperty* EMSCRIPTEN_KEEPALIVE Graph_getColorProperty(tlp::Graph *graph, const char *name) {
   tlp::ColorProperty *prop = graph->getProperty<tlp::ColorProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
+tlp::ColorProperty* EMSCRIPTEN_KEEPALIVE Graph_getLocalColorProperty(tlp::Graph *graph, const char *name) {
+  tlp::ColorProperty *prop = graph->getLocalProperty<tlp::ColorProperty>(name);
   observeObject(prop);
   return prop;
 }
@@ -1437,8 +1449,20 @@ tlp::DoubleProperty *EMSCRIPTEN_KEEPALIVE Graph_getDoubleProperty(tlp::Graph *gr
   return prop;
 }
 
+tlp::DoubleProperty *EMSCRIPTEN_KEEPALIVE Graph_getLocalDoubleProperty(tlp::Graph *graph, const char *name) {
+  tlp::DoubleProperty *prop = graph->getLocalProperty<tlp::DoubleProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
 tlp::IntegerProperty *EMSCRIPTEN_KEEPALIVE Graph_getIntegerProperty(tlp::Graph *graph, const char *name) {
   tlp::IntegerProperty *prop = graph->getProperty<tlp::IntegerProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
+tlp::IntegerProperty *EMSCRIPTEN_KEEPALIVE Graph_getLocalIntegerProperty(tlp::Graph *graph, const char *name) {
+  tlp::IntegerProperty *prop = graph->getLocalProperty<tlp::IntegerProperty>(name);
   observeObject(prop);
   return prop;
 }
@@ -1463,8 +1487,20 @@ tlp::SizeProperty* EMSCRIPTEN_KEEPALIVE Graph_getSizeProperty(tlp::Graph *graph,
   return prop;
 }
 
+tlp::SizeProperty* EMSCRIPTEN_KEEPALIVE Graph_getLocalSizeProperty(tlp::Graph *graph, const char *name) {
+  tlp::SizeProperty *prop = graph->getLocalProperty<tlp::SizeProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
 tlp::StringProperty *EMSCRIPTEN_KEEPALIVE Graph_getStringProperty(tlp::Graph *graph, const char *name) {
   tlp::StringProperty *prop = graph->getProperty<tlp::StringProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
+tlp::StringProperty *EMSCRIPTEN_KEEPALIVE Graph_getLocalStringProperty(tlp::Graph *graph, const char *name) {
+  tlp::StringProperty *prop = graph->getLocalProperty<tlp::StringProperty>(name);
   observeObject(prop);
   return prop;
 }
@@ -1475,8 +1511,20 @@ tlp::BooleanVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getBooleanVectorProperty(
   return prop;
 }
 
+tlp::BooleanVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getLocalBooleanVectorProperty(tlp::Graph *graph, const char *name) {
+  tlp::BooleanVectorProperty *prop = graph->getLocalProperty<tlp::BooleanVectorProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
 tlp::ColorVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getColorVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::ColorVectorProperty *prop = graph->getProperty<tlp::ColorVectorProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
+tlp::ColorVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getLocalColorVectorProperty(tlp::Graph *graph, const char *name) {
+  tlp::ColorVectorProperty *prop = graph->getLocalProperty<tlp::ColorVectorProperty>(name);
   observeObject(prop);
   return prop;
 }
@@ -1487,8 +1535,20 @@ tlp::DoubleVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getDoubleVectorProperty(tl
   return prop;
 }
 
+tlp::DoubleVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getLocalDoubleVectorProperty(tlp::Graph *graph, const char *name) {
+  tlp::DoubleVectorProperty *prop = graph->getLocalProperty<tlp::DoubleVectorProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
 tlp::IntegerVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getIntegerVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::IntegerVectorProperty *prop = graph->getProperty<tlp::IntegerVectorProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
+tlp::IntegerVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getLocalIntegerVectorProperty(tlp::Graph *graph, const char *name) {
+  tlp::IntegerVectorProperty *prop = graph->getLocalProperty<tlp::IntegerVectorProperty>(name);
   observeObject(prop);
   return prop;
 }
@@ -1499,13 +1559,31 @@ tlp::CoordVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getCoordVectorProperty(tlp:
   return prop;
 }
 
+tlp::CoordVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getLocalCoordVectorProperty(tlp::Graph *graph, const char *name) {
+  tlp::CoordVectorProperty *prop = graph->getLocalProperty<tlp::CoordVectorProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
 tlp::SizeVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getSizeVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::SizeVectorProperty *prop = graph->getProperty<tlp::SizeVectorProperty>(name);
   observeObject(prop);
   return prop;
 }
 
+tlp::SizeVectorProperty* EMSCRIPTEN_KEEPALIVE Graph_getLocalSizeVectorProperty(tlp::Graph *graph, const char *name) {
+  tlp::SizeVectorProperty *prop = graph->getLocalProperty<tlp::SizeVectorProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
 tlp::StringVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getStringVectorProperty(tlp::Graph *graph, const char *name) {
+  tlp::StringVectorProperty *prop = graph->getProperty<tlp::StringVectorProperty>(name);
+  observeObject(prop);
+  return prop;
+}
+
+tlp::StringVectorProperty *EMSCRIPTEN_KEEPALIVE Graph_getLocalStringVectorProperty(tlp::Graph *graph, const char *name) {
   tlp::StringVectorProperty *prop = graph->getProperty<tlp::StringVectorProperty>(name);
   observeObject(prop);
   return prop;

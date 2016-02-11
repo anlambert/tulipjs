@@ -961,18 +961,35 @@ tulip.StringVectorProperty.prototype.setAllEdgeValue = function tulip_StringVect
 
 // ==================================================================================================================
 
-tulip.Color = function tulip_Color(r, g, b, a) {
-  checkArgumentsTypes(arguments, ["number", "number", "number", "number"]);
+tulip.Color = function tulip_Color() {
   var newObject = createObject(tulip.Color, this);
-  newObject.r = r;
-  newObject.g = g;
-  newObject.b = b;
-  if (arguments.length < 4) {
-    newObject.a = 255;
-  } else {
-    newObject.a = a;
+  newObject.r = newObject.g = newObject.b = newObject.a = 0;
+  if (arguments.length > 0) {
+    if (arguments.length == 1 && typeOf(arguments[0]) == 'string') {
+      var hexColorRegexp = new RegExp('^#[A-Fa-f0-9]{6}$');
+      if (hexColorRegexp.test(arguments[0])) {
+        newObject.r = parseInt(arguments[0].substr(1, 2), 16);
+        newObject.g = parseInt(arguments[0].substr(3, 2), 16);
+        newObject.b = parseInt(arguments[0].substr(5, 2), 16);
+        newObject.a = 255;
+      }
+    } else {
+      checkArgumentsTypes(arguments, ["number", "number", "number", "number"], 3);
+      newObject.r = arguments[0];
+      newObject.g = arguments[1];
+      newObject.b = arguments[2];
+      if (arguments.length < 4) {
+        newObject.a = 255;
+      } else {
+        newObject.a = arguments[3];
+      }
+    }
   }
   return newObject;
+};
+
+tulip.Color.prototype.rgbHexStr = function tulip_Color_prototype_rgbHexStr() {
+  return '#' + this.r.toString(16) + this.g.toString(16) + this.b.toString(16);
 };
 
 // ==================================================================================================================

@@ -2047,6 +2047,8 @@ var _Graph_getEdges = Module.cwrap('Graph_getEdges', null, ['number', 'number'])
 var _Graph_getOutEdges = Module.cwrap('Graph_getOutEdges', null, ['number', 'number', 'number']);
 var _Graph_getInOutEdges = Module.cwrap('Graph_getInOutEdges', null, ['number', 'number', 'number']);
 var _Graph_getInEdges = Module.cwrap('Graph_getInEdges', null, ['number', 'number', 'number']);
+var _Graph_getRandomNode = Module.cwrap('Graph_getRandomNode', 'number', ['number']);
+var _Graph_getRandomEdge = Module.cwrap('Graph_getRandomEdge', 'number', ['number']);
 
 var _Graph_getId = Module.cwrap('Graph_getId', 'number', ['number']);
 var _Graph_numberOfNodes = Module.cwrap('Graph_numberOfNodes', 'number', ['number']);
@@ -2441,9 +2443,7 @@ tulip.Graph.prototype.getNodes = function tulip_Graph_prototype_getNodes() {
 };
 tulip.Graph.prototype.getRandomNode = function tulip_Graph_prototype_getRandomNode() {
   checkWrappedCppPointer(this.cppPointer);
-  var idx = (Math.random() * this.numberOfNodes()) | 0;
-  var nodes = this.getNodes();
-  return nodes[idx];
+  return tulip.Node(_Graph_getRandomNode(this.cppPointer));
 };
 tulip.Graph.prototype.getInNodes = function tulip_Graph_prototype_getInNodes(node) {
   checkWrappedCppPointer(this.cppPointer);
@@ -2499,9 +2499,7 @@ tulip.Graph.prototype.getEdges = function tulip_Graph_prototype_getEdges() {
 };
 tulip.Graph.prototype.getRandomEdge = function tulip_Graph_prototype_getRandomEdge() {
   checkWrappedCppPointer(this.cppPointer);
-  var idx = (Math.random() * this.numberOfEdges()) | 0;
-  var edges = this.getEdges();
-  return edges[idx];
+  return tulip.Edge(_Graph_getRandomEdge(this.cppPointer));
 };
 tulip.Graph.prototype.getOutEdges = function tulip_Graph_prototype_getOutEdges(node) {
   checkWrappedCppPointer(this.cppPointer);

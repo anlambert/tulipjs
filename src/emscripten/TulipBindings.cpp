@@ -1721,6 +1721,14 @@ bool EMSCRIPTEN_KEEPALIVE Graph_isConnected(tlp::Graph *graph) {
   return tlp::ConnectedTest::isConnected(graph);
 }
 
+double EMSCRIPTEN_KEEPALIVE Graph_getRandomNode(tlp::Graph *graph) {
+  return graph->getRandomNode().id;
+}
+
+double EMSCRIPTEN_KEEPALIVE Graph_getRandomEdge(tlp::Graph *graph) {
+  return graph->getRandomEdge().id;
+}
+
 // ==================================================================================================================
 
 bool EMSCRIPTEN_KEEPALIVE algorithmExists(const char *algoName) {

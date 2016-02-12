@@ -49,7 +49,7 @@ void NeighborhoodInteractor::buildNeighborhoodSubgraph() {
     tlp::node neigh;
     forEach(neigh, _glGraph->graph()->getInOutNodes(_centralNode)) {
       _neighborhoodSg->addNode(neigh);
-      _neighborhoodSg->addEdge(_glGraph->graph()->existEdge(_centralNode, neigh, false));
+      _neighborhoodSg->addEdges(_glGraph->graph()->getEdges(_centralNode, neigh, false));
     }
     _glNeighborhoodGraph = new GlGraph(_neighborhoodSg, new GlCPULODCalculator);
   }

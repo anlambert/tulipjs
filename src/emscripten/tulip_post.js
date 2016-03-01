@@ -4313,7 +4313,6 @@ if (workerMode) {
   function loadGraph(graphHierarchyId, graphFilePath, sendData) {
     _setPluginProgressGraphId(graphHierarchyId);
     graphs[graphHierarchyId] = tulip.loadGraph(graphFilePath, sendData);
-
     if (!sendData) return;
     getGraphData(graphHierarchyId, function() {
       updateMode[graphHierarchyId] = false;
@@ -4385,6 +4384,7 @@ if (workerMode) {
           graphToDestroy = graphs[data.graphHierarchyId];
         }
         loadGraph(data.graphHierarchyId, data.graphFile, data.sendDataBack);
+        FS.unlink(data.graphFile);
         if (graphToDestroy) graphToDestroy.destroy();
       }
       break;
@@ -4788,6 +4788,7 @@ if (workerMode) {
         }
         var saved = tulip.saveGraph(graph, "/graph.tlpb.gz");
         var graphData = FS.readFile("/graph.tlpb.gz");
+        FS.unlink("/graph.tlpb.gz");
         sendGraphToWorker(graph, "graph.tlpb.gz", graphData.buffer, false);
       } else {
         var messageData = {
@@ -4969,6 +4970,7 @@ if (workerMode) {
           }
           FS.writeFile(graphFilePath, new Uint8Array(arrayBuffer), {'encoding' : 'binary'});
           var graph = tulip.loadGraph(graphFilePath, false);
+          FS.unlink(graphFilePath);
           view.setGraph(graph);
           if (graphLoadedCallback) {
             graphLoadedCallback(view.graph);
@@ -5002,6 +5004,7 @@ if (workerMode) {
         }
         FS.writeFile(graphFilePath, new Uint8Array(graphFileData), {'encoding' : 'binary'});
         var graph = tulip.loadGraph(graphFilePath, false);
+        FS.unlink(graphFilePath);
         view.setGraph(graph);
         if (graphLoadedCallback) {
           graphLoadedCallback(view.graph);
@@ -5297,6 +5300,7 @@ if (workerMode) {
       }
       tulip.saveGraph(this, filename);
       var graphData = FS.readFile(filename);
+      FS.unlink(filename);
       return new Blob([graphData.buffer]);
     };
 

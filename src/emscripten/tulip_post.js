@@ -2107,8 +2107,6 @@ var _Graph_applyPropertyAlgorithm = Module.cwrap('Graph_applyPropertyAlgorithm',
 var _Graph_push = Module.cwrap('Graph_push', null, ['number']);
 var _Graph_pop = Module.cwrap('Graph_pop', null, ['number']);
 var _Graph_setEventsActivated = Module.cwrap('Graph_setEventsActivated', null, ['number', 'number']);
-var _Graph_getNodesPropertiesValuesJSON = Module.cwrap('Graph_getNodesPropertiesValuesJSON', 'string', ['number']);
-var _Graph_getEdgesPropertiesValuesJSON = Module.cwrap('Graph_getEdgesPropertiesValuesJSON', 'string', ['number']);
 var _Graph_getAttributesJSON = Module.cwrap('Graph_getAttributesJSON', 'string', ['number']);
 var _Graph_isMetaNode = Module.cwrap('Graph_isMetaNode', 'number', ['number', 'number']);
 var _Graph_openMetaNode = Module.cwrap('Graph_openMetaNode', null, ['number', 'number']);
@@ -2659,7 +2657,6 @@ tulip.Graph.prototype.getProperty = function tulip_Graph_prototype_getPropery(na
       typedProperty = this.getStringVectorProperty(name);
       break;
     default:
-      typedProperty = prop;
       break;
     }
   }
@@ -2814,11 +2811,87 @@ tulip.Graph.prototype.toJSON = function tulip_Graph_prototype_toJSON() {
   checkWrappedCppPointer(this.cppPointer);
   return _getJSONGraph(this.cppPointer);
 };
-tulip.Graph.prototype.getNodesPropertiesValues = function tulip_Graph_prototype_getNodesPropertiesValues() {
-  return JSON.parse(_Graph_getNodesPropertiesValuesJSON(this.cppPointer));
+tulip.Graph.prototype.getNodePropertiesValues = function tulip_Graph_prototype_getNodePropertiesValues(node) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Node], 1);
+  var ret = {};
+  var properties = this.getProperties();
+  for (var i = 0 ; i < properties.length ; ++i) {
+    var propName = properties[i];
+    if (propName == "viewMetaGraph") {
+      continue;
+    }
+    var prop = graph.getProperty(propName);
+    ret[propName] = prop.getNodeValue(node);
+  }
+  return ret;
 };
-tulip.Graph.prototype.getEdgesPropertiesValues = function tulip_Graph_prototype_getEdgesPropertiesValues() {
-  return JSON.parse(_Graph_getEdgesPropertiesValuesJSON(this.cppPointer));
+tulip.Graph.prototype.setNodePropertiesValues = function tulip_Graph_prototype_setNodePropertiesValues(node, values) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Node, "object"], 2);
+  for (var propertyName in values) {
+    if (values.hasOwnProperty(propertyName)) {
+      var prop = this.getProperty(propertyName);
+      if (!prop) {
+        console.log("Error : no graph property named '" + propertyName + "'");
+      }
+      prop.setNodeValue(node, values[propertyName]);
+    }
+  }
+};
+tulip.Graph.prototype.setAllNodePropertiesValues = function tulip_Graph_prototype_setAllNodePropertiesValues(values) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["object"], 2);
+  for (var propertyName in values) {
+    if (values.hasOwnProperty(propertyName)) {
+      var prop = this.getProperty(propertyName);
+      if (!prop) {
+        console.log("Error : no graph property named '" + propertyName + "'");
+      }
+      prop.setAllNodeValue(values[propertyName]);
+    }
+  }
+};
+tulip.Graph.prototype.getEdgePropertiesValues = function tulip_Graph_prototype_getEdgePropertiesValues(edge) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Edge], 1);
+  var ret = {};
+  var properties = this.getProperties();
+  for (var i = 0 ; i < properties.length ; ++i) {
+    var propName = properties[i];
+    if (propName == "viewMetaGraph") {
+      continue;
+    }
+    var prop = graph.getProperty(propName);
+    ret[propName] = prop.getEdgeValue(edge);
+  }
+  return ret;
+};
+tulip.Graph.prototype.setEdgePropertiesValues = function tulip_Graph_prototype_setEdgePropertiesValues(edge, values) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Edge, "object"], 2);
+  for (var propertyName in values) {
+    if (values.hasOwnProperty(propertyName)) {
+      var prop = this.getProperty(propertyName);
+      if (!prop) {
+        console.log("Error : no graph property named '" + propertyName + "'");
+      }
+      prop.setEdgeValue(edge, values[propertyName]);
+    }
+  }
+};
+tulip.Graph.prototype.setAllEdgePropertiesValues = function tulip_Graph_prototype_setAllEdgePropertiesValues(values) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["object"], 2);
+  for (var propertyName in values) {
+    if (values.hasOwnProperty(propertyName)) {
+      var prop = this.getProperty(propertyName);
+      if (!prop) {
+        console.log("Error : no graph property named '" + propertyName + "'");
+      }
+      prop.setAllEdgeValue(values[propertyName]);
+    }
+  }
 };
 tulip.Graph.prototype.applyPropertyAlgorithm = function tulip_Graph_prototype_applyPropertyAlgorithm(algorithmName, resultProperty, algoParameters, notifyProgress) {
   checkWrappedCppPointer(this.cppPointer);
@@ -2947,7 +3020,6 @@ tulip.Graph.prototype.computeGraphHullVertices = function(withHoles) {
   }
   _computeGraphHullVertices(this.cppPointer, withHoles);
 };
-
 
 
 // ==================================================================================================================

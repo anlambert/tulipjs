@@ -1201,6 +1201,150 @@ tulip.ColorProperty.prototype.setAllEdgeValue = function tulip_ColorProperty_pro
 
 // ==================================================================================================================
 
+var _createColorVectorProperty = Module.cwrap('createColorVectorProperty', 'number', ['number', 'string']);
+
+var _ColorVectorProperty_setAllNodeValue = Module.cwrap('ColorVectorProperty_setAllNodeValue', null, ['number', 'number', 'number']);
+var _ColorVectorProperty_setNodeValue = Module.cwrap('ColorVectorProperty_setNodeValue', null, ['number', 'number', 'number', 'number']);
+var _ColorVectorProperty_getNodeDefaultVectorSize = Module.cwrap('ColorVectorProperty_getNodeDefaultVectorSize', 'number', ['number']);
+var _ColorVectorProperty_getNodeDefaultValue = Module.cwrap('ColorVectorProperty_getNodeDefaultValue', null, ['number', 'number']);
+var _ColorVectorProperty_getNodeVectorSize = Module.cwrap('ColorVectorProperty_getNodeVectorSize', 'number', ['number', 'number']);
+var _ColorVectorProperty_getNodeValue = Module.cwrap('ColorVectorProperty_getNodeValue', null, ['number', 'number', 'number']);
+
+var _ColorVectorProperty_setAllEdgeValue = Module.cwrap('ColorVectorProperty_setAllEdgeValue', null, ['number', 'number', 'number']);
+var _ColorVectorProperty_setEdgeValue = Module.cwrap('ColorVectorProperty_setEdgeValue', null, ['number', 'number', 'number', 'number']);
+var _ColorVectorProperty_getEdgeDefaultVectorSize = Module.cwrap('ColorVectorProperty_getEdgeDefaultVectorSize', 'number', ['number']);
+var _ColorVectorProperty_getEdgeDefaultValue = Module.cwrap('ColorVectorProperty_getEdgeDefaultValue', null, ['number', 'number']);
+var _ColorVectorProperty_getEdgeVectorSize = Module.cwrap('ColorVectorProperty_getEdgeVectorSize', 'number', ['number', 'number']);
+var _ColorVectorProperty_getEdgeValue = Module.cwrap('ColorVectorProperty_getEdgeValue', null, ['number', 'number', 'number']);
+
+tulip.ColorVectorProperty = function tulip_ColorVectorProperty() {
+  var newObject = createObject(tulip.ColorVectorProperty, this);
+  if (tulip_ColorVectorProperty.caller == null || tulip_ColorVectorProperty.caller.name != "createObject") {
+    var cppPointer = 0;
+    var graphManaged = false;
+    if (arguments.length == 1 && typeOf(arguments[0]) == "number") {
+      cppPointer = arguments[0];
+      graphManaged = true;
+    } else {
+      checkArgumentsTypes(arguments, [tulip.Graph, "string"], 1);
+      var propName = "";
+      if (arguments.length > 1) propName = arguments[1];
+      cppPointer = _createColorVectorProperty(arguments[0].cppPointer, propName);
+    }
+    tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
+    newObject.setWrappedTypename("tlp::ColorVectorProperty");
+  }
+  return newObject;
+};
+tulip.ColorVectorProperty.inheritsFrom(tulip.PropertyInterface);
+tulip.ColorVectorProperty.prototype.getNodeDefaultValue = function tulip_ColorVectorProperty_prototype_getNodeDefaultValue() {
+  checkWrappedCppPointer(this.cppPointer);
+  var size = _ColorVectorProperty_getNodeDefaultVectorSize(this.cppPointer);
+  var colorArray = allocArrayInEmHeap(Uint8Array, size*4);
+  _ColorVectorProperty_getNodeDefaultValue(this.cppPointer, colorArray.byteOffset);
+  var ret = [];
+  for (var i = 0 ; i < size ; ++i) {
+    ret.push(tulip.Color(colorArray[4*i],colorArray[4*i+1],colorArray[4*i+2],colorArray[4*i+3]));
+  }
+  freeArrayInEmHeap(colorArray);
+  return ret;
+};
+tulip.ColorVectorProperty.prototype.getNodeValue = function tulip_ColorVectorProperty_prototype_getNodeValue(node) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Node], 1);
+  var size = _ColorVectorProperty_getNodeVectorSize(this.cppPointer, node.id);
+  var colorArray = allocArrayInEmHeap(Uint8Array, size*4);
+  _ColorVectorProperty_getNodeValue(this.cppPointer, node.id, colorArray.byteOffset);
+  var ret = [];
+  for (var i = 0 ; i < size ; ++i) {
+    ret.push(tulip.Color(colorArray[4*i],colorArray[4*i+1],colorArray[4*i+2],colorArray[4*i+3]));
+  }
+  freeArrayInEmHeap(colorArray);
+  return ret;
+};
+tulip.ColorVectorProperty.prototype.setNodeValue = function tulip_ColorVectorProperty_prototype_setNodeValue(node, val) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Node, "array"], 2);
+  checkArrayOfType(val, tulip.Color, 1);
+  var colorArray = allocArrayInEmHeap(Uint8Array, val.length*4);
+  for (var i = 0 ; i < val.length ; ++i) {
+    colorArray[4*i] = val[i].r;
+    colorArray[4*i+1] = val[i].g;
+    colorArray[4*i+2] = val[i].b;
+    colorArray[4*i+3] = val[i].a;
+  }
+  _ColorVectorProperty_setNodeValue(this.cppPointer, node.id, colorArray.byteOffset, val.length);
+  freeArrayInEmHeap(colorArray);
+};
+tulip.ColorVectorProperty.prototype.getEdgeDefaultValue = function tulip_ColorVectorProperty_prototype_getEdgeDefaultValue() {
+  checkWrappedCppPointer(this.cppPointer);
+  var size = _ColorVectorProperty_getEdgeDefaultVectorSize(this.cppPointer);
+  var colorArray = allocArrayInEmHeap(Uint8Array, size*4);
+  _ColorVectorProperty_getEdgeDefaultValue(this.cppPointer, colorArray.byteOffset);
+  var ret = [];
+  for (var i = 0 ; i < size ; ++i) {
+    ret.push(tulip.Color(colorArray[4*i],colorArray[4*i+1],colorArray[4*i+2],colorArray[4*i+3]));
+  }
+  freeArrayInEmHeap(colorArray);
+  return ret;
+};
+tulip.ColorVectorProperty.prototype.getEdgeValue = function tulip_ColorVectorProperty_prototype_getEdgeValue(edge) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Edge], 1);
+  var size = _ColorVectorProperty_getEdgeVectorSize(this.cppPointer, edge.id);
+  var colorArray = allocArrayInEmHeap(Uint8Array, size*4);
+  _ColorVectorProperty_getEdgeValue(this.cppPointer, edge.id, colorArray.byteOffset);
+  var ret = [];
+  for (var i = 0 ; i < size ; ++i) {
+    ret.push(tulip.Color(colorArray[4*i],colorArray[4*i+1],colorArray[4*i+2],colorArray[4*i+3]));
+  }
+  freeArrayInEmHeap(colorArray);
+  return ret;
+};
+tulip.ColorVectorProperty.prototype.setEdgeValue = function tulip_ColorVectorProperty_prototype_setEdgeValue(edge, val) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Edge, "array"], 2);
+  checkArrayOfType(val, tulip.Color, 1);
+  var colorArray = allocArrayInEmHeap(Uint8Array, val.length*4);
+  for (var i = 0 ; i < val.length ; ++i) {
+    colorArray[4*i] = val[i].r;
+    colorArray[4*i+1] = val[i].g;
+    colorArray[4*i+2] = val[i].b;
+    colorArray[4*i+3] = val[i].a;
+  }
+  _ColorVectorProperty_setEdgeValue(this.cppPointer, edge.id, colorArray.byteOffset, val.length);
+  freeArrayInEmHeap(colorArray);
+};
+tulip.ColorVectorProperty.prototype.setAllNodeValue = function tulip_ColorVectorProperty_prototype_setAllNodeValue(val) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["array"], 1);
+  checkArrayOfType(val, tulip.Color, 0);
+  var colorArray = allocArrayInEmHeap(Uint8Array, val.length*4);
+  for (var i = 0 ; i < val.length ; ++i) {
+    colorArray[4*i] = val[i].r;
+    colorArray[4*i+1] = val[i].g;
+    colorArray[4*i+2] = val[i].b;
+    colorArray[4*i+3] = val[i].a;
+  }
+  _ColorVectorProperty_setAllNodeValue(this.cppPointer, colorArray.byteOffset, val.length);
+  freeArrayInEmHeap(colorArray);
+};
+tulip.ColorVectorProperty.prototype.setAllEdgeValue = function tulip_ColorVectorProperty_prototype_setAllEdgeValue(val) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["array"], 1);
+  checkArrayOfType(val, "color", 0);
+  var colorArray = allocArrayInEmHeap(Uint8Array, val.length*4);
+  for (var i = 0 ; i < val.length ; ++i) {
+    colorArray[4*i] = val[i].r;
+    colorArray[4*i+1] = val[i].g;
+    colorArray[4*i+2] = val[i].b;
+    colorArray[4*i+3] = val[i].a;
+  }
+  _ColorVectorProperty_setAllEdgeValue(this.cppPointer, colorArray.byteOffset, val.length);
+  freeArrayInEmHeap(colorArray);
+};
+// ==================================================================================================================
+
 tulip.Vec3f = function tulip_Vec3f(x, y, z) {
   checkArgumentsTypes(arguments, ["number", "number", "number"])
   var newObject = createObject(tulip.Vec3f, this);

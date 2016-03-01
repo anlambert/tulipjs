@@ -1963,6 +1963,98 @@ void EMSCRIPTEN_KEEPALIVE ColorProperty_setAllEdgeValue(tlp::ColorProperty *colo
 
 // ==================================================================================================================
 
+tlp::ColorVectorProperty* EMSCRIPTEN_KEEPALIVE createColorVectorProperty(tlp::Graph *graph, const char *name) {
+  tlp::ColorVectorProperty *prop = new tlp::ColorVectorProperty(graph, name);
+  observeObject(prop);
+  return prop;
+}
+
+void EMSCRIPTEN_KEEPALIVE ColorVectorProperty_setAllNodeValue(tlp::ColorVectorProperty *colorVectorProperty, unsigned char *array, unsigned int arraySize) {
+  std::vector<tlp::Color> v(arraySize);
+  for (unsigned int i = 0 ; i < arraySize ; ++i) {
+    v[i] = tlp::Color(array[4*i], array[4*i+1], array[4*i+2], array[4*i+3]);
+  }
+  colorVectorProperty->setAllNodeValue(v);
+}
+
+void EMSCRIPTEN_KEEPALIVE ColorVectorProperty_setNodeValue(tlp::ColorVectorProperty *colorVectorProperty, unsigned int n, unsigned char *array, unsigned int arraySize) {
+  std::vector<tlp::Color> v(arraySize);
+  for (unsigned int i = 0 ; i < arraySize ; ++i) {
+    v[i] = tlp::Color(array[4*i], array[4*i+1], array[4*i+2], array[4*i+3]);
+  }
+  colorVectorProperty->setNodeValue(tlp::node(n), v);
+}
+
+void EMSCRIPTEN_KEEPALIVE ColorVectorProperty_setAllEdgeValue(tlp::ColorVectorProperty *colorVectorProperty, unsigned char *array, unsigned int arraySize) {
+  std::vector<tlp::Color> v(arraySize);
+  for (unsigned int i = 0 ; i < arraySize ; ++i) {
+    v[i] = tlp::Color(array[4*i], array[4*i+1], array[4*i+2], array[4*i+3]);
+  }
+  colorVectorProperty->setAllEdgeValue(v);
+}
+
+void EMSCRIPTEN_KEEPALIVE ColorVectorProperty_setEdgeValue(tlp::ColorVectorProperty *colorVectorProperty, unsigned int e, unsigned char *array, unsigned int arraySize) {
+  std::vector<tlp::Color> v(arraySize);
+  for (unsigned int i = 0 ; i < arraySize ; ++i) {
+    v[i] = tlp::Color(array[4*i], array[4*i+1], array[4*i+2], array[4*i+3]);
+  }
+  colorVectorProperty->setEdgeValue(tlp::edge(e), v);
+}
+
+double EMSCRIPTEN_KEEPALIVE ColorVectorProperty_getNodeDefaultVectorSize(tlp::ColorVectorProperty *colorVectorProperty) {
+  const std::vector<tlp::Color> &value = colorVectorProperty->getNodeDefaultValue();
+  return value.size();
+}
+
+void EMSCRIPTEN_KEEPALIVE ColorVectorProperty_getNodeDefaultValue(tlp::ColorVectorProperty *colorVectorProperty, unsigned char *array) {
+  const std::vector<tlp::Color> &value = colorVectorProperty->getNodeDefaultValue();
+  for (size_t i = 0 ; i < value.size() ; ++i) {
+    for (size_t j = 0 ; j < 4 ; ++j)
+      *array++ = value[i][j];
+  }
+}
+
+double EMSCRIPTEN_KEEPALIVE ColorVectorProperty_getNodeVectorSize(tlp::ColorVectorProperty *colorVectorProperty, unsigned int n) {
+  const std::vector<tlp::Color> &value = colorVectorProperty->getNodeValue(tlp::node(n));
+  return value.size();
+}
+
+void EMSCRIPTEN_KEEPALIVE ColorVectorProperty_getNodeValue(tlp::ColorVectorProperty *colorVectorProperty, unsigned int n, unsigned char *array) {
+  const std::vector<tlp::Color> &value = colorVectorProperty->getNodeValue(tlp::node(n));
+  for (size_t i = 0 ; i < value.size() ; ++i) {
+    for (size_t j = 0 ; j < 4 ; ++j)
+      *array++ = value[i][j];
+  }
+}
+
+unsigned EMSCRIPTEN_KEEPALIVE ColorVectorProperty_getEdgeDefaultVectorSize(tlp::ColorVectorProperty *colorVectorProperty) {
+  const std::vector<tlp::Color> &value = colorVectorProperty->getEdgeDefaultValue();
+  return value.size();
+}
+
+void EMSCRIPTEN_KEEPALIVE ColorVectorProperty_getEdgeDefaultValue(tlp::ColorVectorProperty *colorVectorProperty, unsigned char *array) {
+  const std::vector<tlp::Color> &value = colorVectorProperty->getEdgeDefaultValue();
+  for (size_t i = 0 ; i < value.size() ; ++i) {
+    for (size_t j = 0 ; j < 4 ; ++j)
+      *array++ = value[i][j];
+  }
+}
+
+double EMSCRIPTEN_KEEPALIVE ColorVectorProperty_getEdgeVectorSize(tlp::ColorVectorProperty *colorVectorProperty, unsigned int e) {
+  const std::vector<tlp::Color> &value = colorVectorProperty->getEdgeValue(tlp::edge(e));
+  return value.size();
+}
+
+void EMSCRIPTEN_KEEPALIVE ColorVectorProperty_getEdgeValue(tlp::ColorVectorProperty *colorVectorProperty, unsigned int e, unsigned char *array) {
+  const std::vector<tlp::Color> &value = colorVectorProperty->getEdgeValue(tlp::edge(e));
+  for (size_t i = 0 ; i < value.size() ; ++i) {
+    for (size_t j = 0 ; j < 4 ; ++j)
+      *array++ = value[i][j];
+  }
+}
+
+// ==================================================================================================================
+
 tlp::LayoutProperty* EMSCRIPTEN_KEEPALIVE createLayoutProperty(tlp::Graph *graph, const char *name) {
   tlp::LayoutProperty *prop = new tlp::LayoutProperty(graph, name);
   observeObject(prop);

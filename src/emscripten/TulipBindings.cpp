@@ -1823,6 +1823,94 @@ void EMSCRIPTEN_KEEPALIVE BooleanProperty_getEdgesEqualTo(tlp::BooleanProperty *
 
 // ==================================================================================================================
 
+tlp::BooleanVectorProperty* EMSCRIPTEN_KEEPALIVE createBooleanVectorProperty(tlp::Graph *graph, const char *name) {
+  tlp::BooleanVectorProperty *prop = new tlp::BooleanVectorProperty(graph, name);
+  observeObject(prop);
+  return prop;
+}
+
+void EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_setAllNodeValue(tlp::BooleanVectorProperty *boolVectorProperty, unsigned char *array, unsigned int arraySize) {
+  std::vector<bool> v(arraySize);
+  for (unsigned int i = 0 ; i < arraySize ; ++i) {
+    v[i] = array[i] > 0;
+  }
+  boolVectorProperty->setAllNodeValue(v);
+}
+
+void EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_setNodeValue(tlp::BooleanVectorProperty *boolVectorProperty, unsigned int n, unsigned char *array, unsigned int arraySize) {
+  std::vector<bool> v(arraySize);
+  for (unsigned int i = 0 ; i < arraySize ; ++i) {
+    v[i] = array[i] > 0;
+  }
+  boolVectorProperty->setNodeValue(tlp::node(n), v);
+}
+
+void EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_setAllEdgeValue(tlp::BooleanVectorProperty *boolVectorProperty, unsigned char *array, unsigned int arraySize) {
+  std::vector<bool> v(arraySize);
+  for (unsigned int i = 0 ; i < arraySize ; ++i) {
+    v[i] = array[i] > 0;
+  }
+  boolVectorProperty->setAllEdgeValue(v);
+}
+
+void EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_setEdgeValue(tlp::BooleanVectorProperty *boolVectorProperty, unsigned int e, unsigned char *array, unsigned int arraySize) {
+  std::vector<bool> v(arraySize);
+  for (unsigned int i = 0 ; i < arraySize ; ++i) {
+    v[i] = array[i] > 0;
+  }
+  boolVectorProperty->setEdgeValue(tlp::edge(e), v);
+}
+
+double EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_getNodeDefaultVectorSize(tlp::BooleanVectorProperty *boolVectorProperty) {
+  const std::vector<bool> &value = boolVectorProperty->getNodeDefaultValue();
+  return value.size();
+}
+
+void EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_getNodeDefaultValue(tlp::BooleanVectorProperty *boolVectorProperty, unsigned char *array) {
+  const std::vector<bool> &value = boolVectorProperty->getNodeDefaultValue();
+  for (size_t i = 0 ; i < value.size() ; ++i) {
+    *array++ = value[i];
+  }
+}
+
+double EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_getNodeVectorSize(tlp::BooleanVectorProperty *boolVectorProperty, unsigned int n) {
+  const std::vector<bool> &value = boolVectorProperty->getNodeValue(tlp::node(n));
+  return value.size();
+}
+
+void EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_getNodeValue(tlp::BooleanVectorProperty *boolVectorProperty, unsigned int n, unsigned char *array) {
+  const std::vector<bool> &value = boolVectorProperty->getNodeValue(tlp::node(n));
+  for (size_t i = 0 ; i < value.size() ; ++i) {
+    *array++ = value[i];
+  }
+}
+
+unsigned EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_getEdgeDefaultVectorSize(tlp::BooleanVectorProperty *boolVectorProperty) {
+  const std::vector<bool> &value = boolVectorProperty->getEdgeDefaultValue();
+  return value.size();
+}
+
+void EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_getEdgeDefaultValue(tlp::BooleanVectorProperty *boolVectorProperty, unsigned char *array) {
+  const std::vector<bool> &value = boolVectorProperty->getEdgeDefaultValue();
+  for (size_t i = 0 ; i < value.size() ; ++i) {
+    *array++ = value[i];
+  }
+}
+
+double EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_getEdgeVectorSize(tlp::BooleanVectorProperty *boolVectorProperty, unsigned int e) {
+  const std::vector<bool> &value = boolVectorProperty->getEdgeValue(tlp::edge(e));
+  return value.size();
+}
+
+void EMSCRIPTEN_KEEPALIVE BooleanVectorProperty_getEdgeValue(tlp::BooleanVectorProperty *boolVectorProperty, unsigned int e, unsigned char *array) {
+  const std::vector<bool> &value = boolVectorProperty->getEdgeValue(tlp::edge(e));
+  for (size_t i = 0 ; i < value.size() ; ++i) {
+    *array++ = value[i];
+  }
+}
+
+// ==================================================================================================================
+
 tlp::ColorProperty* EMSCRIPTEN_KEEPALIVE createColorProperty(tlp::Graph *graph, const char *name) {
   tlp::ColorProperty *prop = new tlp::ColorProperty(graph, name);
   observeObject(prop);

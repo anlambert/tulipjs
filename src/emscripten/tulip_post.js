@@ -366,6 +366,126 @@ tulip.BooleanProperty.prototype.getEdgesEqualTo = function tulip_BooleanProperty
 };
 // ==================================================================================================================
 
+var _createBooleanVectorProperty = Module.cwrap('createBooleanVectorProperty', 'number', ['number', 'string']);
+
+var _BooleanVectorProperty_setAllNodeValue = Module.cwrap('BooleanVectorProperty_setAllNodeValue', null, ['number', 'number', 'number']);
+var _BooleanVectorProperty_setNodeValue = Module.cwrap('BooleanVectorProperty_setNodeValue', null, ['number', 'number', 'number', 'number']);
+var _BooleanVectorProperty_getNodeDefaultVectorSize = Module.cwrap('BooleanVectorProperty_getNodeDefaultVectorSize', 'number', ['number']);
+var _BooleanVectorProperty_getNodeDefaultValue = Module.cwrap('BooleanVectorProperty_getNodeDefaultValue', null, ['number', 'number']);
+var _BooleanVectorProperty_getNodeVectorSize = Module.cwrap('BooleanVectorProperty_getNodeVectorSize', 'number', ['number', 'number']);
+var _BooleanVectorProperty_getNodeValue = Module.cwrap('BooleanVectorProperty_getNodeValue', null, ['number', 'number', 'number']);
+
+var _BooleanVectorProperty_setAllEdgeValue = Module.cwrap('BooleanVectorProperty_setAllEdgeValue', null, ['number', 'number', 'number']);
+var _BooleanVectorProperty_setEdgeValue = Module.cwrap('BooleanVectorProperty_setEdgeValue', null, ['number', 'number', 'number', 'number']);
+var _BooleanVectorProperty_getEdgeDefaultVectorSize = Module.cwrap('BooleanVectorProperty_getEdgeDefaultVectorSize', 'number', ['number']);
+var _BooleanVectorProperty_getEdgeDefaultValue = Module.cwrap('BooleanVectorProperty_getEdgeDefaultValue', null, ['number', 'number']);
+var _BooleanVectorProperty_getEdgeVectorSize = Module.cwrap('BooleanVectorProperty_getEdgeVectorSize', 'number', ['number', 'number']);
+var _BooleanVectorProperty_getEdgeValue = Module.cwrap('BooleanVectorProperty_getEdgeValue', null, ['number', 'number', 'number']);
+
+tulip.BooleanVectorProperty = function tulip_BooleanVectorProperty() {
+  var newObject = createObject(tulip.BooleanVectorProperty, this);
+  if (tulip_BooleanVectorProperty.caller == null || tulip_BooleanVectorProperty.caller.name != "createObject") {
+    var cppPointer = 0;
+    var graphManaged = false;
+    if (arguments.length == 1 && typeOf(arguments[0]) == "number") {
+      cppPointer = arguments[0];
+      graphManaged = true;
+    } else {
+      checkArgumentsTypes(arguments, [tulip.Graph, "string"], 1);
+      var propName = "";
+      if (arguments.length > 1) propName = arguments[1];
+      cppPointer = _createBooleanVectorProperty(arguments[0].cppPointer, propName);
+    }
+    tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
+    newObject.setWrappedTypename("tlp::BooleanVectorProperty");
+  }
+  return newObject;
+};
+tulip.BooleanVectorProperty.inheritsFrom(tulip.PropertyInterface);
+tulip.BooleanVectorProperty.prototype.getNodeDefaultValue = function tulip_BooleanVectorProperty_prototype_getNodeDefaultValue() {
+  checkWrappedCppPointer(this.cppPointer);
+  var size = _BooleanVectorProperty_getNodeDefaultVectorSize(this.cppPointer);
+  var booleanArray = allocArrayInEmHeap(Uint8Array, size);
+  _BooleanVectorProperty_getNodeDefaultValue(this.cppPointer, booleanArray.byteOffset);
+  var ret = Array.prototype.slice.call(booleanArray).map(Boolean);
+  freeArrayInEmHeap(booleanArray);
+  return ret;
+};
+tulip.BooleanVectorProperty.prototype.getNodeValue = function tulip_BooleanVectorProperty_prototype_getNodeValue(node) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Node], 1);
+  var size = _BooleanVectorProperty_getNodeVectorSize(this.cppPointer, node.id);
+  var booleanArray = allocArrayInEmHeap(Uint8Array, size);
+  _BooleanVectorProperty_getNodeValue(this.cppPointer, node.id, booleanArray.byteOffset);
+  var ret = Array.prototype.slice.call(booleanArray).map(Boolean);
+  freeArrayInEmHeap(booleanArray);
+  return ret;
+};
+tulip.BooleanVectorProperty.prototype.setNodeValue = function tulip_BooleanVectorProperty_prototype_setNodeValue(node, val) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Node, "array"], 2);
+  checkArrayOfType(val, "boolean", 1);
+  var booleanArray = allocArrayInEmHeap(Uint8Array, val.length);
+  for (var i = 0 ; i < val.length ; ++i) {
+    booleanArray[i] = val[i];
+  }
+  _BooleanVectorProperty_setNodeValue(this.cppPointer, node.id, booleanArray.byteOffset, val.length);
+  freeArrayInEmHeap(booleanArray);
+};
+tulip.BooleanVectorProperty.prototype.getEdgeDefaultValue = function tulip_BooleanVectorProperty_prototype_getEdgeDefaultValue() {
+  checkWrappedCppPointer(this.cppPointer);
+  var size = _BooleanVectorProperty_getEdgeDefaultVectorSize(this.cppPointer);
+  var booleanArray = allocArrayInEmHeap(Uint8Array, size);
+  _BooleanVectorProperty_getEdgeDefaultValue(this.cppPointer, booleanArray.byteOffset);
+  var ret = Array.prototype.slice.call(booleanArray).map(Boolean);
+  freeArrayInEmHeap(booleanArray);
+  return ret;
+};
+tulip.BooleanVectorProperty.prototype.getEdgeValue = function tulip_BooleanVectorProperty_prototype_getEdgeValue(edge) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Edge], 1);
+  var size = _BooleanVectorProperty_getEdgeVectorSize(this.cppPointer, edge.id);
+  var booleanArray = allocArrayInEmHeap(Uint8Array, size);
+  _BooleanVectorProperty_getEdgeValue(this.cppPointer, edge.id, booleanArray.byteOffset);
+  var ret = Array.prototype.slice.call(booleanArray).map(Boolean);
+  freeArrayInEmHeap(booleanArray);
+  return ret;
+};
+tulip.BooleanVectorProperty.prototype.setEdgeValue = function tulip_BooleanVectorProperty_prototype_setEdgeValue(edge, val) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, [tulip.Edge, "array"], 2);
+  checkArrayOfType(val, "boolean", 1);
+  var booleanArray = allocArrayInEmHeap(Uint8Array, val.length);
+  for (var i = 0 ; i < val.length ; ++i) {
+    booleanArray[i] = val[i];
+  }
+  _BooleanVectorProperty_setEdgeValue(this.cppPointer, edge.id, booleanArray.byteOffset, val.length);
+  freeArrayInEmHeap(booleanArray);
+};
+tulip.BooleanVectorProperty.prototype.setAllNodeValue = function tulip_BooleanVectorProperty_prototype_setAllNodeValue(val) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["array"], 1);
+  checkArrayOfType(val, "boolean", 0);
+  var booleanArray = allocArrayInEmHeap(Uint8Array, val.length);
+  for (var i = 0 ; i < val.length ; ++i) {
+    booleanArray[i] = val[i];
+  }
+  _BooleanVectorProperty_setAllNodeValue(this.cppPointer, booleanArray.byteOffset, val.length);
+  freeArrayInEmHeap(booleanArray);
+};
+tulip.BooleanVectorProperty.prototype.setAllEdgeValue = function tulip_BooleanVectorProperty_prototype_setAllEdgeValue(val) {
+  checkWrappedCppPointer(this.cppPointer);
+  checkArgumentsTypes(arguments, ["array"], 1);
+  checkArrayOfType(val, "boolean", 0);
+  var booleanArray = allocArrayInEmHeap(Uint8Array, val.length);
+  for (var i = 0 ; i < val.length ; ++i) {
+    booleanArray[i] = val[i];
+  }
+  _BooleanVectorProperty_setAllEdgeValue(this.cppPointer, booleanArray.byteOffset, val.length);
+  freeArrayInEmHeap(booleanArray);
+};
+// ==================================================================================================================
+
 var _createDoubleProperty = Module.cwrap('createDoubleProperty', 'number', ['number', 'string']);
 var _DoubleProperty_setAllNodeValue = Module.cwrap('DoubleProperty_setAllNodeValue', null, ['number', 'number']);
 var _DoubleProperty_setNodeValue = Module.cwrap('DoubleProperty_setNodeValue', null, ['number', 'number', 'number']);
@@ -443,6 +563,7 @@ tulip.DoubleProperty.prototype.getSortedEdges = function tulip_DoubleProperty_pr
   var propertyObject = this;
   return getArrayOfTulipType(sg.numberOfEdges(), function(byteOffset){_DoubleProperty_getSortedEdges(propertyObject.cppPointer, sg.cppPointer, ascendingOrder, byteOffset)}, tulip.Edge);
 };
+
 // ==================================================================================================================
 
 var _createDoubleVectorProperty = Module.cwrap('createDoubleVectorProperty', 'number', ['number', 'string']);

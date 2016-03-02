@@ -1,3 +1,5 @@
+var tulip = Module;
+
 var UINT_MAX = 0xffffffff;
 
 function typeOf(value) {
@@ -71,8 +73,6 @@ if (typeOf(String.prototype.startsWith) == 'undefined') {
 function createObject(ObjectType, caller) {
   return ObjectType.prototype.isPrototypeOf(caller) ? caller : new ObjectType();
 }
-
-var tulip = Module;
 
 tulip.mainCalled = false;
 if (nodejs) {
@@ -4857,9 +4857,6 @@ if (workerMode) {
     var _activateInteractor = Module.cwrap('activateInteractor', null, ['string', 'string']);
     var _desactivateInteractor = Module.cwrap('desactivateInteractor', null, ['string']);
 
-    var _setProgressBarPercent = Module.cwrap('setProgressBarPercent', null, ['string', 'number']);
-    var _setProgressBarComment = Module.cwrap('setProgressBarComment', null, ['string', 'string']);
-
     var _initCanvas = Module.cwrap('initCanvas', null, ['string', 'number', 'number', 'number']);
     var _setCurrentCanvas = Module.cwrap('setCurrentCanvas', null, ['string']);
     var _getCurrentCanvas = Module.cwrap('getCurrentCanvas', 'string', []);
@@ -4940,7 +4937,6 @@ if (workerMode) {
               view.setProgressBarPercent(0);
               view.startGraphViewData();
               graphData[graphHierarchyId] = event.data;
-              view.draw();
             }
           }, delay);
           break;
@@ -4950,7 +4946,6 @@ if (workerMode) {
           setTimeout(function() {
             if (tulip.vizFeatures && view) {
               view.setProgressBarComment("Finalizing graph rendering data ...");
-              view.draw();
               view.endGraphViewData();
               view.setGraphRenderingDataReady(true);
               view.centerScene();
@@ -4972,7 +4967,6 @@ if (workerMode) {
               view.setProgressBarComment("Updating graph visualization ...");
               view.startGraphViewUpdate(event.data.clearGraph);
               graphData[graphHierarchyId] = event.data;
-              view.draw();
             }, delay);
           }
           break;
@@ -4985,18 +4979,14 @@ if (workerMode) {
             }
             algorithmFinishedCallbacks[graphHierarchyId](g, algorithmSucceed[graphHierarchyId]);
           }
-
+          tulip.unholdObservers();
           if (tulip.vizFeatures && view) {
             setTimeout(function() {
               view.endGraphViewUpdate();
               view.setGraphRenderingDataReady(true);
               view.centerScene();
-              tulip.unholdObservers();
             }, delay);
-          } else {
-            tulip.unholdObservers();
           }
-
           break;
         case 'createGraphProperties':
           setTimeout(function() {
@@ -5077,6 +5067,108 @@ if (workerMode) {
 
   if (tulip.vizFeatures) {
 
+    function addStyleString(str) {
+      var node = document.createElement('style');
+      node.innerHTML = str;
+      document.body.appendChild(node);
+    }
+
+    addStyleString(' \
+    .centerFlex { \
+       align-items: center; \
+       display: flex; \
+       justify-content: center; \
+    }');
+
+//    progress[value] { \
+//      appearance: none; \
+//      border: none; \
+//      background-color: whiteSmoke; \
+//      border-radius: 3px; \
+//      box-shadow: 0 2px 3px rgba(0,0,0,.5) inset; \
+//      color: royalblue; \
+//      position: relative; \
+//      margin: 0 0 1.5em; \
+//    } \
+//    progress[value]::-webkit-progress-bar { \
+//      background-color: whiteSmoke; \
+//      border-radius: 3px; \
+//      box-shadow: 0 2px 3px rgba(0,0,0,.5) inset; \
+//    } \
+//    progress[value]::-webkit-progress-value { \
+//      position: relative; \
+//      background-size: 60px 30px, 100% 100%, 100% 100%; \
+//      border-radius:3px; \
+//      background-image: \
+//      -webkit-linear-gradient( 135deg, \
+//                               transparent, \
+//                               transparent 33%, \
+//                               rgba(0,0,0,.1) 33%, \
+//                               rgba(0,0,0,.1) 66%, \
+//                               transparent 66%), \
+//      -webkit-linear-gradient( top, \
+//                               rgba(255, 255, 255, .25), \
+//                               rgba(0,0,0,.2)), \
+//      -webkit-linear-gradient( left, #09c, #09c); \
+//    } \
+//    progress[value]::-moz-progress-bar { \
+//      background-image: \
+//      -moz-linear-gradient( 135deg, \
+//                            transparent, \
+//                            transparent 33%, \
+//                            rgba(0,0,0,.1) 33%, \
+//                            rgba(0,0,0,.1) 66%, \
+//                            transparent 66%), \
+//      -moz-linear-gradient( top, \
+//                            rgba(255, 255, 255, .25), \
+//                            rgba(0,0,0,.2)), \
+//      -moz-linear-gradient( left, #09c, #09c); \
+//      background-size: 60px 30px, 100% 100%, 100% 100%; \
+//      border-radius:3px; \
+//    }');
+
+    function addHTMLProgressBarToView(view) {
+      view.canvasOverlayDiv = document.createElement('div');
+      view.canvasOverlayDiv.style.position = 'absolute';
+      view.canvasOverlayDiv.style.top = '0';
+      view.canvasOverlayDiv.style.left = '0';
+      view.canvasOverlayDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+      if (view.sizeRelativeToContainer) {
+        view.canvasOverlayDiv.style.width = '100%';
+        view.canvasOverlayDiv.style.height = '100%';
+      } else {
+        view.canvasOverlayDiv.style.width = view.canvas.width + 'px';
+        view.canvasOverlayDiv.style.height = view.canvas.height + 'px';
+      }
+
+      view.canvasOverlayDiv.style.display = "none";
+      view.container.appendChild(view.canvasOverlayDiv);
+
+      view.progress = document.createElement('progress');
+      view.progress.max = '100';
+      view.progress.style.width = '80%';
+      view.progress.style.height = '30px';
+
+      view.progressComment = document.createElement('p');
+      view.progressComment.style.color = '#000000';
+
+      view.progressPercent = document.createElement('span');
+      view.progressPercent.style.color = '#000000';
+      view.progressPercent.style.lineHeight = '30px';
+      view.progressPercent.style.height = '30px';
+
+      var progressDiv = document.createElement('div');
+      progressDiv.style.width = '70%';
+      progressDiv.style.border = '1px solid black';
+      progressDiv.style.borderRadius = '15px';
+      progressDiv.appendChild(view.progressComment);
+      progressDiv.appendChild(view.progress);
+      //progressDiv.appendChild(view.progressPercent);
+
+      view.canvasOverlayDiv.classList.add('centerFlex');
+      view.canvasOverlayDiv.appendChild(progressDiv);
+    }
+
     var _setCanvasGraph = Module.cwrap('setCanvasGraph', null, ['string', 'number']);
     var _getViewRenderingParameters = Module.cwrap('getViewRenderingParameters', 'number', ['string']);
 
@@ -5091,11 +5183,16 @@ if (workerMode) {
           newObject.container = container;
         }
 
+        newObject.container.style.position = 'relative';
+
         var currentId = nextCanvasId++;
 
         newObject.canvasId = 'tulip-canvas-' + currentId;
         newObject.canvas = document.createElement("canvas");
         newObject.canvas.style.outline = 'none';
+        newObject.canvas.style.position = 'absolute';
+        newObject.canvas.style.top = '0';
+        newObject.canvas.style.left = '0';
         newObject.canvas.id = newObject.canvasId;
         newObject.container.appendChild(newObject.canvas);
         if (typeOf(width) != 'undefined' && typeOf(height) != 'undefined') {
@@ -5107,11 +5204,13 @@ if (workerMode) {
           width = newObject.container.clientWidth;
           height = newObject.container.clientHeight;
         }
+
         _initCanvas(newObject.canvasId, width, height, newObject.sizeRelativeToContainer);
+        addHTMLProgressBarToView(newObject);
+
         newObject.graph = null;
         newObject.graphDrawingChanged = false;
         canvasIdToView[newObject.canvasId] = newObject;
-
       }
       newObject.fullScreenActivated = false;
       newObject.busyAnimationStarted = false;
@@ -5138,35 +5237,30 @@ if (workerMode) {
     };
 
     tulip.View.prototype.setProgressBarComment = function(comment) {
-      _setProgressBarComment(this.canvasId, comment);
+      this.canvasOverlayDiv.style.display = "";
+      this.progressComment.innerHTML = comment;
     };
 
     tulip.View.prototype.setProgressBarPercent = function(percent) {
-      _setProgressBarPercent(this.canvasId, percent);
+      this.canvasOverlayDiv.style.display = "";
+      this.progress.value = percent;
+      this.progressPercent.innerHTML = '&nbsp;' + (percent | 0) + '%';
     };
 
     tulip.View.prototype.startBusyAnimation = function() {
-
       if (this.busyAnimationStarted) {
         return;
       }
 
-      var view = this;
-
-      function busyAnimation() {
-        if (view.busyAnimationStarted) {
-          view.setProgressBarPercent(-1);
-          view.updateGlScene();
-          Browser.requestAnimationFrame(busyAnimation);
-        }
-      }
-
+      this.canvasOverlayDiv.style.display = "";
+      this.progress.removeAttribute('value');
+      this.progressPercent.innerHTML='';
       this.busyAnimationStarted = true;
-      Browser.requestAnimationFrame(busyAnimation);
     };
 
     tulip.View.prototype.stopBusyAnimation = function(canvasId) {
       this.busyAnimationStarted = false;
+      this.canvasOverlayDiv.style.display = "none";
     };
 
     tulip.View.prototype.activateInteractor = function(interactorName) {
@@ -5193,6 +5287,10 @@ if (workerMode) {
         height = this.container.clientHeight;
       }
       _resizeCanvas(this.canvasId, width, height, this.sizeRelativeToContainer);
+      if (!this.sizeRelativeToConatiner) {
+        this.canvasOverlayDiv.style.width = width + 'px';
+        this.canvasOverlayDiv.style.height = height + 'px';
+      }
     };
 
     tulip.View.prototype.getWidth = function() {
@@ -5279,6 +5377,7 @@ if (workerMode) {
 
     tulip.View.prototype.setGraphRenderingDataReady = function(ready) {
       _setGraphRenderingDataReady(this.canvasId, ready);
+      this.canvasOverlayDiv.style.display = ready ? "none" : "";
     };
 
     tulip.View.prototype.selectNodesEdges = function(x, y, w, h) {

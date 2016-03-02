@@ -156,7 +156,6 @@ SET(GRAPH_RENDERER_SRCS
     src/tulip-ogles/TextureManager.cpp
     src/tulip-ogles/TextureAtlas.cpp
     src/tulip-ogles/GlGraphRenderingParameters.cpp
-    src/tulip-ogles/GlProgressBar.cpp
     src/tulip-ogles/NanoVGManager.cpp
     src/utils/TimeMeasurer.cpp
     src/utils/ConcaveHullBuilder.cpp
@@ -242,7 +241,7 @@ ADD_EXECUTABLE(tulip-node.js ${TULIPJS_CORE_SRCS})
 
 TARGET_LINK_LIBRARIES(tulip-node.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
 
-SET_TARGET_PROPERTIES(tulip-node.js PROPERTIES LINK_FLAGS "--bind -s USE_ZLIB=1 -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --memory-init-file 0")
+SET_TARGET_PROPERTIES(tulip-node.js PROPERTIES LINK_FLAGS "--bind -s USE_ZLIB=1 -s ALLOW_MEMORY_GROWTH=1 -s ELIMINATE_DUPLICATE_FUNCTIONS=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --memory-init-file 0")
 
 EM_LINK_PRE_JS(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_pre.js)
 EM_LINK_POST_JS(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)
@@ -257,7 +256,8 @@ ADD_EXECUTABLE(tulip.js ${TULIPJS_SRCS})
 TARGET_LINK_LIBRARIES(tulip.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
 
 #SET_TARGET_PROPERTIES(tulip.js PROPERTIES LINK_FLAGS "-s STB_IMAGE=1 --bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
-SET_TARGET_PROPERTIES(tulip.js PROPERTIES LINK_FLAGS "-s STB_IMAGE=1 --bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s TOTAL_MEMORY=268435456 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
+SET_TARGET_PROPERTIES(tulip.js PROPERTIES LINK_FLAGS "-s STB_IMAGE=1 --bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s TOTAL_MEMORY=268435456 -s MODULARIZE=1 -s ELIMINATE_DUPLICATE_FUNCTIONS=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
+#SET_TARGET_PROPERTIES(tulip.js PROPERTIES LINK_FLAGS "-s STB_IMAGE=1 --bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s TOTAL_MEMORY=268435456 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
 
 EM_LINK_PRE_JS(tulip.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_pre.js)
 EM_LINK_POST_JS(tulip.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)
@@ -272,7 +272,7 @@ ADD_EXECUTABLE(tulip-lite.js ${TULIPJS_SRCS})
 TARGET_LINK_LIBRARIES(tulip-lite.js ${TULIP_CORE_LIBRARY})
 
 #SET_TARGET_PROPERTIES(tulip-lite.js PROPERTIES LINK_FLAGS "-s STB_IMAGE=1 --bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
-SET_TARGET_PROPERTIES(tulip-lite.js PROPERTIES LINK_FLAGS "-s STB_IMAGE=1 --bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s TOTAL_MEMORY=268435456 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
+SET_TARGET_PROPERTIES(tulip-lite.js PROPERTIES LINK_FLAGS "-s STB_IMAGE=1 --bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s TOTAL_MEMORY=268435456 -s ELIMINATE_DUPLICATE_FUNCTIONS=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
 
 EM_LINK_PRE_JS(tulip-lite.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_pre.js)
 EM_LINK_POST_JS(tulip-lite.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)

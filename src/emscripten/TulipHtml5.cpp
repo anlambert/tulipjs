@@ -44,7 +44,6 @@
 #include "ShaderManager.h"
 #include "GlShaderProgram.h"
 #include "glyphs/GlyphsRenderer.h"
-#include "GlProgressBar.h"
 #include "GlGraphRenderingParameters.h"
 #include "Interactors.h"
 
@@ -57,7 +56,6 @@ static std::vector<std::string> canvasIds;
 static std::map<std::string, EMSCRIPTEN_WEBGL_CONTEXT_HANDLE> webGlContextHandle;
 static std::map<std::string, GlScene *> glScene;
 static std::map<std::string, GlGraph *> glGraph;
-static std::map<std::string, GlProgressBar *> glProgressBar;
 static std::map<std::string, tlp::Graph *> graph;
 static std::map<tlp::Graph *, std::string> graphToCanvas;
 static std::map<std::string, GlSceneInteractor*> currentCanvasInteractor;
@@ -370,7 +368,6 @@ void cleanManagedCanvasIfNeeded() {
     delete glScene[removedCanvas[i]];
     glScene.erase(removedCanvas[i]);
     graph.erase(removedCanvas[i]);
-    glProgressBar.erase(removedCanvas[i]);
     glGraph.erase(removedCanvas[i]);
     graphToCanvas.erase(graph[removedCanvas[i]]);
     graph.erase(removedCanvas[i]);
@@ -427,13 +424,6 @@ void EMSCRIPTEN_KEEPALIVE initCanvas(const char *canvasId, int width, int height
 
     hullsLayer[currentCanvasId] = new GlLayer("hulls", glScene[currentCanvasId]->getMainLayer()->getCamera(), glScene[currentCanvasId]->getMainLayer()->getLight());
 
-    GlLayer *progressLayer = glScene[currentCanvasId]->createLayer("progress", false);
-    glProgressBar[currentCanvasId] = new GlProgressBar(tlp::Coord(viewport[2]/2.f, viewport[3]/2.f), 0.8f * viewport[2], 0.1f * viewport[3],
-        tlp::Color::Gray, tlp::Color::Black, tlp::Color::Black);
-
-    progressLayer->addGlEntity(glProgressBar[currentCanvasId], "progress bar");
-    glProgressBar[currentCanvasId]->setVisible(false);
-
     activateInteractor(currentCanvasId.c_str(), "ZoomAndPan");
 
     draw();
@@ -479,9 +469,6 @@ void EMSCRIPTEN_KEEPALIVE resizeCanvas(const char *canvasId, int width, int heig
   resizeWebGLCanvas(canvasId, width, height, sizeRelativeToContainer);
   tlp::Vec4i viewport(0, 0, width, height);
   glScene[canvasId]->setViewport(viewport);
-  glProgressBar[canvasId]->setCenter(tlp::Coord(viewport[2]/2.f, viewport[3]/2.f));
-  glProgressBar[canvasId]->setWidth(0.8f * viewport[2]);
-  glProgressBar[canvasId]->setHeight(0.1f * viewport[3]);
 }
 
 bool EMSCRIPTEN_KEEPALIVE graphHasHull(const char *canvasId, tlp::Graph *g) {
@@ -587,7 +574,6 @@ void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
   glGraph[canvasId]->setGraph(g);
 
   glScene[canvasId]->centerScene(tlp::computeBoundingBox(g, viewLayout, viewSize, viewRotation));
-  glProgressBar[currentCanvasId]->setVisible(false);
   setGraphHullsToDisplay(canvasId);
   if (nbTextureToLoad == 0) {
     draw();
@@ -656,17 +642,12 @@ void EMSCRIPTEN_KEEPALIVE endGraphViewData(const char *canvasId) {
 }
 
 void EMSCRIPTEN_KEEPALIVE startGraphViewUpdate(const char *canvasId, bool clearGraph = false) {
-  glProgressBar[canvasId]->setPercent(-1);
-  glGraph[canvasId]->clearObservers();
   if (clearGraph) {
     graph[canvasId]->clear();
   }
 }
 
 void EMSCRIPTEN_KEEPALIVE endGraphViewUpdate(const char *canvasId) {
-  glGraph[canvasId]->prepareEdgesData();
-  glGraph[canvasId]->computeGraphBoundingBox();
-  glGraph[canvasId]->initObservers();
   addSubGraphsHull(canvasId, graph[canvasId]);
   setGraphHullsToDisplay(canvasId);
 }
@@ -791,18 +772,7 @@ tlp::NumericProperty* EMSCRIPTEN_KEEPALIVE GlGraphRenderingParameters_elementsOr
 
 //==============================================================
 
-void EMSCRIPTEN_KEEPALIVE setProgressBarPercent(const char *canvasId, int percent) {
-  glProgressBar[canvasId]->setPercent(percent);
-}
-
-void EMSCRIPTEN_KEEPALIVE setProgressBarComment(const char *canvasId, const char *comment) {
-  glProgressBar[canvasId]->setComment(comment);
-}
-
 void EMSCRIPTEN_KEEPALIVE setGraphRenderingDataReady(const char *canvasId, bool ready) {
-  glProgressBar[canvasId]->setVisible(!ready);
-  glScene[canvasId]->getMainLayer()->setVisible(ready);
-  hullsLayer[canvasId]->setVisible(ready);
   if (!ready) {
     clearGraphsHulls(canvasId);
   }

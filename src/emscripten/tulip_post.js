@@ -5080,53 +5080,6 @@ if (workerMode) {
        justify-content: center; \
     }');
 
-//    progress[value] { \
-//      appearance: none; \
-//      border: none; \
-//      background-color: whiteSmoke; \
-//      border-radius: 3px; \
-//      box-shadow: 0 2px 3px rgba(0,0,0,.5) inset; \
-//      color: royalblue; \
-//      position: relative; \
-//      margin: 0 0 1.5em; \
-//    } \
-//    progress[value]::-webkit-progress-bar { \
-//      background-color: whiteSmoke; \
-//      border-radius: 3px; \
-//      box-shadow: 0 2px 3px rgba(0,0,0,.5) inset; \
-//    } \
-//    progress[value]::-webkit-progress-value { \
-//      position: relative; \
-//      background-size: 60px 30px, 100% 100%, 100% 100%; \
-//      border-radius:3px; \
-//      background-image: \
-//      -webkit-linear-gradient( 135deg, \
-//                               transparent, \
-//                               transparent 33%, \
-//                               rgba(0,0,0,.1) 33%, \
-//                               rgba(0,0,0,.1) 66%, \
-//                               transparent 66%), \
-//      -webkit-linear-gradient( top, \
-//                               rgba(255, 255, 255, .25), \
-//                               rgba(0,0,0,.2)), \
-//      -webkit-linear-gradient( left, #09c, #09c); \
-//    } \
-//    progress[value]::-moz-progress-bar { \
-//      background-image: \
-//      -moz-linear-gradient( 135deg, \
-//                            transparent, \
-//                            transparent 33%, \
-//                            rgba(0,0,0,.1) 33%, \
-//                            rgba(0,0,0,.1) 66%, \
-//                            transparent 66%), \
-//      -moz-linear-gradient( top, \
-//                            rgba(255, 255, 255, .25), \
-//                            rgba(0,0,0,.2)), \
-//      -moz-linear-gradient( left, #09c, #09c); \
-//      background-size: 60px 30px, 100% 100%, 100% 100%; \
-//      border-radius:3px; \
-//    }');
-
     function addHTMLProgressBarToView(view) {
       view.canvasOverlayDiv = document.createElement('div');
       view.canvasOverlayDiv.style.position = 'absolute';
@@ -5159,11 +5112,8 @@ if (workerMode) {
 
       var progressDiv = document.createElement('div');
       progressDiv.style.width = '70%';
-      progressDiv.style.border = '1px solid black';
-      progressDiv.style.borderRadius = '15px';
       progressDiv.appendChild(view.progressComment);
       progressDiv.appendChild(view.progress);
-      //progressDiv.appendChild(view.progressPercent);
 
       view.canvasOverlayDiv.classList.add('centerFlex');
       view.canvasOverlayDiv.appendChild(progressDiv);

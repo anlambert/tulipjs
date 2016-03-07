@@ -5099,16 +5099,12 @@ if (workerMode) {
 
       view.progress = document.createElement('progress');
       view.progress.max = '100';
-      view.progress.style.width = '80%';
+      view.progress.style.width = '100%';
       view.progress.style.height = '30px';
 
       view.progressComment = document.createElement('p');
       view.progressComment.style.color = '#000000';
-
-      view.progressPercent = document.createElement('span');
-      view.progressPercent.style.color = '#000000';
-      view.progressPercent.style.lineHeight = '30px';
-      view.progressPercent.style.height = '30px';
+      view.progressComment.style.textAlign = 'center';
 
       var progressDiv = document.createElement('div');
       progressDiv.style.width = '70%';
@@ -5194,7 +5190,6 @@ if (workerMode) {
     tulip.View.prototype.setProgressBarPercent = function(percent) {
       this.canvasOverlayDiv.style.display = "";
       this.progress.value = percent;
-      this.progressPercent.innerHTML = '&nbsp;' + (percent | 0) + '%';
     };
 
     tulip.View.prototype.startBusyAnimation = function() {
@@ -5204,7 +5199,6 @@ if (workerMode) {
 
       this.canvasOverlayDiv.style.display = "";
       this.progress.removeAttribute('value');
-      this.progressPercent.innerHTML='';
       this.busyAnimationStarted = true;
     };
 

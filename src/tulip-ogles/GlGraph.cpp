@@ -866,21 +866,16 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
   }
 
   NumericProperty *orderingProperty = _renderingParameters.elementsOrderingProperty();
+  GreatThanEdge gte(orderingProperty);
+  GreatThanNode gtn(orderingProperty);
 
   if (_renderingParameters.elementsOrdered() && orderingProperty) {
 
-    GreatThanEdge gte(orderingProperty);
-    GreatThanNode gtn(orderingProperty);
-
-    std::sort(lineEdges.begin(), lineEdges.end(), gte);
-    std::sort(quadsEdges.begin(), quadsEdges.end(), gte);
     std::sort(pointsEdges.begin(), pointsEdges.end(), gte);
     std::sort(glyphsNodes.begin(), glyphsNodes.end(), gtn);
     std::sort(pointsNodes.begin(), pointsNodes.end(), gtn);
 
     if (!_renderingParameters.elementsOrderedDescending()) {
-      std::reverse(lineEdges.begin(), lineEdges.end());
-      std::reverse(quadsEdges.begin(), quadsEdges.end());
       std::reverse(pointsEdges.begin(), pointsEdges.end());
       std::reverse(glyphsNodes.begin(), glyphsNodes.end());
       std::reverse(pointsNodes.begin(), pointsNodes.end());
@@ -926,12 +921,55 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
       renderEdgeExtremities(camera, light);
     }
 
-    renderEdges(camera, lineEdges, true);
-
-    if (!_renderingParameters.edges3D()) {
-      renderEdges(camera, quadsEdges, false, false);
+    if (_renderingParameters.elementsOrdered() && _renderingParameters.elementsOrderingProperty()) {
+      set<edge> lineEdgesSet(lineEdges.begin(), lineEdges.end());
+      vector<edge> edgesToRender = lineEdges;
+      edgesToRender.insert(edgesToRender.end(), quadsEdges.begin(), quadsEdges.end());
+      std::sort(edgesToRender.begin(), edgesToRender.end(), gte);
+      if (!_renderingParameters.elementsOrderedDescending()) {
+        std::reverse(edgesToRender.begin(), edgesToRender.end());
+      }
+      vector<edge> currentEdgesRenderingBash;
+      currentEdgesRenderingBash.push_back(edgesToRender.front());
+      bool lineEdges = lineEdgesSet.find(edgesToRender.front()) != lineEdgesSet.end();
+      for (size_t i = 1 ; i < edgesToRender.size() ; ++i) {
+        bool lineEdge = lineEdgesSet.find(edgesToRender[i]) != lineEdgesSet.end();
+        if (lineEdge == lineEdges) {
+          currentEdgesRenderingBash.push_back(edgesToRender[i]);
+        } else {
+          if (lineEdges) {
+            renderEdges(camera, currentEdgesRenderingBash, true);
+          } else {
+            if (!_renderingParameters.edges3D()) {
+              renderEdges(camera, currentEdgesRenderingBash, false, false);
+            } else {
+              renderEdges(camera, currentEdgesRenderingBash, false, true);
+            }
+          }
+          currentEdgesRenderingBash.clear();
+          currentEdgesRenderingBash.push_back(edgesToRender[i]);
+          lineEdges = lineEdge;
+        }
+      }
+      if (!currentEdgesRenderingBash.empty()) {
+        if (lineEdges) {
+          renderEdges(camera, currentEdgesRenderingBash, true);
+        } else {
+          if (!_renderingParameters.edges3D()) {
+            renderEdges(camera, currentEdgesRenderingBash, false, false);
+          } else {
+            renderEdges(camera, currentEdgesRenderingBash, false, true);
+          }
+        }
+      }
     } else {
-      renderEdges(camera, quadsEdges, false, true);
+      renderEdges(camera, lineEdges, true);
+
+      if (!_renderingParameters.edges3D()) {
+        renderEdges(camera, quadsEdges, false, false);
+      } else {
+        renderEdges(camera, quadsEdges, false, true);
+      }
     }
 
     renderEdges(camera, selectedLinesEdges, true);

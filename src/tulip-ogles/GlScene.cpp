@@ -112,7 +112,6 @@ void GlScene::draw() {
 
     for(vector<pair<string, GlLayer *> >::iterator it=_layersList.begin(); it!=_layersList.end(); ++it) {
 
-      glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       Camera &camera = *(it->second->getCamera());
       Light &light = *(it->second->getLight());
       GlLODSceneVisitor glLODSceneVisitor(_lodCalculator);
@@ -139,6 +138,8 @@ void GlScene::draw() {
           lodResult[i].glEntity->draw(camera, light, _pickingMode);
         }
       }
+
+      glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     glDisable(GL_DEPTH_TEST);

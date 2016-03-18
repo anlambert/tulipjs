@@ -97,9 +97,9 @@ private :
   void renderMetaNodes(const std::vector<tlp::node> &metaNodes, const Camera &camera, const Light &light);
   void renderPointsNodesAndEdges(const Camera &camera, const std::vector<tlp::node> &pointsNodes, const std::vector<tlp::edge> &pointsEdges);
 
-  void renderEdges(const Camera &camera, const std::vector<tlp::edge> &edges, bool lineMode, bool billboard=false);
+  void renderEdges(const Camera &camera, const Light &light, const std::vector<tlp::edge> &edges, bool lineMode, bool billboard=false);
 
-  void renderEdgeExtremities(const Camera &camera, const Light &light);
+  void renderEdgeExtremities(const Camera &camera, const Light &light, const tlp::edge &e);
 
   void setGraphElementsPickingMode(const bool pickingMode) {
     _graphElementsPickingMode = pickingMode;
@@ -172,7 +172,6 @@ private :
 
   std::map<tlp::edge, std::vector<tlp::Vec3f> > _srcEdgeExtremitiesData;
   std::map<tlp::edge, std::vector<tlp::Vec3f> > _tgtEdgeExtremitiesData;
-  std::map<int, std::vector<tlp::edge> > _srcEdgeExtremityGlyphs, _tgtEdgeExtremityGlyphs;
 
   size_t _maxEdgePoints;
 

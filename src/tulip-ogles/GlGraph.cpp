@@ -800,65 +800,6 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
     }
   }
 
-  _srcEdgeExtremityGlyphs.clear();
-  _tgtEdgeExtremityGlyphs.clear();
-
-  if (_renderingParameters.displayEdgesExtremities()) {
-    for (size_t i = 0 ; i < quadsEdges.size() ; ++i) {
-      int srcEEGlyphId = _viewSrcAnchorShape->getEdgeValue(quadsEdges[i]);
-      int tgtEEGlyphId = _viewTgtAnchorShape->getEdgeValue(quadsEdges[i]);
-      if (srcEEGlyphId == tlp::EdgeExtremityShape::FontAwesomeIcon) {
-        std::string icon = _viewFontAwesomeIcon->getEdgeValue(quadsEdges[i]);
-        srcEEGlyphId = tlp::TulipFontAwesome::getFontAwesomeIconCodePoint(icon);
-      }
-      if (tgtEEGlyphId == tlp::EdgeExtremityShape::FontAwesomeIcon) {
-        std::string icon = _viewFontAwesomeIcon->getEdgeValue(quadsEdges[i]);
-        tgtEEGlyphId = tlp::TulipFontAwesome::getFontAwesomeIconCodePoint(icon);
-      }
-      if (srcEEGlyphId != EdgeExtremityShape::None) {
-        if (_srcEdgeExtremityGlyphs.find(srcEEGlyphId) == _srcEdgeExtremityGlyphs.end()) {
-          _srcEdgeExtremityGlyphs[srcEEGlyphId] = vector<edge>();
-          _srcEdgeExtremityGlyphs[srcEEGlyphId].reserve(_graph->numberOfEdges());
-        }
-        _srcEdgeExtremityGlyphs[srcEEGlyphId].push_back(quadsEdges[i]);
-      }
-      if (tgtEEGlyphId != EdgeExtremityShape::None) {
-        if (_tgtEdgeExtremityGlyphs.find(tgtEEGlyphId) == _tgtEdgeExtremityGlyphs.end()) {
-          _tgtEdgeExtremityGlyphs[tgtEEGlyphId] = vector<edge>();
-          _tgtEdgeExtremityGlyphs[tgtEEGlyphId].reserve(_graph->numberOfEdges());
-        }
-        _tgtEdgeExtremityGlyphs[tgtEEGlyphId].push_back(quadsEdges[i]);
-      }
-    }
-
-    for (size_t i = 0 ; i < selectedQuadsEdges.size() ; ++i) {
-      int srcEEGlyphId = _viewSrcAnchorShape->getEdgeValue(selectedQuadsEdges[i]);
-      int tgtEEGlyphId = _viewTgtAnchorShape->getEdgeValue(selectedQuadsEdges[i]);
-      if (srcEEGlyphId == tlp::EdgeExtremityShape::FontAwesomeIcon) {
-        std::string icon = _viewFontAwesomeIcon->getEdgeValue(quadsEdges[i]);
-        srcEEGlyphId = tlp::TulipFontAwesome::getFontAwesomeIconCodePoint(icon);
-      }
-      if (tgtEEGlyphId == tlp::EdgeExtremityShape::FontAwesomeIcon) {
-        std::string icon = _viewFontAwesomeIcon->getEdgeValue(quadsEdges[i]);
-        tgtEEGlyphId = tlp::TulipFontAwesome::getFontAwesomeIconCodePoint(icon);
-      }
-      if (srcEEGlyphId != EdgeExtremityShape::None) {
-        if (_srcEdgeExtremityGlyphs.find(srcEEGlyphId) == _srcEdgeExtremityGlyphs.end()) {
-          _srcEdgeExtremityGlyphs[srcEEGlyphId] = vector<edge>();
-          _srcEdgeExtremityGlyphs[srcEEGlyphId].reserve(_graph->numberOfEdges());
-        }
-        _srcEdgeExtremityGlyphs[srcEEGlyphId].push_back(selectedQuadsEdges[i]);
-      }
-      if (tgtEEGlyphId != EdgeExtremityShape::None) {
-        if (_tgtEdgeExtremityGlyphs.find(tgtEEGlyphId) == _tgtEdgeExtremityGlyphs.end()) {
-          _tgtEdgeExtremityGlyphs[tgtEEGlyphId] = vector<edge>();
-          _tgtEdgeExtremityGlyphs[tgtEEGlyphId].reserve(_graph->numberOfEdges());
-        }
-        _tgtEdgeExtremityGlyphs[tgtEEGlyphId].push_back(selectedQuadsEdges[i]);
-      }
-    }
-  }
-
   if (_graphElementsPickingMode) {
     glDisable(GL_BLEND);
   } else if (_renderingParameters.displayMetaNodes()) {
@@ -881,45 +822,9 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
       std::reverse(pointsNodes.begin(), pointsNodes.end());
     }
 
-    std::map<int, std::vector<tlp::edge> >::iterator it = _srcEdgeExtremityGlyphs.begin();
-    for (; it != _srcEdgeExtremityGlyphs.end() ; ++it) {
-      vector<edge> &edges = it->second;
-      vector<edge>::iterator itE = edges.begin();
-      while (itE != edges.end()) {
-        if (_viewSelection->getEdgeValue(*itE)) {
-          break;
-        }
-        ++itE;
-      }
-      std::sort(edges.begin(), itE, gte);
-      if (!_renderingParameters.elementsOrderedDescending()) {
-        std::reverse(edges.begin(), itE);
-      }
-    }
-
-    it = _tgtEdgeExtremityGlyphs.begin();
-    for (; it != _tgtEdgeExtremityGlyphs.end() ; ++it) {
-      vector<edge> &edges = it->second;
-      vector<edge>::iterator itE = edges.begin();
-      while (itE != edges.end()) {
-        if (_viewSelection->getEdgeValue(*itE)) {
-          break;
-        }
-        ++itE;
-      }
-      std::sort(edges.begin(), itE, gte);
-      if (!_renderingParameters.elementsOrderedDescending()) {
-        std::reverse(edges.begin(), itE);
-      }
-    }
-
   }
 
   if (_renderingParameters.displayEdges()) {
-
-    if (_renderingParameters.displayEdgesExtremities()) {
-      renderEdgeExtremities(camera, light);
-    }
 
     if (_renderingParameters.elementsOrdered() && _renderingParameters.elementsOrderingProperty()) {
       set<edge> lineEdgesSet(lineEdges.begin(), lineEdges.end());
@@ -938,12 +843,12 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
           currentEdgesRenderingBash.push_back(edgesToRender[i]);
         } else {
           if (lineEdges) {
-            renderEdges(camera, currentEdgesRenderingBash, true);
+            renderEdges(camera, light, currentEdgesRenderingBash, true);
           } else {
             if (!_renderingParameters.edges3D()) {
-              renderEdges(camera, currentEdgesRenderingBash, false, false);
+              renderEdges(camera, light, currentEdgesRenderingBash, false, false);
             } else {
-              renderEdges(camera, currentEdgesRenderingBash, false, true);
+              renderEdges(camera, light, currentEdgesRenderingBash, false, true);
             }
           }
           currentEdgesRenderingBash.clear();
@@ -953,31 +858,31 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
       }
       if (!currentEdgesRenderingBash.empty()) {
         if (lineEdges) {
-          renderEdges(camera, currentEdgesRenderingBash, true);
+          renderEdges(camera, light, currentEdgesRenderingBash, true);
         } else {
           if (!_renderingParameters.edges3D()) {
-            renderEdges(camera, currentEdgesRenderingBash, false, false);
+            renderEdges(camera, light, currentEdgesRenderingBash, false, false);
           } else {
-            renderEdges(camera, currentEdgesRenderingBash, false, true);
+            renderEdges(camera, light, currentEdgesRenderingBash, false, true);
           }
         }
       }
     } else {
-      renderEdges(camera, lineEdges, true);
+      renderEdges(camera, light, lineEdges, true);
 
       if (!_renderingParameters.edges3D()) {
-        renderEdges(camera, quadsEdges, false, false);
+        renderEdges(camera, light, quadsEdges, false, false);
       } else {
-        renderEdges(camera, quadsEdges, false, true);
+        renderEdges(camera, light, quadsEdges, false, true);
       }
     }
 
-    renderEdges(camera, selectedLinesEdges, true);
+    renderEdges(camera, light, selectedLinesEdges, true);
 
     if (!_renderingParameters.edges3D()) {
-      renderEdges(camera, selectedQuadsEdges, false, false);
+      renderEdges(camera, light, selectedQuadsEdges, false, false);
     } else {
-      renderEdges(camera, selectedQuadsEdges, false, true);
+      renderEdges(camera, light, selectedQuadsEdges, false, true);
     }
 
   }
@@ -1302,140 +1207,106 @@ void GlGraph::getEdgeExtremityData(edge e, bool srcGlyph, tlp::Coord &position, 
   rotationAxisAndAngle = Vec4f(cross, rotationAngle);
 }
 
-void GlGraph::renderEdgeExtremities(const Camera &camera, const Light &light) {
+void GlGraph::renderEdgeExtremities(const Camera &camera, const Light &light, const tlp::edge &e) {
 
   glStencilFunc(GL_LEQUAL, _renderingParameters.edgesStencil(), 0xFF);
 
-  edge e;
-  vector<Coord> centers;
-  vector<Size> sizes;
-  vector<Vec4f> rotationAxisAndAngles;
-  vector<Color> colors;
-  vector<string> textures;
-  vector<float> borderWidths;
-  vector<Color> borderColors;
-  map<int, vector<edge> >::const_iterator it = _srcEdgeExtremityGlyphs.begin();
-  for ( ; it != _srcEdgeExtremityGlyphs.end() ; ++it) {
-    for (size_t i = 0 ; i < it->second.size() ; ++i) {
-      e = it->second[i];
+  Coord center;
+  Size size;
+  Vec4f rotationAxisAndAngle;
+  Color color;
+  string texture;
+  float borderWidth;
+  Color borderColor;
 
-      Coord position;
-      Size size;
-      Vec4f rotationAxisAndAngle;
-      getEdgeExtremityData(e, true, position, size, rotationAxisAndAngle);
+  int srcShape = _viewSrcAnchorShape->getEdgeValue(e);
+  int tgtShape = _viewTgtAnchorShape->getEdgeValue(e);
 
-      Color color = _viewColor->getEdgeValue(e);
-      if (_renderingParameters.interpolateEdgesColors()) {
-        color = _viewColor->getNodeValue(_graph->source(e));
-      }
-      const Color &borderColor = _viewBorderColor->getEdgeValue(e);
-      std::string texture = _viewTexture->getEdgeValue(e);
-
-      centers.push_back(position);
-      sizes.push_back(size);
-      rotationAxisAndAngles.push_back(rotationAxisAndAngle);
-
-      if (!_graphElementsPickingMode) {
-        if (!_viewSelection->getEdgeValue(e)) {
-          colors.push_back(color);
-          if (_renderingParameters.interpolateEdgesColors()) {
-            borderColors.push_back(color);
-          } else {
-            borderColors.push_back(borderColor);
-          }
-        } else {
-          colors.push_back(_renderingParameters.selectionColor());
-          borderColors.push_back(_renderingParameters.selectionColor());
-        }
-        textures.push_back(texture);
-      } else {
-        tlp::Color pickColor = uintToColor(_graph->getRoot()->numberOfNodes()+e.id+1);
-        colors.push_back(pickColor);
-        borderColors.push_back(pickColor);
-        textures.push_back("");
-      }
-
-      borderWidths.push_back(_viewBorderWidth->getEdgeValue(e));
-    }
-
-    bool swapYZ = false;
-    if (it->first == EdgeExtremityShape::Cone || it->first == EdgeExtremityShape::Cylinder) {
-      swapYZ = true;
-    }
-
-    GlyphsRenderer::instance()->renderGlyphs(camera, light, it->first, centers, sizes, colors, textures, borderWidths, borderColors, rotationAxisAndAngles, _graphElementsPickingMode, swapYZ);
-
-    centers.clear();
-    sizes.clear();
-    rotationAxisAndAngles.clear();
-    colors.clear();
-    textures.clear();
-    borderWidths.clear();
-    borderColors.clear();
+  if (srcShape == tlp::EdgeExtremityShape::FontAwesomeIcon) {
+    std::string icon = _viewFontAwesomeIcon->getEdgeValue(e);
+    srcShape = tlp::TulipFontAwesome::getFontAwesomeIconCodePoint(icon);
   }
 
-  it = _tgtEdgeExtremityGlyphs.begin();
-  for ( ; it != _tgtEdgeExtremityGlyphs.end() ; ++it) {
-    for (size_t i = 0 ; i < it->second.size() ; ++i) {
-      e = it->second[i];
+  if (tgtShape == tlp::EdgeExtremityShape::FontAwesomeIcon) {
+    std::string icon = _viewFontAwesomeIcon->getEdgeValue(e);
+    tgtShape = tlp::TulipFontAwesome::getFontAwesomeIconCodePoint(icon);
+  }
 
-      Coord position;
-      Size size;
-      Vec4f rotationAxisAndAngle;
-      getEdgeExtremityData(e, false, position, size, rotationAxisAndAngle);
+  if (srcShape != EdgeExtremityShape::None) {
 
-      Color color = _viewColor->getEdgeValue(e);
-      if (_renderingParameters.interpolateEdgesColors()) {
-        color = _viewColor->getNodeValue(_graph->target(e));
-      }
-      const Color &borderColor = _viewBorderColor->getEdgeValue(e);
-      std::string texture = _viewTexture->getEdgeValue(e);
+    getEdgeExtremityData(e, true, center, size, rotationAxisAndAngle);
 
-      centers.push_back(position);
-      sizes.push_back(size);
-      rotationAxisAndAngles.push_back(rotationAxisAndAngle);
-
-      if (!_graphElementsPickingMode) {
-        if (!_viewSelection->getEdgeValue(e)) {
-          colors.push_back(color);
-          if (_renderingParameters.interpolateEdgesColors()) {
-            borderColors.push_back(color);
-          } else {
-            borderColors.push_back(borderColor);
-          }
-        } else {
-          colors.push_back(_renderingParameters.selectionColor());
-          borderColors.push_back(_renderingParameters.selectionColor());
-        }
-        textures.push_back(texture);
-      } else {
-        tlp::Color pickColor = uintToColor(_graph->getRoot()->numberOfNodes()+e.id+1);
-        colors.push_back(pickColor);
-        borderColors.push_back(pickColor);
-        textures.push_back("");
-      }
-
-      borderWidths.push_back(_viewBorderWidth->getEdgeValue(e));
+    color = _viewColor->getEdgeValue(e);
+    borderColor = _viewBorderColor->getEdgeValue(e);
+    if (_renderingParameters.interpolateEdgesColors()) {
+      color = _viewColor->getNodeValue(_graph->source(e));
+      borderColor = color;
     }
 
+    texture = _viewTexture->getEdgeValue(e);
+
+    if (!_graphElementsPickingMode) {
+      if (_viewSelection->getEdgeValue(e)) {
+        color = _renderingParameters.selectionColor();
+        borderColor = _renderingParameters.selectionColor();
+      }
+    } else {
+      tlp::Color pickColor = uintToColor(_graph->getRoot()->numberOfNodes()+e.id+1);
+      color = pickColor;
+      borderColor = pickColor;
+      texture = "";
+    }
+
+    borderWidth = _viewBorderWidth->getEdgeValue(e);
+
+
     bool swapYZ = false;
-    if (it->first == EdgeExtremityShape::Cone || it->first == EdgeExtremityShape::Cylinder) {
+    if (srcShape == EdgeExtremityShape::Cone || srcShape == EdgeExtremityShape::Cylinder) {
       swapYZ = true;
     }
 
-    GlyphsRenderer::instance()->renderGlyphs(camera, light, it->first, centers, sizes, colors, textures, borderWidths, borderColors, rotationAxisAndAngles, _graphElementsPickingMode, swapYZ);
+    GlyphsRenderer::instance()->renderGlyph(camera, light, srcShape, center, size, color, texture, borderWidth, borderColor, rotationAxisAndAngle, _graphElementsPickingMode, swapYZ);
 
-    centers.clear();
-    sizes.clear();
-    rotationAxisAndAngles.clear();
-    colors.clear();
-    textures.clear();
-    borderWidths.clear();
-    borderColors.clear();
+  }
+
+  if (tgtShape != EdgeExtremityShape::None) {
+
+    getEdgeExtremityData(e, false, center, size, rotationAxisAndAngle);
+
+    color = _viewColor->getEdgeValue(e);
+    borderColor = _viewBorderColor->getEdgeValue(e);
+    if (_renderingParameters.interpolateEdgesColors()) {
+      color = _viewColor->getNodeValue(_graph->target(e));
+      borderColor = color;
+    }
+
+    texture = _viewTexture->getEdgeValue(e);
+
+    if (!_graphElementsPickingMode) {
+      if (_viewSelection->getEdgeValue(e)) {
+        color =_renderingParameters.selectionColor();
+        borderColor = _renderingParameters.selectionColor();
+      }
+    } else {
+      tlp::Color pickColor = uintToColor(_graph->getRoot()->numberOfNodes()+e.id+1);
+      color = pickColor;
+      borderColor = pickColor;
+      texture  = "";
+    }
+
+    borderWidth = _viewBorderWidth->getEdgeValue(e);
+
+    bool swapYZ = false;
+    if (tgtShape == EdgeExtremityShape::Cone || tgtShape == EdgeExtremityShape::Cylinder) {
+      swapYZ = true;
+    }
+
+    GlyphsRenderer::instance()->renderGlyph(camera, light, tgtShape, center, size, color, texture, borderWidth, borderColor, rotationAxisAndAngle, _graphElementsPickingMode, swapYZ);
+
   }
 }
 
-void GlGraph::renderEdges(const Camera &camera, const std::vector<edge> &edges, bool lineMode, bool billboard) {
+void GlGraph::renderEdges(const Camera &camera, const Light &light, const std::vector<edge> &edges, bool lineMode, bool billboard) {
 
   if (!lineMode && billboard && !_graphElementsPickingMode) {
     TextureManager::instance()->addTextureFromFile("resources/cylinderTexture.png");
@@ -1580,6 +1451,9 @@ void GlGraph::renderEdges(const Camera &camera, const std::vector<edge> &edges, 
         glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*2*sizeof(unsigned short)));
       } else {
         glDrawElements(GL_TRIANGLE_STRIP, nbCurvePoints*2, GL_UNSIGNED_SHORT, BUFFER_OFFSET(0));
+        if (_renderingParameters.displayEdgesExtremities()) {
+          renderEdgeExtremities(camera, light, e);
+        }
       }
 
       if (!lineMode && _viewBorderWidth->getEdgeValue(e) > 0) {

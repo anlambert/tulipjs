@@ -3277,6 +3277,8 @@ tulip.Graph.prototype.isConnected = function tulip_Graph_prototype_isConnected()
   return _Graph_isConnected(this.cppPointer) > 0;
 };
 
+if (!nodejs) {
+
 var _computeGraphHullVertices = Module.cwrap('computeGraphHullVertices', null, ['number', 'number']);
 
 tulip.Graph.prototype.computeGraphHullVertices = function(withHoles) {
@@ -3286,6 +3288,7 @@ tulip.Graph.prototype.computeGraphHullVertices = function(withHoles) {
   _computeGraphHullVertices(this.cppPointer, withHoles);
 };
 
+}
 
 // ==================================================================================================================
 

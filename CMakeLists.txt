@@ -239,19 +239,19 @@ SET(CMAKE_EXECUTABLE_SUFFIX "")
 
 FILE(GLOB_RECURSE TULIP_PLUGINS_LIBRARIES "${TULIP_PLUGINS_DIR}/*.so")
 
-#ADD_EXECUTABLE(tulip-node.js ${TULIPJS_CORE_SRCS})
+ADD_EXECUTABLE(tulip-node.js ${TULIPJS_CORE_SRCS})
 
-#TARGET_LINK_LIBRARIES(tulip-node.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
+TARGET_LINK_LIBRARIES(tulip-node.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
 
-#SET_TARGET_PROPERTIES(tulip-node.js PROPERTIES LINK_FLAGS "--bind -s USE_ZLIB=1 -s ALLOW_MEMORY_GROWTH=1 -s EVAL_CTORS=0 -s ELIMINATE_DUPLICATE_FUNCTIONS=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --memory-init-file 0")
+SET_TARGET_PROPERTIES(tulip-node.js PROPERTIES LINK_FLAGS "--bind -s USE_ZLIB=1 -s ALLOW_MEMORY_GROWTH=1 -s EVAL_CTORS=0 -s ELIMINATE_DUPLICATE_FUNCTIONS=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --memory-init-file 0")
 
-#EM_LINK_PRE_JS(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_pre.js)
-#EM_LINK_POST_JS(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)
-#EM_LINK_JS_LIBRARY(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_library.js)
+EM_LINK_PRE_JS(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_pre.js)
+EM_LINK_POST_JS(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)
+EM_LINK_JS_LIBRARY(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_library.js)
 
-#ADD_CUSTOM_COMMAND(TARGET tulip-node.js POST_BUILD
-#                   COMMAND ${CMAKE_COMMAND} -DTULIP_VIZ_FEATURES=OFF -DJSFILE=tulip-node.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
-#                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+ADD_CUSTOM_COMMAND(TARGET tulip-node.js POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -DTULIP_VIZ_FEATURES=OFF -DJSFILE=tulip-node.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
+                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 ADD_EXECUTABLE(tulip.js ${TULIPJS_SRCS})
 

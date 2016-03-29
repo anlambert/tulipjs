@@ -1451,14 +1451,11 @@ void GlGraph::renderEdges(const Camera &camera, const Light &light, const std::v
         glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*2*sizeof(unsigned short)));
       } else {
         glDrawElements(GL_TRIANGLE_STRIP, nbCurvePoints*2, GL_UNSIGNED_SHORT, BUFFER_OFFSET(0));
-        if (_renderingParameters.displayEdgesExtremities()) {
-          renderEdgeExtremities(camera, light, e);
-        }
       }
 
-      if (!lineMode && _viewBorderWidth->getEdgeValue(e) > 0) {
-        TextureManager::instance()->unbindTexture(edgeTexture);
+      TextureManager::instance()->unbindTexture(edgeTexture);
 
+      if (!lineMode && _viewBorderWidth->getEdgeValue(e) > 0) {
         if (!_renderingParameters.interpolateEdgesColors()) {
           srcColor = borderColor;
           tgtColor = borderColor;
@@ -1471,8 +1468,12 @@ void GlGraph::renderEdges(const Camera &camera, const Light &light, const std::v
         glLineWidth(_viewBorderWidth->getEdgeValue(e));
         glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*2*sizeof(unsigned short)));
         glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*3*sizeof(unsigned short)));
-
       }
+
+      if (!lineMode && _renderingParameters.displayEdgesExtremities()) {
+        renderEdgeExtremities(camera, light, e);
+      }
+
     } else {
       edgesLinesRenderingIndices.insert(edgesLinesRenderingIndices.end(), _edgeLineVerticesIndices[e].begin(), _edgeLineVerticesIndices[e].end());
     }

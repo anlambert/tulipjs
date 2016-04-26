@@ -4,9 +4,6 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-
 #include <tulip/Coord.h>
 #include <tulip/Size.h>
 #include <tulip/Graph.h>
@@ -58,7 +55,24 @@ bool convexPolygonsIntersect(const std::vector<tlp::Vec2f> &convexPolygonA, cons
 
 unsigned int nearestPOT(unsigned int x);
 
-SDL_Surface *createTextureSurfaceFromImage(const char *file);
+struct TextureData {
+
+  TextureData(unsigned int width, unsigned int height,
+            unsigned int nbBytesPerPixel, unsigned char *pixels) :
+    width(width), height(height), nbBytesPerPixel(nbBytesPerPixel), pixels(pixels) {}
+
+  ~TextureData() {
+    delete [] pixels;
+  }
+
+  unsigned int width;
+  unsigned int height;
+  unsigned int nbBytesPerPixel;
+  unsigned char *pixels;
+
+};
+
+TextureData *loadTextureData(const char *file);
 
 GLuint loadTexture(const char *file);
 

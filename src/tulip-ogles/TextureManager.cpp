@@ -39,19 +39,6 @@ TextureManager *TextureManager::instance() {
   return instance(_currentCanvasId);
 }
 
-static unsigned char * rgbTextureToRgbaTexture(int width, int height, unsigned char *textureData) {
-  unsigned char *textureDataRgba = new unsigned char[width*height*4];
-  for (int i = 0 ; i < height ; ++i) {
-    for (int j = 0 ; j < width ; ++j) {
-      textureDataRgba[4*(i*width+j)] = textureData[3*(i*width+j)];
-      textureDataRgba[4*(i*width+j)+1] = textureData[3*(i*width+j)+1];
-      textureDataRgba[4*(i*width+j)+2] = textureData[3*(i*width+j)+2];
-      textureDataRgba[4*(i*width+j)+3] = 255;
-    }
-  }
-  return textureDataRgba;
-}
-
 static int nbTexturesInAtlas = 0;
 
 void TextureManager::addTextureInAtlasFromFile(const std::string &textureFile) {
@@ -59,23 +46,12 @@ void TextureManager::addTextureInAtlasFromFile(const std::string &textureFile) {
   if (textureFile.empty() || _textureAtlasUnit.find(textureFile) != _textureAtlasUnit.end()) {
     return;
   }
-  SDL_Surface *surface = createTextureSurfaceFromImage(textureFile.c_str());
-  if (!surface) {
+  TextureData *textureData = loadTextureData(textureFile.c_str());
+  if (!textureData) {
     return;
   }
-  unsigned char *textureData = static_cast<unsigned char*>(surface->pixels);
-  bool deleteTextureData = false;
-  if (surface->format->BytesPerPixel == 3) {
-    unsigned char *textureDataRgba = rgbTextureToRgbaTexture(surface->w, surface->h, static_cast<unsigned char*>(surface->pixels));
-    textureData = textureDataRgba;
-    deleteTextureData = true;
-  }
-  addTextureInAtlasFromData(textureFile, textureData, surface->w, surface->h);
-  if (deleteTextureData) {
-    delete [] textureData;
-  }
-  SDL_FreeSurface(surface);
-
+  addTextureInAtlasFromData(textureFile, textureData->pixels, textureData->width, textureData->height);
+  delete textureData;
 }
 
 void TextureManager::addTextureInAtlasFromData(const std::string &textureName, const unsigned char *textureData, unsigned int width, unsigned int height) {
@@ -181,9 +157,8 @@ void TextureManager::addTextureFromFile(const std::string &textureFile, bool add
   if (textureFile.empty() || (!addAlsoInAtlas && _coordinatesOffsets.find(textureFile) != _coordinatesOffsets.end()) || _textures.find(textureFile) != _textures.end()) {
     return;
   }
-
-  SDL_Surface *surface = createTextureSurfaceFromImage(textureFile.c_str());
-  if (!surface) {
+  TextureData *textureData = loadTextureData(textureFile.c_str());
+  if (!textureData) {
     return;
   }
   GLuint textureId;
@@ -193,15 +168,14 @@ void TextureManager::addTextureFromFile(const std::string &textureFile, bool add
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  GLenum format = surface->format->BytesPerPixel == 3 ? GL_RGB : GL_RGBA;
-  glTexImage2D(GL_TEXTURE_2D, 0, format, surface->w, surface->h, 0, format, GL_UNSIGNED_BYTE, surface->pixels);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureData->width, textureData->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData->pixels);
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
   _textures[textureFile] = textureId;
   if (addAlsoInAtlas) {
-    addTextureInAtlasFromData(textureFile, reinterpret_cast<const unsigned char*>(surface->pixels), surface->w, surface->h);
+    addTextureInAtlasFromData(textureFile, textureData->pixels, textureData->width, textureData->height);
   }
-  SDL_FreeSurface(surface);
+  delete textureData;
 }
 
 void TextureManager::addTextureFromData(const std::string &textureName, const unsigned char *textureData, unsigned int width, unsigned int height, bool addAlsoInAtlas) {

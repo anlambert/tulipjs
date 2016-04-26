@@ -13,6 +13,11 @@
 #include "Utils.h"
 #include "GlGraphRenderingParameters.h"
 
+#include "stb_image.h"
+
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include "stb_image_resize.h"
+
 using namespace std;
 using namespace tlp;
 
@@ -337,116 +342,66 @@ bool convexPolygonsIntersect(const std::vector<tlp::Vec2f> &convexPolygonA, cons
 }
 
 //===========================================================================================================
-static int invertImage(int pitch, int height, void* image_pixels) {
-  int index;
-  void* temp_row;
-  int height_div_2;
-
-  temp_row = (void *)malloc(pitch);
-  if(NULL == temp_row) {
-    return -1;
+static unsigned char *invertImage(int pitch, int height, unsigned char* imagePixels) {
+  unsigned char *tempRow = new unsigned char[pitch];
+  unsigned int heightDiv2 = static_cast<unsigned int>(height * .5);
+  for(unsigned int index = 0 ; index < heightDiv2 ; ++index) {
+    memcpy(tempRow, imagePixels + pitch * index, pitch);
+    memcpy(imagePixels + pitch * index, imagePixels + pitch * (height-index-1), pitch);
+    memcpy(imagePixels + pitch * (height-index-1), tempRow, pitch);
   }
-  //if height is odd, don't need to swap middle row
-  height_div_2 = (int) (height * .5);
-  for(index = 0; index < height_div_2; index++) {
-    //uses string.h
-    memcpy((Uint8 *)temp_row, (Uint8 *)(image_pixels) + pitch * index, pitch);
-    memcpy((Uint8 *)(image_pixels) + pitch * index, (Uint8 *)(image_pixels) + pitch * (height - index-1), pitch);
-    memcpy((Uint8 *)(image_pixels) + pitch * (height - index-1), temp_row, pitch);
-  }
-  free(temp_row);
-  return 0;
-}
-//===========================================================================================================
-static int SDL_InvertSurface(SDL_Surface* image) {
-  if(NULL == image) {
-    return -1;
-  }
-  return(invertImage(image->pitch, image->h, image->pixels));
-}
-//===========================================================================================================
-static unsigned char readPixelComponent(SDL_Surface* surface, int x, int y, int c) {
-  unsigned char *p = static_cast<unsigned char*>(surface->pixels) + y * surface->pitch + x * surface->format->BytesPerPixel;
-  return p[c];
-}
-//===========================================================================================================
-static void writePixelComponent(SDL_Surface* surface, int x, int y, int c, unsigned char val) {
-  unsigned char *p = static_cast<unsigned char*>(surface->pixels) + y * surface->pitch + x * surface->format->BytesPerPixel;
-  p[c] = val;
-}
-//===========================================================================================================
-static void stretchSurfaceLinear(SDL_Surface* src, SDL_Surface* dest) {
-  double rx = dest->w*1.0/src->w;
-  double ry = dest->h*1.0/src->h;
-  for(int i = 0 ; i < dest->w ; ++i) {
-    for(int j = 0; j < dest->h ; ++j) {
-      double valx = i/rx;
-      double valy = j/ry;
-      int minx = static_cast<int>(valx);
-      int miny = static_cast<int>(valy);
-      int maxx = minx+1;
-      if (maxx >= src->w)
-        maxx--;
-      int maxy = miny+1;
-      if (maxy >= src->h)
-        maxy--;
-      double fx = valx-minx;
-      double fy = valy-miny;
-      for(int k = 0 ; k < src->format->BytesPerPixel ; ++k) {
-        unsigned char pix = static_cast<unsigned char>(readPixelComponent(src, minx, miny, k)*(1-fx)*(1-fy) + readPixelComponent(src, maxx, miny, k)*fx*(1-fy) +
-                                                       readPixelComponent(src, minx, maxy, k)*(1-fx)*fy + readPixelComponent(src, maxx, maxy, k)*fx*fy);
-        writePixelComponent(dest, i, j, k, pix);
-      }
-    }
-  }
+  delete [] tempRow;
+  return imagePixels;
 }
 //===========================================================================================================
 unsigned int nearestPOT(unsigned int x) {
   return pow(2, ceil(log(x)/log(2)));
 }
 //===========================================================================================================
-SDL_Surface *createTextureSurfaceFromImage(const char *file) {
+TextureData *loadTextureData(const char *file) {
   tlp_stat_t buf;
   if (tlp::statPath(file, &buf) < 0) return NULL;
-  SDL_Surface* surface = IMG_Load(file);
-  if (surface) {
-    int nearestpotW = nearestPOT(surface->w);
-    int nearestpotH = nearestPOT(surface->h);
-    if (nearestpotW != surface->w || nearestpotH != surface->h) {
-      SDL_Surface* stretchedSurface = SDL_CreateRGBSurface(surface->flags, nearestpotW, nearestpotH, surface->format->BitsPerPixel,
-                                                           surface->format->Rmask, surface->format->Gmask, surface->format->Bmask, surface->format->Amask);
-      stretchSurfaceLinear(surface, stretchedSurface);
-      SDL_FreeSurface(surface);
-      surface = stretchedSurface;
+  int w,h,n;
+  static const unsigned int nbBytesPerPixel = 4;
+  unsigned char *pixels = stbi_load(file, &w, &h, &n, nbBytesPerPixel);
+  if (pixels) {
+    int nearestpotW = nearestPOT(w);
+    int nearestpotH = nearestPOT(h);
+    if (nearestpotW != w || nearestpotH != h) {
+      unsigned char *newPixels = new unsigned char[nearestpotW*nearestpotH*nbBytesPerPixel];
+      stbir_resize_uint8(pixels, w, h, 0, newPixels, nearestpotW, nearestpotH, 0, nbBytesPerPixel);
+      delete [] pixels;
+      pixels = newPixels;
+      w = nearestpotW;
+      h = nearestpotH;
     }
-    SDL_InvertSurface(surface);
+    return new TextureData(w, h, nbBytesPerPixel, invertImage(w*nbBytesPerPixel, h, pixels));
   } else {
     std::cerr << "Unable to load image file " << file << std::endl;
+    return NULL;
   }
-  return surface;
 }
 //===========================================================================================================
 GLuint loadTexture(const char *file) {
-  SDL_Surface* surface = createTextureSurfaceFromImage(file);
-  if (!surface) {
+  TextureData* textureData = loadTextureData(file);
+  if (!textureData) {
     return 0;
   }
   GLuint texture;
   glPixelStorei(GL_UNPACK_ALIGNMENT,4);
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
-  SDL_PixelFormat *format = surface->format;
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  if (format->Amask) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
+  if (textureData->nbBytesPerPixel == 4) {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureData->width, textureData->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureData->pixels);
     glGenerateMipmap(GL_TEXTURE_2D);
   } else {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, surface->w, surface->h, 0, GL_RGB, GL_UNSIGNED_BYTE, surface->pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureData->width, textureData->height, 0, GL_RGB, GL_UNSIGNED_BYTE, textureData->pixels);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
   glBindTexture(GL_TEXTURE_2D, 0);
-  SDL_FreeSurface(surface);
+  delete textureData;
   return texture;
 }
 //===========================================================================================================

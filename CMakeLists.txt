@@ -154,6 +154,7 @@ SET(GRAPH_RENDERER_SRCS
     src/tulip-ogles/TextureManager.cpp
     src/tulip-ogles/TextureAtlas.cpp
     src/tulip-ogles/GlGraphRenderingParameters.cpp
+    src/tulip-ogles/GlGraphInputData.cpp
     src/tulip-ogles/NanoVGManager.cpp
     src/utils/TimeMeasurer.cpp
     src/utils/ConcaveHullBuilder.cpp
@@ -206,6 +207,7 @@ TARGET_LINK_LIBRARIES(graph_renderer ${QT_LIBRARIES} ${GLUT_LIB})
 
 ELSE(NOT EMSCRIPTEN)
 
+SET(USE_DFE OFF CACHE BOOL "Use duplicate functions elimination to reduce emitted js file size (time consuming)")
 SET(USE_WASM OFF CACHE BOOL "Use WebAssembly (experimental) instead of asm.js")
 
 FIND_PACKAGE(PythonInterp REQUIRED)
@@ -238,7 +240,14 @@ ADD_EXECUTABLE(tulip-node.js ${TULIPJS_CORE_SRCS})
 
 TARGET_LINK_LIBRARIES(tulip-node.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
 
-SET_TARGET_PROPERTIES(tulip-node.js PROPERTIES LINK_FLAGS "--bind -s USE_ZLIB=1 -s ALLOW_MEMORY_GROWTH=1 -s EVAL_CTORS=0 -s ELIMINATE_DUPLICATE_FUNCTIONS=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --memory-init-file 0")
+
+SET(TULIP_NODE_LINK_FLAGS "--bind -s USE_ZLIB=1 -s ALLOW_MEMORY_GROWTH=1 -s EVAL_CTORS=0 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --memory-init-file 0")
+
+IF(USE_DFE)
+SET(TULIP_NODE_LINK_FLAGS "${TULIP_NODE_LINK_FLAGS} -s ELIMINATE_DUPLICATE_FUNCTIONS=1")
+ENDIF(USE_DFE)
+
+SET_TARGET_PROPERTIES(tulip-node.js PROPERTIES LINK_FLAGS ${TULIP_NODE_LINK_FLAGS})
 
 EM_LINK_PRE_JS(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_pre.js)
 EM_LINK_POST_JS(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)
@@ -255,7 +264,11 @@ TARGET_LINK_LIBRARIES(tulip.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TUL
 #SET(TULIP_JS_LINK_FLAGS "--bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
 #SET(TULIP_JS_LINK_FLAGS "--bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s TOTAL_MEMORY=268435456 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
 
-SET(TULIP_JS_LINK_FLAGS "--bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s TOTAL_MEMORY=268435456 -s MODULARIZE=1 -s EVAL_CTORS=0 -s ELIMINATE_DUPLICATE_FUNCTIONS=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
+SET(TULIP_JS_LINK_FLAGS "--bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s TOTAL_MEMORY=268435456 -s MODULARIZE=1 -s EVAL_CTORS=0 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
+
+IF(USE_DFE)
+SET(TULIP_JS_LINK_FLAGS "${TULIP_JS_LINK_FLAGS} -s ELIMINATE_DUPLICATE_FUNCTIONS=1")
+ENDIF(USE_DFE)
 
 IF(USE_WASM)
 

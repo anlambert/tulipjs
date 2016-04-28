@@ -14,6 +14,7 @@
 
 #include "GlEntity.h"
 #include "GlGraphRenderingParameters.h"
+#include "GlGraphInputData.h"
 
 class Glyph;
 class LabelsRenderer;
@@ -84,11 +85,13 @@ public:
     return _renderingParameters;
   }
 
+  GlGraphInputData &getInputData() {
+    return _inputData;
+  }
+
   void setRenderingParameters(const GlGraphRenderingParameters &renderingParameters);
 
 private :
-  
-  void initGraphProperties();
 
   void getEdgeExtremityData(tlp::edge e, bool srcGlyph, tlp::Coord &position, tlp::Size &size, tlp::Vec4f &rotationAxisAndAngle);
 
@@ -114,23 +117,6 @@ private :
   tlp::Size getEdgeSize(tlp::edge e);
 
   tlp::Graph *_graph;
-  tlp::ColorProperty *_viewColor;
-  tlp::LayoutProperty *_viewLayout;
-  tlp::SizeProperty *_viewSize;
-  tlp::DoubleProperty *_viewRotation;
-  tlp::DoubleProperty *_viewBorderWidth;
-  tlp::ColorProperty *_viewBorderColor;
-  tlp::StringProperty *_viewLabel;
-  tlp::IntegerProperty *_viewShape;
-  tlp::StringProperty *_viewTexture;
-  tlp::BooleanProperty *_viewSelection;
-  tlp::IntegerProperty *_viewSrcAnchorShape;
-  tlp::IntegerProperty *_viewTgtAnchorShape;
-  tlp::SizeProperty *_viewSrcAnchorSize;
-  tlp::SizeProperty *_viewTgtAnchorSize;
-  tlp::StringProperty *_viewFontAwesomeIcon;
-  tlp::BooleanProperty *_viewGlow;
-  tlp::ColorProperty *_viewLabelColor;
 
   GlShaderProgram *_flatShader;
 
@@ -177,6 +163,7 @@ private :
 
   tlp::BoundingBox _lastGraphBoundingBox;
 
+  GlGraphInputData _inputData;
   GlGraphRenderingParameters _renderingParameters;
 
   bool _updateQuadTree;

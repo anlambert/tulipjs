@@ -5120,6 +5120,7 @@ if (workerMode) {
 
     var _setCanvasGraph = Module.cwrap('setCanvasGraph', null, ['string', 'number']);
     var _getViewRenderingParameters = Module.cwrap('getViewRenderingParameters', 'number', ['string']);
+    var _getViewInputData = Module.cwrap('getViewInputData', 'number', ['string']);
 
     var nextCanvasId = 0;
 
@@ -5351,6 +5352,10 @@ if (workerMode) {
 
     tulip.View.prototype.getRenderingParameters = function() {
       return tulip.GlGraphRenderingParameters(_getViewRenderingParameters(this.canvasId));
+    };
+
+    tulip.View.prototype.getInputData = function() {
+      return tulip.GlGraphInputData(_getViewInputData(this.canvasId));
     };
 
     tulip.View.prototype.graphHasHull = function(graph) {
@@ -5603,6 +5608,255 @@ if (workerMode) {
         _GlGraphRenderingParameters_setElementsOrderingProperty(this.cppPointer, prop.cppPointer);
       }
     };
+
+    // ==================================================================================================
+
+    var _GlGraphInputData_getElementColor = Module.cwrap('GlGraphInputData_getElementColor', 'number', ['number']);
+    var _GlGraphInputData_setElementColor = Module.cwrap('GlGraphInputData_setElementColor', null, ['number', 'number']);
+    var _GlGraphInputData_getElementLabelColor = Module.cwrap('GlGraphInputData_getElementLabelColor', 'number', ['number']);
+    var _GlGraphInputData_setElementLabelColor = Module.cwrap('GlGraphInputData_setElementLabelColor', null, ['number', 'number']);
+    var _GlGraphInputData_getElementSize = Module.cwrap('GlGraphInputData_getElementSize', 'number', ['number']);
+    var _GlGraphInputData_setElementSize = Module.cwrap('GlGraphInputData_setElementSize', null, ['number', 'number']);
+    var _GlGraphInputData_getElementLabelPosition = Module.cwrap('GlGraphInputData_getElementLabelPosition', 'number', ['number']);
+    var _GlGraphInputData_setElementLabelPosition = Module.cwrap('GlGraphInputData_setElementLabelPosition', null, ['number', 'number']);
+    var _GlGraphInputData_getElementShape = Module.cwrap('GlGraphInputData_getElementShape', 'number', ['number']);
+    var _GlGraphInputData_setElementShape = Module.cwrap('GlGraphInputData_setElementShape', null, ['number', 'number']);
+    var _GlGraphInputData_getElementRotation = Module.cwrap('GlGraphInputData_getElementRotation', 'number', ['number']);
+    var _GlGraphInputData_setElementRotation = Module.cwrap('GlGraphInputData_setElementRotation', null, ['number', 'number']);
+    var _GlGraphInputData_getElementSelection = Module.cwrap('GlGraphInputData_getElementSelection', 'number', ['number']);
+    var _GlGraphInputData_setElementSelection = Module.cwrap('GlGraphInputData_setElementSelection', null, ['number', 'number']);
+    var _GlGraphInputData_getElementFont = Module.cwrap('GlGraphInputData_getElementFont', 'number', ['number']);
+    var _GlGraphInputData_setElementFont = Module.cwrap('GlGraphInputData_setElementFont', null, ['number', 'number']);
+    var _GlGraphInputData_getElementFontSize = Module.cwrap('GlGraphInputData_getElementFontSize', 'number', ['number']);
+    var _GlGraphInputData_setElementFontSize = Module.cwrap('GlGraphInputData_setElementFontSize', null, ['number', 'number']);
+    var _GlGraphInputData_getElementLabel = Module.cwrap('GlGraphInputData_getElementLabel', 'number', ['number']);
+    var _GlGraphInputData_setElementLabel = Module.cwrap('GlGraphInputData_setElementLabel', null, ['number', 'number']);
+    var _GlGraphInputData_getElementLayout = Module.cwrap('GlGraphInputData_getElementLayout', 'number', ['number']);
+    var _GlGraphInputData_setElementLayout = Module.cwrap('GlGraphInputData_setElementLayout', null, ['number', 'number']);
+    var _GlGraphInputData_getElementTexture = Module.cwrap('GlGraphInputData_getElementTexture', 'number', ['number']);
+    var _GlGraphInputData_setElementTexture = Module.cwrap('GlGraphInputData_setElementTexture', null, ['number', 'number']);
+    var _GlGraphInputData_getElementBorderColor = Module.cwrap('GlGraphInputData_getElementBorderColor', 'number', ['number']);
+    var _GlGraphInputData_setElementBorderColor = Module.cwrap('GlGraphInputData_setElementBorderColor', null, ['number', 'number']);
+    var _GlGraphInputData_getElementBorderWidth = Module.cwrap('GlGraphInputData_getElementBorderWidth', 'number', ['number']);
+    var _GlGraphInputData_setElementBorderWidth = Module.cwrap('GlGraphInputData_setElementBorderWidth', null, ['number', 'number']);
+    var _GlGraphInputData_getElementSrcAnchorShape = Module.cwrap('GlGraphInputData_getElementSrcAnchorShape', 'number', ['number']);
+    var _GlGraphInputData_setElementSrcAnchorShape = Module.cwrap('GlGraphInputData_setElementSrcAnchorShape', null, ['number', 'number']);
+    var _GlGraphInputData_getElementSrcAnchorSize = Module.cwrap('GlGraphInputData_getElementSrcAnchorSize', 'number', ['number']);
+    var _GlGraphInputData_setElementSrcAnchorSize = Module.cwrap('GlGraphInputData_setElementSrcAnchorSize', null, ['number', 'number']);
+    var _GlGraphInputData_getElementTgtAnchorShape = Module.cwrap('GlGraphInputData_getElementTgtAnchorShape', 'number', ['number']);
+    var _GlGraphInputData_setElementTgtAnchorShape = Module.cwrap('GlGraphInputData_setElementTgtAnchorShape', null, ['number', 'number']);
+    var _GlGraphInputData_getElementTgtAnchorSize = Module.cwrap('GlGraphInputData_getElementTgtAnchorSize', 'number', ['number']);
+    var _GlGraphInputData_setElementTgtAnchorSize = Module.cwrap('GlGraphInputData_setElementTgtAnchorSize', null, ['number', 'number']);
+    var _GlGraphInputData_getElementFontAwesomeIcon = Module.cwrap('GlGraphInputData_getElementFontAwesomeIcon', 'number', ['number']);
+    var _GlGraphInputData_setElementFontAwesomeIcon = Module.cwrap('GlGraphInputData_setElementFontAwesomeIcon', null, ['number', 'number']);
+    var _GlGraphInputData_getElementGlow = Module.cwrap('GlGraphInputData_getElementGlow', 'number', ['number']);
+    var _GlGraphInputData_setElementGlow = Module.cwrap('GlGraphInputData_setElementGlow', null, ['number', 'number']);
+    var _GlGraphInputData_getElementGlowColor = Module.cwrap('GlGraphInputData_getElementGlowColor', 'number', ['number']);
+    var _GlGraphInputData_setElementGlowColor = Module.cwrap('GlGraphInputData_setElementGlowColor', null, ['number', 'number']);
+    var _GlGraphInputData_reloadGraphProperties = Module.cwrap('GlGraphInputData_reloadGraphProperties', null, ['number', 'number']);
+
+    tulip.GlGraphInputData = function tulip_GlGraphInputData(cppPointer) {
+      var newObject = createObject(tulip.GlGraphInputData, this);
+      tulip.CppObjectWrapper.call(newObject, cppPointer, "GlGraphInputData");
+      return newObject;
+    };
+    tulip.GlGraphInputData.inheritsFrom(tulip.CppObjectWrapper);
+
+    tulip.GlGraphInputData.prototype.getElementColor = function tulip_GlGraphInputData_prototype_getElementColor() {
+      return tulip.ColorProperty(_GlGraphInputData_getElementColor(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementColor = function tulip_GlGraphInputData_prototype_setElementColor(prop) {
+      checkArgumentsTypes(arguments, [tulip.ColorProperty], 1);
+      _GlGraphInputData_setElementColor(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementLabelColor = function tulip_GlGraphInputData_prototype_getElementLabelColor() {
+      return tulip.ColorProperty(_GlGraphInputData_getElementLabelColor(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementLabelColor = function tulip_GlGraphInputData_prototype_setElementLabelColor(prop) {
+      checkArgumentsTypes(arguments, [tulip.ColorProperty], 1);
+      _GlGraphInputData_setElementLabelColor(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementSize = function tulip_GlGraphInputData_prototype_getElementSize() {
+      return tulip.SizeProperty(_GlGraphInputData_getElementSize(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementSize = function tulip_GlGraphInputData_prototype_setElementSize(prop) {
+      checkArgumentsTypes(arguments, [tulip.SizeProperty], 1);
+      _GlGraphInputData_setElementSize(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementLabelPosition = function tulip_GlGraphInputData_prototype_getElementLabelPosition() {
+      return tulip.IntegerProperty(_GlGraphInputData_getElementLabelPosition(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementLabelPosition = function tulip_GlGraphInputData_prototype_setElementLabelPosition(prop) {
+      checkArgumentsTypes(arguments, [tulip.IntegerProperty], 1);
+      _GlGraphInputData_setElementLabelPosition(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementShape = function tulip_GlGraphInputData_prototype_getElementShape() {
+      return tulip.IntegerProperty(_GlGraphInputData_getElementShape(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementShape = function tulip_GlGraphInputData_prototype_setElementShape(prop) {
+      checkArgumentsTypes(arguments, [tulip.IntegerProperty], 1);
+      _GlGraphInputData_setElementShape(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementRotation = function tulip_GlGraphInputData_prototype_getElementRotation() {
+      return tulip.DoubleProperty(_GlGraphInputData_getElementRotation(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementRotation = function tulip_GlGraphInputData_prototype_setElementRotation(prop) {
+      checkArgumentsTypes(arguments, [tulip.DoubleProperty], 1);
+      _GlGraphInputData_setElementRotation(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementSelection = function tulip_GlGraphInputData_prototype_getElementSelection() {
+      return tulip.BooleanProperty(_GlGraphInputData_getElementSelection(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementSelection = function tulip_GlGraphInputData_prototype_setElementSelection(prop) {
+      checkArgumentsTypes(arguments, [tulip.BooleanProperty], 1);
+      _GlGraphInputData_setElementSelection(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementFont = function tulip_GlGraphInputData_prototype_getElementFont() {
+      return tulip.StringProperty(_GlGraphInputData_getElementFont(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementFont = function tulip_GlGraphInputData_prototype_setElementFont(prop) {
+      checkArgumentsTypes(arguments, [tulip.StringProperty], 1);
+      _GlGraphInputData_setElementFont(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementFontSize = function tulip_GlGraphInputData_prototype_getElementFontSize() {
+      return tulip.IntegerProperty(_GlGraphInputData_getElementFontSize(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementFontSize = function tulip_GlGraphInputData_prototype_setElementFontSize(prop) {
+      checkArgumentsTypes(arguments, [tulip.IntegerProperty], 1);
+      _GlGraphInputData_setElementFontSize(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementLabel = function tulip_GlGraphInputData_prototype_getElementLabel() {
+      return tulip.StringProperty(_GlGraphInputData_getElementLabel(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementLabel = function tulip_GlGraphInputData_prototype_setElementLabel(prop) {
+      checkArgumentsTypes(arguments, [tulip.StringProperty], 1);
+      _GlGraphInputData_setElementLabel(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementLayout = function tulip_GlGraphInputData_prototype_getElementLayout() {
+      return tulip.LayoutProperty(_GlGraphInputData_getElementLayout(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementLayout = function tulip_GlGraphInputData_prototype_setElementLayout(prop) {
+      checkArgumentsTypes(arguments, [tulip.LayoutProperty], 1);
+      _GlGraphInputData_setElementLayout(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementTexture = function tulip_GlGraphInputData_prototype_getElementTexture() {
+      return tulip.StringProperty(_GlGraphInputData_getElementTexture(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementTexture = function tulip_GlGraphInputData_prototype_setElementTexture(prop) {
+      checkArgumentsTypes(arguments, [tulip.StringProperty], 1);
+      _GlGraphInputData_setElementTexture(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementBorderColor = function tulip_GlGraphInputData_prototype_getElementBorderColor() {
+      return tulip.ColorProperty(_GlGraphInputData_getElementBorderColor(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementBorderColor = function tulip_GlGraphInputData_prototype_setElementBorderColor(prop) {
+      checkArgumentsTypes(arguments, [tulip.ColorProperty], 1);
+      _GlGraphInputData_setElementBorderColor(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementBorderWidth = function tulip_GlGraphInputData_prototype_getElementBorderWidth() {
+      return tulip.DoubleProperty(_GlGraphInputData_getElementBorderWidth(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementBorderWidth = function tulip_GlGraphInputData_prototype_setElementBorderWidth(prop) {
+      checkArgumentsTypes(arguments, [tulip.DoubleProperty], 1);
+      _GlGraphInputData_setElementBorderWidth(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementSrcAnchorShape = function tulip_GlGraphInputData_prototype_getElementSrcAnchorShape() {
+      return tulip.IntegerProperty(_GlGraphInputData_getElementSrcAnchorShape(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementSrcAnchorShape = function tulip_GlGraphInputData_prototype_setElementSrcAnchorShape(prop) {
+      checkArgumentsTypes(arguments, [tulip.IntegerProperty], 1);
+      _GlGraphInputData_setElementSrcAnchorShape(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementSrcAnchorSize = function tulip_GlGraphInputData_prototype_getElementSrcAnchorSize() {
+      return tulip.SizeProperty(_GlGraphInputData_getElementSrcAnchorSize(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementSrcAnchorSize = function tulip_GlGraphInputData_prototype_setElementSrcAnchorSize(prop) {
+      checkArgumentsTypes(arguments, [tulip.SizeProperty], 1);
+      _GlGraphInputData_setElementSrcAnchorSize(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementTgtAnchorShape = function tulip_GlGraphInputData_prototype_getElementTgtAnchorShape() {
+      return tulip.IntegerProperty(_GlGraphInputData_getElementTgtAnchorShape(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementTgtAnchorShape = function tulip_GlGraphInputData_prototype_setElementTgtAnchorShape(prop) {
+      checkArgumentsTypes(arguments, [tulip.IntegerProperty], 1);
+      _GlGraphInputData_setElementTgtAnchorShape(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementTgtAnchorSize = function tulip_GlGraphInputData_prototype_getElementTgtAnchorSize() {
+      return tulip.SizeProperty(_GlGraphInputData_getElementTgtAnchorSize(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementTgtAnchorSize = function tulip_GlGraphInputData_prototype_setElementTgtAnchorSize(prop) {
+      checkArgumentsTypes(arguments, [tulip.SizeProperty], 1);
+      _GlGraphInputData_setElementTgtAnchorSize(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementFontAwesomeIcon = function tulip_GlGraphInputData_prototype_getElementFontAwesomeIcon() {
+      return tulip.StringProperty(_GlGraphInputData_getElementFontAwesomeIcon(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementFontAwesomeIcon = function tulip_GlGraphInputData_prototype_setElementFontAwesomeIcon(prop) {
+      checkArgumentsTypes(arguments, [tulip.StringProperty], 1);
+      _GlGraphInputData_setElementFontAwesomeIcon(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementGlow = function tulip_GlGraphInputData_prototype_getElementGlow() {
+      return tulip.BooleanProperty(_GlGraphInputData_getElementGlow(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementGlow = function tulip_GlGraphInputData_prototype_setElementGlow(prop) {
+      checkArgumentsTypes(arguments, [tulip.BooleanProperty], 1);
+      _GlGraphInputData_setElementGlow(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.getElementGlowColor = function tulip_GlGraphInputData_prototype_getElementGlowColor() {
+      return tulip.ColorProperty(_GlGraphInputData_getElementGlowColor(this.cppPointer));
+    };
+
+    tulip.GlGraphInputData.prototype.setElementGlowColor = function tulip_GlGraphInputData_prototype_setElementGlowColor(prop) {
+      checkArgumentsTypes(arguments, [tulip.ColorProperty], 1);
+      _GlGraphInputData_setElementGlowColor(this.cppPointer, prop.cppPointer);
+    };
+
+    tulip.GlGraphInputData.prototype.reloadGraphProperties = function tulip_GlGraphInputData_prototype_reloadGraphProperties(reset) {
+      checkArgumentsTypes(arguments, ["boolean"], 0);
+      _GlGraphInputData_reloadGraphProperties(this.cppPointer, reset);
+    };
+
+    // ==================================================================================================
 
     tulip.Graph.prototype.getTlpFileBlob = function(gzip) {
       var filename = "/graph.tlp";

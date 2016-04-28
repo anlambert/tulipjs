@@ -422,16 +422,6 @@ GlShaderProgram *GlGraph::getEdgeShader(int edgeShape) {
 
 GlGraph::GlGraph(Graph *graph, GlLODCalculator *lodCalculator) :
   _graph(NULL),
-  _viewColor(NULL),
-  _viewLayout(NULL),
-  _viewSize(NULL),
-  _viewRotation(NULL),
-  _viewBorderWidth(NULL),
-  _viewBorderColor(NULL),
-  _viewLabel(NULL),
-  _viewShape(NULL),
-  _viewTexture(NULL),
-  _viewSelection(NULL),
   _canUseUIntIndices(true),
   _graphElementsPickingMode(false),
   _lodCalculator(lodCalculator),
@@ -472,6 +462,8 @@ GlGraph::GlGraph(Graph *graph, GlLODCalculator *lodCalculator) :
   _renderingParameters.addListener(this);
   _renderingParameters.addObserver(this);
 
+  _inputData.addListener(this);
+
   setGraph(graph);
 
 }
@@ -507,7 +499,7 @@ void GlGraph::setGraph(tlp::Graph *graph) {
 
   _graph = graph;
 
-  initGraphProperties();
+  _inputData.setGraph(graph);
 
   _lastGraphBoundingBox = BoundingBox();
 
@@ -530,56 +522,26 @@ void GlGraph::setGraph(tlp::Graph *graph) {
 
 }
 
-void GlGraph::initGraphProperties() {
-  _viewColor = _graph->getProperty<ColorProperty>("viewColor");
-  _viewLayout = _graph->getProperty<LayoutProperty>("viewLayout");
-  _viewSize = _graph->getProperty<SizeProperty>("viewSize");
-  _viewRotation = _graph->getProperty<DoubleProperty>("viewRotation");
-  _viewBorderWidth = _graph->getProperty<DoubleProperty>("viewBorderWidth");
-  _viewBorderColor = _graph->getProperty<ColorProperty>("viewBorderColor");
-  _viewLabel = _graph->getProperty<StringProperty>("viewLabel");
-  _viewShape = _graph->getProperty<IntegerProperty>("viewShape");
-  _viewTexture = _graph->getProperty<StringProperty>("viewTexture");
-  _viewSelection = _graph->getProperty<BooleanProperty>("viewSelection");
-  _viewSrcAnchorShape = _graph->getProperty<IntegerProperty>("viewSrcAnchorShape");
-  _viewTgtAnchorShape = _graph->getProperty<IntegerProperty>("viewTgtAnchorShape");
-  _viewSrcAnchorSize = _graph->getProperty<SizeProperty>("viewSrcAnchorSize");
-  _viewTgtAnchorSize = _graph->getProperty<SizeProperty>("viewTgtAnchorSize");
-  _viewFontAwesomeIcon = _graph->getProperty<StringProperty>("viewFontAwesomeIcon");
-  _viewGlow = _graph->getProperty<BooleanProperty>("viewGlow");
-  _viewLabelColor = _graph->getProperty<ColorProperty>("viewLabelColor");
-}
-
-static const string viewPropPrefix = "view";
-
 void GlGraph::initObservers() {
   _graph->addListener(this);
   _graph->addObserver(this);
-  string propName;
-  forEach(propName, _graph->getProperties()) {
-    if (propName.length() > viewPropPrefix.length() && propName.substr(0, viewPropPrefix.length()) == viewPropPrefix) {
-      PropertyInterface *prop = _graph->getProperty(propName);
-      prop->addListener(this);
-      prop->addObserver(this);
-    }
+  for(auto prop : _inputData.getProperties()) {
+    prop->addListener(this);
+    prop->addObserver(this);
   }
 }
 
 void GlGraph::clearObservers() {
   _graph->removeListener(this);
   _graph->removeObserver(this);
-  string propName;
-  forEach(propName, _graph->getProperties()) {
-    if (propName.length() > viewPropPrefix.length() && propName.substr(0, viewPropPrefix.length()) == viewPropPrefix) {
-      PropertyInterface *prop = _graph->getProperty(propName);
-      prop->removeListener(this);
-      prop->removeObserver(this);
-    }
+  for(auto prop : _inputData.getProperties()) {
+    prop->removeListener(this);
+    prop->removeObserver(this);
   }
 }
 
 void GlGraph::computeGraphBoundingBox() {
-  _boundingBox = tlp::computeBoundingBox(_graph, _viewLayout, _viewSize, _viewRotation);
+  _boundingBox = tlp::computeBoundingBox(_graph, _inputData.getElementLayout(), _inputData.getElementSize(), _inputData.getElementRotation());
 }
 
 void GlGraph::prepareEdgesData() {
@@ -653,13 +615,13 @@ void GlGraph::endEdgesData() {
   edge e;
   forEach(e, _graph->getEdges()) {
 
-    Color edgeColor = _viewColor->getEdgeValue(e);
-    const Color &srcColor = _viewColor->getNodeValue(_graph->source(e));
-    const Color &tgtColor = _viewColor->getNodeValue(_graph->target(e));
+    Color edgeColor = _inputData.getElementColor()->getEdgeValue(e);
+    const Color &srcColor = _inputData.getElementColor()->getNodeValue(_graph->source(e));
+    const Color &tgtColor = _inputData.getElementColor()->getNodeValue(_graph->target(e));
     const Color &selectionColor = uintToColor(_graph->numberOfNodes() + e.id + 1);
 
-    if (_viewBorderWidth->getEdgeValue(e) > 0) {
-      edgeColor = _viewBorderColor->getEdgeValue(e);
+    if (_inputData.getElementBorderWidth()->getEdgeValue(e) > 0) {
+      edgeColor = _inputData.getElementBorderColor()->getEdgeValue(e);
     }
 
     vector<Coord> edgePoints;
@@ -756,13 +718,13 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
     }
     nodesLabelsToRender.push_back(nodesLodResult[i].n);
     glyphsNodes.push_back(nodesLodResult[i].n);
-    int glyphId = _viewShape->getNodeValue(nodesLodResult[i].n);
+    int glyphId = _inputData.getElementShape()->getNodeValue(nodesLodResult[i].n);
     if (glyphId == tlp::NodeShape::FontAwesomeIcon) {
-      std::string icon = _viewFontAwesomeIcon->getNodeValue(nodesLodResult[i].n);
+      std::string icon = _inputData.getElementFontAwesomeIcon()->getNodeValue(nodesLodResult[i].n);
       glyphId = tlp::TulipFontAwesome::getFontAwesomeIconCodePoint(icon);
     }
     _nodesGlyphs[glyphId].push_back(nodesLodResult[i].n);
-    if (_viewSelection->getNodeValue(nodesLodResult[i].n) && nodesLodResult[i].lod >= 10) {
+    if (_inputData.getElementSelection()->getNodeValue(nodesLodResult[i].n) && nodesLodResult[i].lod >= 10) {
       selectedNodes.push_back(nodesLodResult[i].n);
     }
     if (_graph->isMetaNode(nodesLodResult[i].n)) {
@@ -785,14 +747,14 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
     if (edgesLodResult[i].lod < 5 && !_renderingParameters.bypassLodSystem()) {
       pointsEdges.push_back(edgesLodResult[i].e);
     } else if (abs(edgesLodResult[i].lodSize) < 5 && !_renderingParameters.bypassLodSystem()) {
-      if (_viewSelection->getEdgeValue(edgesLodResult[i].e)) {
+      if (_inputData.getElementSelection()->getEdgeValue(edgesLodResult[i].e)) {
         selectedLinesEdges.push_back(edgesLodResult[i].e);
       } else {
         lineEdges.push_back(edgesLodResult[i].e);
       }
     }
     else {
-      if (_viewSelection->getEdgeValue(edgesLodResult[i].e)) {
+      if (_inputData.getElementSelection()->getEdgeValue(edgesLodResult[i].e)) {
         selectedQuadsEdges.push_back(edgesLodResult[i].e);
       } else {
         quadsEdges.push_back(edgesLodResult[i].e);
@@ -900,11 +862,11 @@ void GlGraph::draw(const Camera &camera, const Light &light, bool pickingMode) {
   if (!_graphElementsPickingMode && _renderingParameters.displayNodesLabels()) {
     _labelsRenderer->setLabelsScaled(_renderingParameters.labelsScaled());
     _labelsRenderer->setMinMaxSizes(_renderingParameters.minSizeOfLabels(), _renderingParameters.maxSizeOfLabels());
-    std::sort(nodesLabelsToRender.begin(), nodesLabelsToRender.end(), NodesLabelsSorting(_viewSelection, orderingProperty));
+    std::sort(nodesLabelsToRender.begin(), nodesLabelsToRender.end(), NodesLabelsSorting(_inputData.getElementSelection(), orderingProperty));
     if (_renderingParameters.elementsOrdered() && orderingProperty && !_renderingParameters.elementsOrderedDescending()) {
       vector<node>::iterator itN = nodesLabelsToRender.begin();
       while (itN != nodesLabelsToRender.end()) {
-        if (_viewSelection->getNodeValue(*itN)) {
+        if (_inputData.getElementSelection()->getNodeValue(*itN)) {
           break;
         } else {
           ++itN;
@@ -935,10 +897,10 @@ void GlGraph::renderMetaNodes(const std::vector<tlp::node> &metaNodes, const Cam
 
   for (size_t i = 0 ; i < metaNodes.size() ; ++i) {
     glMetaGraph->setGraph(_graph->getNodeMetaInfo(metaNodes[i]));
-    const tlp::Coord &metaNodePos = _viewLayout->getNodeValue(metaNodes[i]);
-    const tlp::Size &metaNodeSize = _viewSize->getNodeValue(metaNodes[i]);
+    const tlp::Coord &metaNodePos = _inputData.getElementLayout()->getNodeValue(metaNodes[i]);
+    const tlp::Size &metaNodeSize = _inputData.getElementSize()->getNodeValue(metaNodes[i]);
     tlp::BoundingBox metaNodeBB(metaNodePos - metaNodeSize/2.f, metaNodePos + metaNodeSize/2.f);
-    Glyph *metaNodeGlyph = GlyphsManager::getGlyph(_viewShape->getNodeValue(metaNodes[i]));
+    Glyph *metaNodeGlyph = GlyphsManager::getGlyph(_inputData.getElementShape()->getNodeValue(metaNodes[i]));
     tlp::BoundingBox includeBB;
     metaNodeGlyph->getIncludeBoundingBox(includeBB);
     tlp::BoundingBox metaNodeBBTmp;
@@ -1026,13 +988,13 @@ void GlGraph::renderNodes(const Camera &camera, const Light &light) {
     borderWidths.reserve(it->second.size());
     borderColors.reserve(it->second.size());
     for (size_t i = 0 ; i < it->second.size(); ++i) {
-      centers.push_back(_viewLayout->getNodeValue(it->second[i]));
-      sizes.push_back(_viewSize->getNodeValue(it->second[i]));
-      rotationAngles.push_back(Vec4f(0.0f, 0.0f, 1.0f, _viewRotation->getNodeValue(it->second[i])));
+      centers.push_back(_inputData.getElementLayout()->getNodeValue(it->second[i]));
+      sizes.push_back(_inputData.getElementSize()->getNodeValue(it->second[i]));
+      rotationAngles.push_back(Vec4f(0.0f, 0.0f, 1.0f, _inputData.getElementRotation()->getNodeValue(it->second[i])));
       if (!_graphElementsPickingMode) {
-        colors.push_back(_viewColor->getNodeValue(it->second[i]));
-        borderColors.push_back(_viewBorderColor->getNodeValue(it->second[i]));
-        textures.push_back(_viewTexture->getNodeValue(it->second[i]));
+        colors.push_back(_inputData.getElementColor()->getNodeValue(it->second[i]));
+        borderColors.push_back(_inputData.getElementBorderColor()->getNodeValue(it->second[i]));
+        textures.push_back(_inputData.getElementTexture()->getNodeValue(it->second[i]));
         TextureManager::instance()->addTextureInAtlasFromFile(textures.back());
       } else {
         Color pickColor = uintToColor(it->second[i].id+1);
@@ -1040,11 +1002,11 @@ void GlGraph::renderNodes(const Camera &camera, const Light &light) {
         borderColors.push_back(pickColor);
         textures.push_back("");
       }
-      borderWidths.push_back(_viewBorderWidth->getNodeValue(it->second[i]));
+      borderWidths.push_back(_inputData.getElementBorderWidth()->getNodeValue(it->second[i]));
 
-      if (!_graphElementsPickingMode && _viewSelection->getNodeValue(it->second[i])) {
-        centersSelected.push_back(_viewLayout->getNodeValue(it->second[i]));
-        sizesSelected.push_back(_viewSize->getNodeValue(it->second[i]));
+      if (!_graphElementsPickingMode && _inputData.getElementSelection()->getNodeValue(it->second[i])) {
+        centersSelected.push_back(_inputData.getElementLayout()->getNodeValue(it->second[i]));
+        sizesSelected.push_back(_inputData.getElementSize()->getNodeValue(it->second[i]));
         rotationAnglesSelected.push_back(Vec4f(0.0f, 0.0f, 1.0f, 0.0f));
         colorsSelected.push_back(Color());
         texturesSelected.push_back("");
@@ -1098,10 +1060,10 @@ void GlGraph::renderNodesGlow(const vector<node> &nodes, const Camera &camera, c
 
   for (size_t i = 0 ; i < nodes.size() ; ++i) {
     node n = nodes[i];
-    if (!_viewGlow->getNodeValue(n)) continue;
-    centers.push_back(_viewLayout->getNodeValue(n));
-    sizes.push_back(_viewSize->getNodeValue(n) * 2.f);
-    Color nodeColor = _viewColor->getNodeValue(n);
+    if (!_inputData.getElementGlow()->getNodeValue(n)) continue;
+    centers.push_back(_inputData.getElementLayout()->getNodeValue(n));
+    sizes.push_back(_inputData.getElementSize()->getNodeValue(n) * 2.f);
+    Color nodeColor = _inputData.getElementColor()->getNodeValue(n);
     nodeColor.setA(128);
     colors.push_back(nodeColor);
     textures.push_back("resources/radialGradientTexture.png");
@@ -1130,36 +1092,36 @@ void GlGraph::renderPointsNodesAndEdges(const Camera &camera, const std::vector<
   pointsData.reserve((pointsNodes.size()+pointsEdges.size()) * 8);
 
   for (size_t i = 0 ; i < pointsEdges.size() ; ++i) {
-    Coord pointEdge = (_viewLayout->getNodeValue(_graph->source(pointsEdges[i])) + _viewLayout->getNodeValue(_graph->target(pointsEdges[i]))) / 2.f;
+    Coord pointEdge = (_inputData.getElementLayout()->getNodeValue(_graph->source(pointsEdges[i])) + _inputData.getElementLayout()->getNodeValue(_graph->target(pointsEdges[i]))) / 2.f;
     if (_graphElementsPickingMode) {
       addTlpVecToVecFloat(Vec4f(pointEdge, 2.0f), pointsData);
       addColorToVecFloat(uintToColor(_graph->getRoot()->numberOfNodes() + pointsEdges[i].id+1), pointsData);
-    } else if (_viewSelection->getEdgeValue(pointsEdges[i])) {
+    } else if (_inputData.getElementSelection()->getEdgeValue(pointsEdges[i])) {
       addTlpVecToVecFloat(Vec4f(pointEdge, 4.0f), pointsData);
       addColorToVecFloat(_renderingParameters.selectionColor(), pointsData);
     } else {
       addTlpVecToVecFloat(Vec4f(pointEdge, 2.0f), pointsData);
-      if (_viewBorderWidth->getEdgeValue(pointsEdges[i]) > 0) {
-        addColorToVecFloat(_viewBorderColor->getEdgeValue(pointsEdges[i]), pointsData);
+      if (_inputData.getElementBorderWidth()->getEdgeValue(pointsEdges[i]) > 0) {
+        addColorToVecFloat(_inputData.getElementBorderColor()->getEdgeValue(pointsEdges[i]), pointsData);
       } else {
-        addColorToVecFloat(_viewColor->getEdgeValue(pointsEdges[i]), pointsData);
+        addColorToVecFloat(_inputData.getElementColor()->getEdgeValue(pointsEdges[i]), pointsData);
       }
     }
   }
 
   for (size_t i = 0 ; i < pointsNodes.size() ; ++i) {
     if (_graphElementsPickingMode) {
-      addTlpVecToVecFloat(Vec4f(_viewLayout->getNodeValue(pointsNodes[i]), 3.0f), pointsData);
+      addTlpVecToVecFloat(Vec4f(_inputData.getElementLayout()->getNodeValue(pointsNodes[i]), 3.0f), pointsData);
       addColorToVecFloat(uintToColor(pointsNodes[i].id+1), pointsData);
-    } else if (_viewSelection->getNodeValue(pointsNodes[i])) {
-      addTlpVecToVecFloat(Vec4f(_viewLayout->getNodeValue(pointsNodes[i]), 4.0f), pointsData);
+    } else if (_inputData.getElementSelection()->getNodeValue(pointsNodes[i])) {
+      addTlpVecToVecFloat(Vec4f(_inputData.getElementLayout()->getNodeValue(pointsNodes[i]), 4.0f), pointsData);
       addColorToVecFloat(_renderingParameters.selectionColor(), pointsData);
     } else {
-      addTlpVecToVecFloat(Vec4f(_viewLayout->getNodeValue(pointsNodes[i]), 3.0f), pointsData);
-      if (_viewBorderWidth->getNodeValue(pointsNodes[i]) > 0) {
-        addColorToVecFloat(_viewBorderColor->getNodeValue(pointsNodes[i]), pointsData);
+      addTlpVecToVecFloat(Vec4f(_inputData.getElementLayout()->getNodeValue(pointsNodes[i]), 3.0f), pointsData);
+      if (_inputData.getElementBorderWidth()->getNodeValue(pointsNodes[i]) > 0) {
+        addColorToVecFloat(_inputData.getElementBorderColor()->getNodeValue(pointsNodes[i]), pointsData);
       } else {
-        addColorToVecFloat(_viewColor->getNodeValue(pointsNodes[i]), pointsData);
+        addColorToVecFloat(_inputData.getElementColor()->getNodeValue(pointsNodes[i]), pointsData);
       }
     }
   }
@@ -1219,16 +1181,16 @@ void GlGraph::renderEdgeExtremities(const Camera &camera, const Light &light, co
   float borderWidth;
   Color borderColor;
 
-  int srcShape = _viewSrcAnchorShape->getEdgeValue(e);
-  int tgtShape = _viewTgtAnchorShape->getEdgeValue(e);
+  int srcShape = _inputData.getElementSrcAnchorShape()->getEdgeValue(e);
+  int tgtShape = _inputData.getElementTgtAnchorShape()->getEdgeValue(e);
 
   if (srcShape == tlp::EdgeExtremityShape::FontAwesomeIcon) {
-    std::string icon = _viewFontAwesomeIcon->getEdgeValue(e);
+    std::string icon = _inputData.getElementFontAwesomeIcon()->getEdgeValue(e);
     srcShape = tlp::TulipFontAwesome::getFontAwesomeIconCodePoint(icon);
   }
 
   if (tgtShape == tlp::EdgeExtremityShape::FontAwesomeIcon) {
-    std::string icon = _viewFontAwesomeIcon->getEdgeValue(e);
+    std::string icon = _inputData.getElementFontAwesomeIcon()->getEdgeValue(e);
     tgtShape = tlp::TulipFontAwesome::getFontAwesomeIconCodePoint(icon);
   }
 
@@ -1236,17 +1198,17 @@ void GlGraph::renderEdgeExtremities(const Camera &camera, const Light &light, co
 
     getEdgeExtremityData(e, true, center, size, rotationAxisAndAngle);
 
-    color = _viewColor->getEdgeValue(e);
-    borderColor = _viewBorderColor->getEdgeValue(e);
+    color = _inputData.getElementColor()->getEdgeValue(e);
+    borderColor = _inputData.getElementBorderColor()->getEdgeValue(e);
     if (_renderingParameters.interpolateEdgesColors()) {
-      color = _viewColor->getNodeValue(_graph->source(e));
+      color = _inputData.getElementColor()->getNodeValue(_graph->source(e));
       borderColor = color;
     }
 
-    texture = _viewTexture->getEdgeValue(e);
+    texture = _inputData.getElementTexture()->getEdgeValue(e);
 
     if (!_graphElementsPickingMode) {
-      if (_viewSelection->getEdgeValue(e)) {
+      if (_inputData.getElementSelection()->getEdgeValue(e)) {
         color = _renderingParameters.selectionColor();
         borderColor = _renderingParameters.selectionColor();
       }
@@ -1257,7 +1219,7 @@ void GlGraph::renderEdgeExtremities(const Camera &camera, const Light &light, co
       texture = "";
     }
 
-    borderWidth = _viewBorderWidth->getEdgeValue(e);
+    borderWidth = _inputData.getElementBorderWidth()->getEdgeValue(e);
 
 
     bool swapYZ = false;
@@ -1273,17 +1235,17 @@ void GlGraph::renderEdgeExtremities(const Camera &camera, const Light &light, co
 
     getEdgeExtremityData(e, false, center, size, rotationAxisAndAngle);
 
-    color = _viewColor->getEdgeValue(e);
-    borderColor = _viewBorderColor->getEdgeValue(e);
+    color = _inputData.getElementColor()->getEdgeValue(e);
+    borderColor = _inputData.getElementBorderColor()->getEdgeValue(e);
     if (_renderingParameters.interpolateEdgesColors()) {
-      color = _viewColor->getNodeValue(_graph->target(e));
+      color = _inputData.getElementColor()->getNodeValue(_graph->target(e));
       borderColor = color;
     }
 
-    texture = _viewTexture->getEdgeValue(e);
+    texture = _inputData.getElementTexture()->getEdgeValue(e);
 
     if (!_graphElementsPickingMode) {
-      if (_viewSelection->getEdgeValue(e)) {
+      if (_inputData.getElementSelection()->getEdgeValue(e)) {
         color =_renderingParameters.selectionColor();
         borderColor = _renderingParameters.selectionColor();
       }
@@ -1294,7 +1256,7 @@ void GlGraph::renderEdgeExtremities(const Camera &camera, const Light &light, co
       texture  = "";
     }
 
-    borderWidth = _viewBorderWidth->getEdgeValue(e);
+    borderWidth = _inputData.getElementBorderWidth()->getEdgeValue(e);
 
     bool swapYZ = false;
     if (tgtShape == EdgeExtremityShape::Cone || tgtShape == EdgeExtremityShape::Cylinder) {
@@ -1322,25 +1284,25 @@ void GlGraph::renderEdges(const Camera &camera, const Light &light, const std::v
     edge e = edges[i];
     node src = _graph->source(e);
     node tgt = _graph->target(e);
-    const Coord &srcCoord = _viewLayout->getNodeValue(src);
-    const Coord &tgtCoord = _viewLayout->getNodeValue(tgt);
-    Color srcColor = _viewColor->getEdgeValue(e);
-    Color tgtColor = _viewColor->getEdgeValue(e);
-    Color borderColor = _viewBorderColor->getEdgeValue(e);
+    const Coord &srcCoord = _inputData.getElementLayout()->getNodeValue(src);
+    const Coord &tgtCoord = _inputData.getElementLayout()->getNodeValue(tgt);
+    Color srcColor = _inputData.getElementColor()->getEdgeValue(e);
+    Color tgtColor = _inputData.getElementColor()->getEdgeValue(e);
+    Color borderColor = _inputData.getElementBorderColor()->getEdgeValue(e);
     if (_renderingParameters.interpolateEdgesColors()) {
-      srcColor = _viewColor->getNodeValue(src);
-      tgtColor = _viewColor->getNodeValue(tgt);
-    } else if (lineMode && _viewBorderWidth->getEdgeValue(e) > 0) {
+      srcColor = _inputData.getElementColor()->getNodeValue(src);
+      tgtColor = _inputData.getElementColor()->getNodeValue(tgt);
+    } else if (lineMode && _inputData.getElementBorderWidth()->getEdgeValue(e) > 0) {
       srcColor = tgtColor = borderColor;
     }
 
     if (_graphElementsPickingMode) {
       srcColor = tgtColor = borderColor = uintToColor(_graph->getRoot()->numberOfNodes()+e.id+1);
-    } else if (_viewSelection->getEdgeValue(e)) {
+    } else if (_inputData.getElementSelection()->getEdgeValue(e)) {
       srcColor = tgtColor = borderColor = _renderingParameters.selectionColor();
     }
 
-    int edgeShape = _viewShape->getEdgeValue(e);
+    int edgeShape = _inputData.getElementShape()->getEdgeValue(e);
 
     unsigned int nbCurvePoints = _edgePoints[e].size();
     unsigned int indicesOffset = _maxEdgePoints;
@@ -1363,10 +1325,10 @@ void GlGraph::renderEdges(const Camera &camera, const Light &light, const std::v
       edgeShape = tlp::EdgeShape::Polyline;
     }
 
-    if (!lineMode || parametricCurveMode || _viewSelection->getEdgeValue(e)) {
+    if (!lineMode || parametricCurveMode || _inputData.getElementSelection()->getEdgeValue(e)) {
 
-      string edgeTexture = _viewTexture->getEdgeValue(e);
-      Size edgeSize = ::getEdgeSize(_graph, e, _viewSize, &_renderingParameters);
+      string edgeTexture = _inputData.getElementTexture()->getEdgeValue(e);
+      Size edgeSize = ::getEdgeSize(_graph, e, _inputData.getElementSize(), &_renderingParameters);
 
       vector<Vec4f> edgePoints;
       float length = 0;
@@ -1455,7 +1417,7 @@ void GlGraph::renderEdges(const Camera &camera, const Light &light, const std::v
 
       TextureManager::instance()->unbindTexture(edgeTexture);
 
-      if (!lineMode && _viewBorderWidth->getEdgeValue(e) > 0) {
+      if (!lineMode && _inputData.getElementBorderWidth()->getEdgeValue(e) > 0) {
         if (!_renderingParameters.interpolateEdgesColors()) {
           srcColor = borderColor;
           tgtColor = borderColor;
@@ -1465,7 +1427,7 @@ void GlGraph::renderEdges(const Camera &camera, const Light &light, const std::v
         edgeShader->setUniformColor("u_startColor", srcColor);
         edgeShader->setUniformColor("u_endColor", tgtColor);
 
-        glLineWidth(_viewBorderWidth->getEdgeValue(e));
+        glLineWidth(_inputData.getElementBorderWidth()->getEdgeValue(e));
         glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*2*sizeof(unsigned short)));
         glDrawElements(GL_LINE_STRIP, nbCurvePoints, GL_UNSIGNED_SHORT, BUFFER_OFFSET(indicesOffset*3*sizeof(unsigned short)));
       }
@@ -1594,9 +1556,9 @@ bool GlGraph::pickNodeOrEdge(const Camera &camera,
 Size GlGraph::getEdgeSize(edge e) {
   node src = _graph->source(e);
   node tgt = _graph->target(e);
-  const Size &srcSize = _viewSize->getNodeValue(src);
-  const Size &tgtSize = _viewSize->getNodeValue(tgt);
-  const Size &edgeSize = _viewSize->getEdgeValue(e);
+  const Size &srcSize = _inputData.getElementSize()->getNodeValue(src);
+  const Size &tgtSize = _inputData.getElementSize()->getNodeValue(tgt);
+  const Size &edgeSize = _inputData.getElementSize()->getEdgeValue(e);
 
   float startSize = 0;
   float endSize = 0;
@@ -1629,14 +1591,14 @@ void GlGraph::prepareEdgeData(tlp::edge e) {
   node src = _graph->source(e);
   node tgt = _graph->target(e);
 
-  const Coord &srcCoord = _viewLayout->getNodeValue(src);
-  const Coord &tgtCoord = _viewLayout->getNodeValue(tgt);
-  const Size &srcSize = _viewSize->getNodeValue(src);
-  const Size &tgtSize = _viewSize->getNodeValue(tgt);
-  double srcRot = _viewRotation->getNodeValue(src);
-  double tgtRot = _viewRotation->getNodeValue(tgt);
-  int srcGlyphId = _viewShape->getNodeValue(src);
-  int tgtGlyphId = _viewShape->getNodeValue(tgt);
+  const Coord &srcCoord = _inputData.getElementLayout()->getNodeValue(src);
+  const Coord &tgtCoord = _inputData.getElementLayout()->getNodeValue(tgt);
+  const Size &srcSize = _inputData.getElementSize()->getNodeValue(src);
+  const Size &tgtSize = _inputData.getElementSize()->getNodeValue(tgt);
+  double srcRot = _inputData.getElementRotation()->getNodeValue(src);
+  double tgtRot = _inputData.getElementRotation()->getNodeValue(tgt);
+  int srcGlyphId = _inputData.getElementShape()->getNodeValue(src);
+  int tgtGlyphId = _inputData.getElementShape()->getNodeValue(tgt);
 
   float maxSrcSize = max(srcSize[0], srcSize[1]);
   float maxTgtSize = max(tgtSize[0], tgtSize[1]);
@@ -1644,7 +1606,7 @@ void GlGraph::prepareEdgeData(tlp::edge e) {
   BoundingBox srcBB(srcCoord - srcSize/2.f, srcCoord + srcSize/2.f);
   BoundingBox tgtBB(tgtCoord - tgtSize/2.f, tgtCoord + tgtSize/2.f);
 
-  const vector<Coord> &oribends = _viewLayout->getEdgeValue(e);
+  const vector<Coord> &oribends = _inputData.getElementLayout()->getEdgeValue(e);
   vector<Coord> bends;
   for (size_t i = 0 ; i < oribends.size() ; ++i) {
     if (!srcBB.contains(oribends[i]) && !tgtBB.contains(oribends[i])) {
@@ -1674,7 +1636,7 @@ void GlGraph::prepareEdgeData(tlp::edge e) {
 
     vector<Vec3f> eeData;
     eeData.reserve(3);
-    if (_renderingParameters.displayEdgesExtremities() && _viewSrcAnchorShape->getEdgeValue(e) != EdgeExtremityShape::None) {
+    if (_renderingParameters.displayEdgesExtremities() && _inputData.getElementSrcAnchorShape()->getEdgeValue(e) != EdgeExtremityShape::None) {
 
       Coord lineAnchor = bends.size() > 0 ? bends.front() : tgtAnchor;
       eeData.push_back(lineAnchor);
@@ -1682,7 +1644,7 @@ void GlGraph::prepareEdgeData(tlp::edge e) {
       if (_renderingParameters.interpolateEdgesSizes()) {
         eeData.push_back(Vec3f(srcSize[0] / 4.f, srcSize[0] / 4.f, srcSize[0] / 4.f));
       } else {
-        Size srcAnchorSize = _viewSrcAnchorSize->getEdgeValue(e);
+        Size srcAnchorSize = _inputData.getElementSrcAnchorSize()->getEdgeValue(e);
         if (_renderingParameters.maxEdgesSizesToNodesSizes()) {
           srcAnchorSize[0] = min(srcAnchorSize[0], maxSrcSize);
           srcAnchorSize[1] = min(srcAnchorSize[1], maxSrcSize);
@@ -1725,7 +1687,7 @@ void GlGraph::prepareEdgeData(tlp::edge e) {
 
     eeData.clear();
 
-    if (_renderingParameters.displayEdgesExtremities() && _viewTgtAnchorShape->getEdgeValue(e) != EdgeExtremityShape::None) {
+    if (_renderingParameters.displayEdgesExtremities() && _inputData.getElementTgtAnchorShape()->getEdgeValue(e) != EdgeExtremityShape::None) {
 
       Coord lineAnchor = bends.size() > 0 ? bends.back() : srcAnchor;
       eeData.push_back(lineAnchor);
@@ -1733,7 +1695,7 @@ void GlGraph::prepareEdgeData(tlp::edge e) {
       if (_renderingParameters.interpolateEdgesSizes()) {
         eeData.push_back(Vec3f(tgtSize[0] / 4.f, tgtSize[0] / 4.f, tgtSize[0] / 4.f));
       } else {
-        Size tgtAnchorSize = _viewTgtAnchorSize->getEdgeValue(e);
+        Size tgtAnchorSize = _inputData.getElementTgtAnchorSize()->getEdgeValue(e);
         if (_renderingParameters.maxEdgesSizesToNodesSizes()) {
           tgtAnchorSize[0] = min(tgtAnchorSize[0], maxTgtSize);
           tgtAnchorSize[1] = min(tgtAnchorSize[1], maxTgtSize);
@@ -1795,7 +1757,9 @@ void GlGraph::treatEvent(const tlp::Event &message) {
   const GraphEvent *gEvt = dynamic_cast<const GraphEvent *>(&message);
   const PropertyEvent *pEvt = dynamic_cast<const PropertyEvent *>(&message);
   const GlGraphRenderingParametersEvent *rpEvt = dynamic_cast<const GlGraphRenderingParametersEvent *>(&message);
-  if (gEvt) {
+  if (message.sender() == &_inputData) {
+    notifyModified();
+  } else if (gEvt) {
     if (gEvt->getType() == GraphEvent::TLP_ADD_NODE) {
       _nodesToUpdate.insert(gEvt->getNode());
     } else if (gEvt->getType() == GraphEvent::TLP_ADD_NODES) {
@@ -1821,7 +1785,7 @@ void GlGraph::treatEvent(const tlp::Event &message) {
       notifyModified();
     }
   }
-  else if (pEvt && (pEvt->getProperty() == _viewLayout || pEvt->getProperty() == _viewSize || pEvt->getProperty() == _viewColor)) {
+  else if (pEvt && (pEvt->getProperty() == _inputData.getElementLayout() || pEvt->getProperty() == _inputData.getElementSize() || pEvt->getProperty() == _inputData.getElementColor())) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE && _graph->isElement(pEvt->getNode())) {
       forEach(e, _graph->getInOutEdges(pEvt->getNode())) {
         _edgesToUpdate.insert(e);
@@ -1833,17 +1797,17 @@ void GlGraph::treatEvent(const tlp::Event &message) {
       }
     }
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_EDGE_VALUE &&
-        (pEvt->getProperty() == _viewLayout || pEvt->getProperty() == _viewColor) &&
+        (pEvt->getProperty() == _inputData.getElementLayout() || pEvt->getProperty() == _inputData.getElementColor()) &&
         _graph->isElement(pEvt->getEdge())) {
       _edgesToUpdate.insert(pEvt->getEdge());
     }
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_EDGE_VALUE &&
-        (pEvt->getProperty() == _viewLayout || pEvt->getProperty() == _viewColor)) {
+        (pEvt->getProperty() == _inputData.getElementLayout() || pEvt->getProperty() == _inputData.getElementColor())) {
       forEach(e, _graph->getEdges()) {
         _edgesToUpdate.insert(e);
       }
     }
-  } else if (pEvt && pEvt->getProperty() == _viewLabel) {
+  } else if (pEvt && pEvt->getProperty() == _inputData.getElementLabel()) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE && _graph->isElement(pEvt->getNode())) {
       _nodesToUpdate.insert(pEvt->getNode());
     } else if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE) {
@@ -1851,7 +1815,7 @@ void GlGraph::treatEvent(const tlp::Event &message) {
         _nodesToUpdate.insert(n);
       }
     }
-  } else if (pEvt && (pEvt->getProperty() == _viewShape || pEvt->getProperty() == _viewBorderWidth || pEvt->getProperty() == _viewBorderColor)) {
+  } else if (pEvt && (pEvt->getProperty() == _inputData.getElementShape() || pEvt->getProperty() == _inputData.getElementBorderWidth() || pEvt->getProperty() == _inputData.getElementBorderColor())) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_EDGE_VALUE) {
       forEach(e, _graph->getEdges()) {
         _edgesToUpdate.insert(e);
@@ -1863,7 +1827,7 @@ void GlGraph::treatEvent(const tlp::Event &message) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE) {
       notifyModified();
     }
-  } else if (pEvt && (pEvt->getProperty() == _viewGlow || pEvt->getProperty() == _viewFontAwesomeIcon || pEvt->getProperty() == _viewLabelColor) &&
+  } else if (pEvt && (pEvt->getProperty() == _inputData.getElementGlow() || pEvt->getProperty() == _inputData.getElementFontAwesomeIcon() || pEvt->getProperty() == _inputData.getElementLabelColor()) &&
              (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE)) {
 
     notifyModified();

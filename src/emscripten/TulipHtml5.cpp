@@ -46,6 +46,7 @@
 #include "glyphs/GlyphsRenderer.h"
 #include "GlGraphRenderingParameters.h"
 #include "Interactors.h"
+#include "GlGraphInputData.h"
 
 #include <sys/stat.h>
 #include <emscripten/emscripten.h>
@@ -792,6 +793,184 @@ void EMSCRIPTEN_KEEPALIVE computeGraphHullVertices(tlp::Graph *graph, bool withH
     oss << "hullVertices" << i;
     graph->setAttribute(oss.str(), hullVertices[i]);
   }
+}
+
+//==============================================================
+
+GlGraphInputData* EMSCRIPTEN_KEEPALIVE getViewInputData(const char *canvasId) {
+  return &(glGraph[canvasId]->getInputData());
+}
+
+tlp::ColorProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementColor(GlGraphInputData *inputData) {
+  return inputData->getElementColor();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementColor(GlGraphInputData *inputData, tlp::ColorProperty *property) {
+  inputData->setElementColor(property);
+}
+
+tlp::ColorProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementLabelColor(GlGraphInputData *inputData) {
+  return inputData->getElementLabelColor();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementLabelColor(GlGraphInputData *inputData, tlp::ColorProperty *property) {
+  inputData->setElementLabelColor(property);
+}
+
+tlp::SizeProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementSize(GlGraphInputData *inputData) {
+  return inputData->getElementSize();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementSize(GlGraphInputData *inputData, tlp::SizeProperty *property) {
+  inputData->setElementSize(property);
+}
+
+tlp::IntegerProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementLabelPosition(GlGraphInputData *inputData) {
+  return inputData->getElementLabelPosition();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementLabelPosition(GlGraphInputData *inputData, tlp::IntegerProperty *property) {
+  inputData->setElementLabelPosition(property);
+}
+
+tlp::IntegerProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementShape(GlGraphInputData *inputData) {
+  return inputData->getElementShape();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementShape(GlGraphInputData *inputData, tlp::IntegerProperty *property) {
+  inputData->setElementShape(property);
+}
+
+tlp::DoubleProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementRotation(GlGraphInputData *inputData) {
+  return inputData->getElementRotation();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementRotation(GlGraphInputData *inputData, tlp::DoubleProperty *property) {
+  inputData->setElementRotation(property);
+}
+
+tlp::BooleanProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementSelection(GlGraphInputData *inputData) {
+  return inputData->getElementSelection();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementSelection(GlGraphInputData *inputData, tlp::BooleanProperty *property) {
+  inputData->setElementSelection(property);
+}
+
+tlp::StringProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementFont(GlGraphInputData *inputData) {
+  return inputData->getElementFont();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementFont(GlGraphInputData *inputData, tlp::StringProperty *property) {
+  inputData->setElementFont(property);
+}
+
+tlp::IntegerProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementFontSize(GlGraphInputData *inputData) {
+  return inputData->getElementFontSize();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementFontSize(GlGraphInputData *inputData, tlp::IntegerProperty *property) {
+  inputData->setElementFontSize(property);
+}
+
+tlp::StringProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementLabel(GlGraphInputData *inputData) {
+  return inputData->getElementLabel();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementLabel(GlGraphInputData *inputData, tlp::StringProperty *property) {
+  inputData->setElementLabel(property);
+}
+
+tlp::LayoutProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementLayout(GlGraphInputData *inputData) {
+  return inputData->getElementLayout();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementLayout(GlGraphInputData *inputData, tlp::LayoutProperty *property) {
+  inputData->setElementLayout(property);
+}
+
+tlp::StringProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementTexture(GlGraphInputData *inputData) {
+  return inputData->getElementTexture();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementTexture(GlGraphInputData *inputData, tlp::StringProperty *property) {
+  inputData->setElementTexture(property);
+}
+
+tlp::ColorProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementBorderColor(GlGraphInputData *inputData) {
+  return inputData->getElementBorderColor();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementBorderColor(GlGraphInputData *inputData, tlp::ColorProperty *property) {
+  inputData->setElementBorderColor(property);
+}
+
+tlp::DoubleProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementBorderWidth(GlGraphInputData *inputData) {
+  return inputData->getElementBorderWidth();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementBorderWidth(GlGraphInputData *inputData, tlp::DoubleProperty *property) {
+  inputData->setElementBorderWidth(property);
+}
+
+tlp::IntegerProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementSrcAnchorShape(GlGraphInputData *inputData) {
+  return inputData->getElementSrcAnchorShape();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementSrcAnchorShape(GlGraphInputData *inputData, tlp::IntegerProperty *property) {
+  inputData->setElementSrcAnchorShape(property);
+}
+
+tlp::SizeProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementSrcAnchorSize(GlGraphInputData *inputData) {
+  return inputData->getElementSrcAnchorSize();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementSrcAnchorSize(GlGraphInputData *inputData, tlp::SizeProperty *property) {
+  inputData->setElementSrcAnchorSize(property);
+}
+
+tlp::IntegerProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementTgtAnchorShape(GlGraphInputData *inputData) {
+  return inputData->getElementTgtAnchorShape();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementTgtAnchorShape(GlGraphInputData *inputData, tlp::IntegerProperty *property) {
+  inputData->setElementTgtAnchorShape(property);
+}
+
+tlp::SizeProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementTgtAnchorSize(GlGraphInputData *inputData) {
+  return inputData->getElementTgtAnchorSize();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementTgtAnchorSize(GlGraphInputData *inputData, tlp::SizeProperty *property) {
+  inputData->setElementTgtAnchorSize(property);
+}
+
+tlp::StringProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementFontAwesomeIcon(GlGraphInputData *inputData) {
+  return inputData->getElementFontAwesomeIcon();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementFontAwesomeIcon(GlGraphInputData *inputData, tlp::StringProperty *property) {
+  inputData->setElementFontAwesomeIcon(property);
+}
+
+tlp::BooleanProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementGlow(GlGraphInputData *inputData) {
+  return inputData->getElementGlow();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementGlow(GlGraphInputData *inputData, tlp::BooleanProperty *property) {
+  inputData->setElementGlow(property);
+}
+
+tlp::ColorProperty* EMSCRIPTEN_KEEPALIVE GlGraphInputData_getElementGlowColor(GlGraphInputData *inputData) {
+  return inputData->getElementGlowColor();
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_setElementGlowColor(GlGraphInputData *inputData, tlp::ColorProperty *property) {
+  inputData->setElementGlowColor(property);
+}
+
+void EMSCRIPTEN_KEEPALIVE GlGraphInputData_reloadGraphProperties(GlGraphInputData *inputData, bool resetDefaulProperties = false) {
+  inputData->reloadGraphProperties(resetDefaulProperties);
 }
 
 }

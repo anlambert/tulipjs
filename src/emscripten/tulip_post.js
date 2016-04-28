@@ -282,6 +282,36 @@ tulip.PropertyInterface.prototype.getGraph = function tulip_PropertyInterface_pr
 
 // ==================================================================================================================
 
+function createPropertyProxyIfAvailable(prop) {
+  if (typeof Proxy == 'function') {
+    var handler = {
+      get: function(target, p) {
+        if (p.startsWith('[Node')) {
+          return target.getNodeValue(tulip.Node(parseInt(p.substr(6, p.length-7))));
+        } else if (p.startsWith('[Edge')) {
+          return target.getEdgeValue(tulip.Edge(parseInt(p.substr(6, p.length-7))));
+        } else {
+          return target[p];
+        }
+      },
+      set: function(target, p, value){
+        if (p.startsWith('[Node')) {
+          target.setNodeValue(tulip.Node(parseInt(p.substr(6, p.length-7))), value);
+        } else if (p.startsWith('[Edge')) {
+          target.setEdgeValue(tulip.Edge(parseInt(p.substr(6, p.length-7))), value);
+        } else {
+          target[p] = value;
+        }
+      }
+    };
+    return new Proxy(prop, handler);
+  } else {
+    return prop;
+  }
+}
+
+// ==================================================================================================================
+
 var _createBooleanProperty = Module.cwrap('createBooleanProperty', 'number', ['number', 'string']);
 var _BooleanProperty_setAllNodeValue = Module.cwrap('BooleanProperty_setAllNodeValue', null, ['number', 'number']);
 var _BooleanProperty_getNodeDefaultValue = Module.cwrap('BooleanProperty_getNodeDefaultValue', 'number', ['number']);
@@ -311,7 +341,7 @@ tulip.BooleanProperty = function tulip_BooleanProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::BooleanProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.BooleanProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.BooleanProperty.prototype.getNodeDefaultValue = function tulip_BooleanProperty_prototype_getNodeDefaultValue() {
@@ -399,7 +429,7 @@ tulip.BooleanVectorProperty = function tulip_BooleanVectorProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::BooleanVectorProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.BooleanVectorProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.BooleanVectorProperty.prototype.getNodeDefaultValue = function tulip_BooleanVectorProperty_prototype_getNodeDefaultValue() {
@@ -514,7 +544,7 @@ tulip.DoubleProperty = function tulip_DoubleProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::DoubleProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.DoubleProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.DoubleProperty.prototype.getNodeDefaultValue = function tulip_DoubleProperty_prototype_getNodeDefaultValue() {
@@ -599,7 +629,7 @@ tulip.DoubleVectorProperty = function tulip_DoubleVectorProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::DoubleVectorProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.DoubleVectorProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.DoubleVectorProperty.prototype.getNodeDefaultValue = function tulip_DoubleVectorProperty_prototype_getNodeDefaultValue() {
@@ -714,7 +744,7 @@ tulip.IntegerProperty = function tulip_IntegerProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::IntegerProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.IntegerProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.IntegerProperty.prototype.getNodeDefaultValue = function tulip_IntegerProperty_prototype_getNodeDefaultValue() {
@@ -791,7 +821,7 @@ tulip.IntegerVectorProperty = function tulip_IntegerVectorProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::IntegerVectorProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.IntegerVectorProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.IntegerVectorProperty.prototype.getNodeDefaultValue = function tulip_IntegerVectorProperty_prototype_getNodeDefaultValue() {
@@ -906,7 +936,7 @@ tulip.StringProperty = function tulip_StringProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::StringProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.StringProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.StringProperty.prototype.getNodeDefaultValue = function tulip_StringProperty_prototype_getNodeDefaultValue() {
@@ -989,7 +1019,7 @@ tulip.StringVectorProperty = function tulip_StringVectorProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::StringVectorProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.StringVectorProperty.inheritsFrom(tulip.PropertyInterface);
 
@@ -1142,7 +1172,7 @@ tulip.ColorProperty = function tulip_ColorProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::ColorProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.ColorProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.ColorProperty.prototype.getNodeDefaultValue = function tulip_ColorProperty_prototype_getNodeDefaultValue() {
@@ -1234,7 +1264,7 @@ tulip.ColorVectorProperty = function tulip_ColorVectorProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::ColorVectorProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.ColorVectorProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.ColorVectorProperty.prototype.getNodeDefaultValue = function tulip_ColorVectorProperty_prototype_getNodeDefaultValue() {
@@ -1696,7 +1726,7 @@ tulip.LayoutProperty = function tulip_LayoutProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::LayoutProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.LayoutProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.LayoutProperty.prototype.getNodeDefaultValue = function tulip_LayoutProperty_prototype_getNodeDefaultValue() {
@@ -1910,7 +1940,7 @@ tulip.SizeProperty = function tulip_SizeProperty() {
     tulip.PropertyInterface.call(newObject, cppPointer, graphManaged);
     newObject.setWrappedTypename("tlp::SizeProperty");
   }
-  return newObject;
+  return createPropertyProxyIfAvailable(newObject);
 };
 tulip.SizeProperty.inheritsFrom(tulip.PropertyInterface);
 tulip.SizeProperty.prototype.getNodeDefaultValue = function tulip_SizeProperty_prototype_getNodeDefaultValue() {
@@ -2100,6 +2130,9 @@ tulip.Node = function tulip_Node(id) {
 tulip.Node.prototype.isValid = function() {
   return this.id != UINT_MAX;
 };
+tulip.Node.prototype.toString = function() {
+  return '[Node ' + this.id + ']';
+};
 
 // ==================================================================================================================
 /**
@@ -2120,6 +2153,9 @@ tulip.Edge = function tulip_Edge(id) {
 };
 tulip.Edge.prototype.isValid = function() {
   return this.id != UINT_MAX;
+};
+tulip.Edge.prototype.toString = function() {
+  return '[Edge ' + this.id + ']';
 };
 
 // ==================================================================================================================

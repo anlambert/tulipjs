@@ -1851,6 +1851,8 @@ void GlGraph::treatEvent(const tlp::Event &message) {
              (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE)) {
 
     notifyModified();
+  } else if (pEvt && pEvt->getProperty() == _inputData.getElementSelection()) {
+    notifyModified();
   } else if (rpEvt && (rpEvt->getType() == GlGraphRenderingParametersEvent::DISPLAY_EDGES_EXTREMITIES_TOGGLED)) {
     forEach(e, _graph->getEdges()) {
       _edgesToUpdate.insert(e);

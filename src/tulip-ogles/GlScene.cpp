@@ -156,7 +156,9 @@ void GlScene::draw() {
     drawBackBufferBackup();
   }
 
-  _sceneNeedRedraw = false;
+  if (!_pickingMode) {
+    _sceneNeedRedraw = false;
+  }
 }
 
 void GlScene::backupBackBuffer() {

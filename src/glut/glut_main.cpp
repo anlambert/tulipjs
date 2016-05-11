@@ -58,7 +58,6 @@ static int CURRENT_HEIGHT = 768;
 static tlp::Color backgroundColor(255,255,255);
 static GlScene * glScene;
 static GlGraph * glGraph;
-static GlLayer * hullsLayer;
 static tlp::Graph * graph;
 
 static GlSceneInteractor *currentInteractor = NULL;
@@ -346,8 +345,6 @@ int  main(int argc, char *argv[]) {
 
   glGraph = new GlGraph();
   glScene->getMainLayer()->addGlEntity(glGraph, "graph");
-
-  hullsLayer = glScene->createLayerAfter("hulls", "Main");
 
   activateInteractor("ZoomAndPan");
 

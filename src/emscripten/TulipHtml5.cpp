@@ -416,8 +416,6 @@ void EMSCRIPTEN_KEEPALIVE initCanvas(const char *canvasId, int width, int height
     glScene[currentCanvasId]->addListener(&glDrawObserver);
     glScene[currentCanvasId]->getMainLayer()->addListener(&glDrawObserver);
 
-
-    glScene[currentCanvasId]->getMainLayer()->getLight()->setDirectionnalLight(true);
     glScene[currentCanvasId]->setViewport(viewport);
 
     glGraph[currentCanvasId] = new GlGraph();

@@ -754,7 +754,11 @@ void GlyphsRenderer::renderGlyphsHardwareInstancing(int glyphId,
         _glyphsInstanceAttributesDataBuffer->write((i * glyphsAttributesDataStride + 10) * sizeof(float), 4 * sizeof(float), &outlineColorsData[4*i]);
       }
 
-      glLineWidth(it->first);
+      if (it->first > 0) {
+        glLineWidth(it->first);
+      } else {
+        glLineWidth(2.0f);
+      }
 
       glDrawElementsInstancedARB(GL_LINES, nbOutlineIndices, GL_UNSIGNED_SHORT, BUFFER_OFFSET(_glyphsOutlineIndicesOffset[glyph]), it->second.size());
     }
@@ -878,7 +882,11 @@ void GlyphsRenderer::renderGlyphsPseudoInstancing(int glyphId,
           _glyphShader->setUniformBool("u_flatShading", true);
           _glyphShader->setUniformBool("u_textureActivated", false);
           _glyphShader->setUniformVec4FloatArray("u_color", nbInstancesByRenderingBatch, &outlineColorsData[0]);
-          glLineWidth(it->first);
+          if (it->first > 0) {
+            glLineWidth(it->first);
+          } else {
+            glLineWidth(2.0f);
+          }
           glDrawElements(GL_LINES, cpt*nbOutlineIndices, indicesType, BUFFER_OFFSET(_glyphsOutlineIndicesOffset[glyph]));
         }
 
@@ -911,8 +919,11 @@ void GlyphsRenderer::renderGlyphsPseudoInstancing(int glyphId,
         _glyphShader->setUniformBool("u_flatShading", true);
         _glyphShader->setUniformBool("u_textureActivated", false);
         _glyphShader->setUniformVec4FloatArray("u_color", cpt, &outlineColorsData[0]);
-
-        glLineWidth(it->first);
+        if (it->first > 0) {
+          glLineWidth(it->first);
+        } else {
+          glLineWidth(2.0f);
+        }
 
         glDrawElements(GL_LINES, cpt*nbOutlineIndices, indicesType, BUFFER_OFFSET(_glyphsOutlineIndicesOffset[glyph]));
       }

@@ -31,6 +31,10 @@ function getScriptName() {
     scriptName = scriptName.substr(0, scriptName.indexOf('?r='));
   }
 
+  if (scriptName && scriptName.indexOf('?v=') != -1) {
+    scriptName = scriptName.substr(0, scriptName.indexOf('?v='));
+  }
+
   return scriptName;
 }
 

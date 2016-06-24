@@ -90,11 +90,10 @@ void GlScene::requestDraw() {
 
 void GlScene::draw() {
 
-  static BoundingBox lastSceneBoundingBox;
   BoundingBox sceneBoundingBox = getBoundingBox();
-  if (lastSceneBoundingBox[0] != sceneBoundingBox[0] || lastSceneBoundingBox[1] != sceneBoundingBox[1]) {
+  if (_lastSceneBoundingBox[0] != sceneBoundingBox[0] || _lastSceneBoundingBox[1] != sceneBoundingBox[1]) {
     _lodCalculator->setSceneBoundingBox(sceneBoundingBox);
-    lastSceneBoundingBox = sceneBoundingBox;
+    _lastSceneBoundingBox = sceneBoundingBox;
   }
 
   if (_sceneNeedRedraw || _pickingMode) {
@@ -111,6 +110,8 @@ void GlScene::draw() {
     initGlParameters();
 
     for(vector<pair<string, GlLayer *> >::iterator it=_layersList.begin(); it!=_layersList.end(); ++it) {
+
+      glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       Camera &camera = *(it->second->getCamera());
       Light &light = *(it->second->getLight());
@@ -129,6 +130,7 @@ void GlScene::draw() {
         _lodCalculator->compute(&camera, _selectionViewport);
       }
       const vector<GlEntityLODUnit> &lodResult = _lodCalculator->getGlEntitiesResult(it->second);
+
       if (!lodResult.empty()) {
         for (size_t i = 0 ; i < lodResult.size() ; ++i) {
           if (lodResult[i].lod < 0 || !lodResult[i].glEntity->isVisible()) {
@@ -139,7 +141,6 @@ void GlScene::draw() {
         }
       }
 
-      glClear(GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     glDisable(GL_DEPTH_TEST);

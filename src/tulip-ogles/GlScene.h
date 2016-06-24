@@ -180,6 +180,8 @@ private:
   bool _pickingMode;
   bool _backupBackBuffer;
 
+  tlp::BoundingBox _lastSceneBoundingBox;
+
 
 };
 

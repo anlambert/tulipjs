@@ -145,7 +145,7 @@ static int getModifiers(const EmscriptenKeyboardEvent &keyEvent) {
 }
 
 static EM_BOOL mouseCallback(int eventType, const EmscriptenMouseEvent *mouseEvent, void *userData) {
-  std::string canvasId = canvasIds[reinterpret_cast<int>(userData)];
+  std::string canvasId = reinterpret_cast<const char *>(userData);
   if (currentCanvasInteractor[canvasId]) {
     MouseButton button;
     if (mouseEvent->button == 0) {
@@ -172,7 +172,7 @@ static EM_BOOL mouseCallback(int eventType, const EmscriptenMouseEvent *mouseEve
 }
 
 static EM_BOOL wheelCallback(int /* eventType */, const EmscriptenWheelEvent *wheelEvent, void *userData) {
-  std::string canvasId = canvasIds[reinterpret_cast<int>(userData)];
+  std::string canvasId = reinterpret_cast<const char *>(userData);
   if (currentCanvasInteractor[canvasId]) {
     double delta = wheelEvent->deltaY;
     if (wheelEvent->mouse.shiftKey && isChrome()) {
@@ -188,8 +188,7 @@ static EM_BOOL wheelCallback(int /* eventType */, const EmscriptenWheelEvent *wh
 }
 
 static EM_BOOL keyCallback(int /* eventType */, const EmscriptenKeyboardEvent *keyEvent, void *userData) {
-
-  std::string canvasId = canvasIds[reinterpret_cast<int>(userData)];
+  std::string canvasId = reinterpret_cast<const char *>(userData);
   if (currentCanvasInteractor[canvasId]) {
     return currentCanvasInteractor[canvasId]->keyboardCallback(keyEvent->key, getModifiers(*keyEvent));
   }
@@ -403,13 +402,13 @@ void EMSCRIPTEN_KEEPALIVE initCanvas(const char *canvasId, int width, int height
 
     setCurrentCanvas(canvasId);
 
-    emscripten_set_mousedown_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(canvasIds.size()-1), false, mouseCallback);
-    emscripten_set_mouseup_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(canvasIds.size()-1), false, mouseCallback);
-    emscripten_set_mousemove_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(canvasIds.size()-1), false, mouseCallback);
-    emscripten_set_mouseenter_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(canvasIds.size()-1), false, mouseCallback);
-    emscripten_set_mouseleave_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(canvasIds.size()-1), false, mouseCallback);
-    emscripten_set_wheel_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(canvasIds.size()-1), false, wheelCallback);
-    emscripten_set_keypress_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(canvasIds.size()-1), false, keyCallback);
+    emscripten_set_mousedown_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(const_cast<char*>(canvasIds.back().c_str())), false, mouseCallback);
+    emscripten_set_mouseup_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(const_cast<char*>(canvasIds.back().c_str())), false, mouseCallback);
+    emscripten_set_mousemove_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(const_cast<char*>(canvasIds.back().c_str())), false, mouseCallback);
+    emscripten_set_mouseenter_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(const_cast<char*>(canvasIds.back().c_str())), false, mouseCallback);
+    emscripten_set_mouseleave_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(const_cast<char*>(canvasIds.back().c_str())), false, mouseCallback);
+    emscripten_set_wheel_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(const_cast<char*>(canvasIds.back().c_str())), false, wheelCallback);
+    emscripten_set_keypress_callback(canvasIds.back().c_str(), reinterpret_cast<void*>(const_cast<char*>(canvasIds.back().c_str())), false, keyCallback);
 
     tlp::Vec4i viewport(0, 0, width, height);
 

@@ -209,6 +209,7 @@ ELSE(NOT EMSCRIPTEN)
 
 SET(USE_DFE OFF CACHE BOOL "Use duplicate functions elimination to reduce emitted js file size (time consuming)")
 SET(USE_WASM OFF CACHE BOOL "Use WebAssembly (experimental) instead of asm.js")
+SET(LIGHTWEIGHT_TULIPJS OFF CACHE BOOL "Compile a lightweight version of tulip.js : contains only the graph visualization features, no algorithms bundled and no Worker created")
 
 FIND_PACKAGE(PythonInterp REQUIRED)
 
@@ -236,6 +237,8 @@ SET(CMAKE_EXECUTABLE_SUFFIX "")
 
 FILE(GLOB_RECURSE TULIP_PLUGINS_LIBRARIES "${TULIP_PLUGINS_DIR}/*.so")
 
+############################################################################################################
+
 ADD_EXECUTABLE(tulip-node.js ${TULIPJS_CORE_SRCS})
 
 TARGET_LINK_LIBRARIES(tulip-node.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
@@ -254,15 +257,20 @@ EM_LINK_POST_JS(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)
 EM_LINK_JS_LIBRARY(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_library.js)
 
 ADD_CUSTOM_COMMAND(TARGET tulip-node.js POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -DTULIP_VIZ_FEATURES=OFF -DJSFILE=tulip-node.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
+                   COMMAND ${CMAKE_COMMAND} -DTULIP_VIZ_FEATURES=OFF -DTULIP_USE_WORKER=OFF -DJSFILE=tulip-node.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+############################################################################################################
 
 ADD_EXECUTABLE(tulip.js ${TULIPJS_SRCS})
 
-TARGET_LINK_LIBRARIES(tulip.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
+TARGET_LINK_LIBRARIES(tulip.js ${TULIP_CORE_LIBRARY})
+SET(USE_WORKER ON)
 
-#SET(TULIP_JS_LINK_FLAGS "--bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
-#SET(TULIP_JS_LINK_FLAGS "--bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s TOTAL_MEMORY=268435456 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
+IF(NOT LIGHTWEIGHT_TULIPJS)
+  TARGET_LINK_LIBRARIES(tulip.js ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
+  SET(USE_WORKER OFF)
+ENDIF(NOT LIGHTWEIGHT_TULIPJS)
 
 SET(TULIP_JS_LINK_FLAGS "--bind -s USE_ZLIB=1 -s USE_FREETYPE=1 -s LZ4=1 -s TOTAL_MEMORY=268435456 -s MODULARIZE=1 -s EVAL_CTORS=0 -s EXPORT_NAME=\\\"tulipjs\\\" --preload-file resources/")
 
@@ -283,7 +291,7 @@ EM_LINK_POST_JS(tulip.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_post.js)
 EM_LINK_JS_LIBRARY(tulip.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_library.js)
 
 ADD_CUSTOM_COMMAND(TARGET tulip.js POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -DUSE_WASM=${USE_WASM} -DTULIP_VIZ_FEATURES=ON -DJSFILE=tulip.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
+                   COMMAND ${CMAKE_COMMAND} -DUSE_WASM=${USE_WASM} -DTULIP_VIZ_FEATURES=ON -DTULIP_USE_WORKER=${USE_WORKER} -DJSFILE=tulip.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_web.html DESTINATION ${CMAKE_INSTALL_PREFIX})

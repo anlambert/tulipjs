@@ -4924,7 +4924,7 @@ if (workerMode) {
 
   var tulipWorkerInit = true;
 
-  if (!nodejs) {
+  if (!nodejs && tulip.useWorker) {
 
     tulipWorkerInit = false;
 
@@ -5914,7 +5914,7 @@ if (workerMode) {
     return tulip.mainCalled && tulipWorkerInit;
   }
 
-  if (!nodejs) {
+  if (!nodejs && tulip.useWorker) {
 
     tulip.Graph.prototype.applyAlgorithmInWorker = function(algorithmName, algoParameters, algoFinishedCallback) {
       if (!tulip.algorithmExists(algorithmName)) {

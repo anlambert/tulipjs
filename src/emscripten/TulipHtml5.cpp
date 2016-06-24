@@ -364,6 +364,7 @@ void cleanManagedCanvasIfNeeded() {
     }
   }
   for (size_t i = 0 ; i < removedCanvas.size() ; ++i) {
+    setCurrentCanvas(removedCanvas[i].c_str());
     canvasIds.erase(std::remove(canvasIds.begin(), canvasIds.end(), removedCanvas[i]), canvasIds.end());
     emscripten_webgl_destroy_context(webGlContextHandle[removedCanvas[i]]);
     delete glScene[removedCanvas[i]];
@@ -551,6 +552,7 @@ void EMSCRIPTEN_KEEPALIVE clearGraphsHulls(const char *canvasId) {
 }
 
 void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
+
   setCurrentCanvas(canvasId);
 
   if (graph.find(canvasId) != graph.end() && graph[canvasId]->getRoot() != g->getRoot()) {

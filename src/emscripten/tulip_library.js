@@ -150,6 +150,21 @@ var LibraryTulipUtils = {
   isChrome: function() {
     return navigator.userAgent.toLowerCase().indexOf('chrome') > -1 &&
            navigator.vendor.toLowerCase().indexOf('google inc') > -1;
+  },
+
+  focusCanvas: function(canvasId) {
+    var canvas = document.getElementById(Pointer_stringify(canvasId));
+    if (!canvas) return;
+    var oldPos = canvas.style.position;
+    canvas.style.position = 'fixed';
+    canvas.focus();
+    canvas.style.position = oldPos;
+  },
+
+  blurCanvas: function(canvasId) {
+    var canvas = document.getElementById(Pointer_stringify(canvasId));
+    if (!canvas) return;
+    canvas.blur();
   }
 
 };

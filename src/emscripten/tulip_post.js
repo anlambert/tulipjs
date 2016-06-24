@@ -5180,6 +5180,7 @@ if (workerMode) {
         newObject.canvas.style.top = '0';
         newObject.canvas.style.left = '0';
         newObject.canvas.id = newObject.canvasId;
+        newObject.canvas.tabIndex = -1;
         newObject.container.appendChild(newObject.canvas);
         if (typeOf(width) != 'undefined' && typeOf(height) != 'undefined') {
           newObject.sizeRelativeToContainer = false;

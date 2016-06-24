@@ -77,6 +77,9 @@ bool domElementExists(const char *elementId);
 bool canXhrOnUrl(const char *url);
 void loadImageFromUrl(const char *url, void (*imageLoadedFunc)(const char *, const unsigned char *, unsigned int, unsigned int), void (*errorFunc)(unsigned int, void *, int));
 bool isChrome();
+void blurCanvas(const char *canvasId);
+void focusCanvas(const char *canvasId);
+
 
 void EMSCRIPTEN_KEEPALIVE updateGlScene(const char *canvasId) {
   std::string curCanvasBak = currentCanvasId;
@@ -384,10 +387,6 @@ void EMSCRIPTEN_KEEPALIVE initCanvas(const char *canvasId, int width, int height
 
   if (glScene.find(currentCanvasId) == glScene.end() || !glScene[currentCanvasId]) {
 
-    std::ostringstream oss;
-    oss << "document.getElementById('" << currentCanvasId << "').setAttribute('tabindex', '" << canvasIds.size() << "');";
-    emscripten_run_script(oss.str().c_str());
-
     canvasIds.push_back(currentCanvasId);
 
     resizeWebGLCanvas(canvasIds.back().c_str(), width, height, sizeRelativeToContainer);
@@ -444,18 +443,15 @@ void EMSCRIPTEN_KEEPALIVE setCurrentCanvas(const char *canvasId) {
       currentCanvasInteractor[canvasId]->setScene(glScene[canvasId]);
     }
   }
-  std::ostringstream oss;
+
   for (size_t i = 0 ; i < canvasIds.size() ; ++i) {
     if (canvasIds[i] != currentCanvasId) {
-      oss.str("");
-      oss << "if (document.getElementById('" << canvasIds[i] << "')) document.getElementById('" << canvasIds[i] << "').blur();";
-      emscripten_run_script(oss.str().c_str());
+      blurCanvas(canvasIds[i].c_str());
     }
   }
+
   if (std::string(canvasId) != "") {
-    oss.str("");
-    oss << "if (document.getElementById('" << canvasId << "')) document.getElementById('" << canvasId << "').focus();";
-    emscripten_run_script(oss.str().c_str());
+    focusCanvas(canvasId);
   }
 
 }

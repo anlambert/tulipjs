@@ -5213,7 +5213,7 @@ if (workerMode) {
     }
 
     tulip.View.prototype.draw = function() {
-      if (this.sizeRelativeToContainer) {
+      if (this.sizeRelativeToContainer && !this.fullScreenActivated) {
         _resizeCanvas(this.canvasId, this.container.clientWidth, this.container.clientHeight, this.sizeRelativeToContainer);
       }
       var view = this;

@@ -4928,7 +4928,7 @@ if (workerMode) {
 
     tulipWorkerInit = false;
 
-    var _tulipWorker = new Worker(scriptPath + scriptName);
+    var _tulipWorker = new Worker(tulip.modulePrefixURL + scriptName);
 
     _tulipWorker.addEventListener('message', function (event) {
       var delay = 0;

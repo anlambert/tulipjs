@@ -5303,7 +5303,7 @@ if (workerMode) {
       graphReq.onload = function (oEvent) {
         var arrayBuffer = graphReq.response;
         var paths = graphFilePath.split('/');
-        if (loadGraphInWorker) {
+        if (loadGraphInWorker && tulip.useWorker) {
           view.loadGraphFromData(paths[paths.length-1], arrayBuffer, loadGraphInWorker, graphLoadedCallback);
         } else {
           var file = FS.findObject(graphFilePath);
@@ -5330,7 +5330,7 @@ if (workerMode) {
 
     tulip.View.prototype.loadGraphFromData = function(graphFilePath, graphFileData, loadGraphInWorker, graphLoadedCallback) {
       var view = this;
-      if (loadGraphInWorker) {
+      if (loadGraphInWorker && tulip.useWorker) {
         var graph = tulip.Graph();
         view.setGraph(graph, true);
         if (graphLoadedCallback) {

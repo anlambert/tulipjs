@@ -276,6 +276,13 @@ void observeObject(tlp::Observable *observable) {
   deletedPointers.erase(pointerValue);
 }
 
+void observeGraphHierarchy(tlp::Graph *root) {
+  observeObject(root);
+  for (tlp::Graph *sg: root->getSubGraphs()) {
+    observeGraphHierarchy(sg);
+  }
+}
+
 void observeGraph(tlp::Graph *g) {
   if (!g || workerMode()) {
     return;
@@ -781,6 +788,7 @@ tlp::Graph * EMSCRIPTEN_KEEPALIVE addSubGraph(tlp::Graph *graph, unsigned int pa
   tlp::Graph *sg = parentGraph->getSubGraph(subGraphId);
   if (!sg) {
     sg = static_cast<tlp::GraphAbstract*>(parentGraph)->addSubGraph(subGraphId);
+    observeObject(sg);
   }
 
   std::vector<unsigned int> ids;
@@ -1000,8 +1008,7 @@ tlp::Graph * EMSCRIPTEN_KEEPALIVE loadGraph(const char *filename, bool notifyPro
       std::cerr << pluginProgress->getError() << std::endl;
     }
   }
-  //observeGraph(g);
-  observeObject(g);
+  observeGraphHierarchy(g);
   return g;
 }
 

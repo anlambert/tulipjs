@@ -5154,7 +5154,7 @@ if (workerMode) {
       view.canvasOverlayDiv.appendChild(progressDiv);
     }
 
-    var _setCanvasGraph = Module.cwrap('setCanvasGraph', null, ['string', 'number']);
+    var _setCanvasGraph = Module.cwrap('setCanvasGraph', null, ['string', 'number', 'number']);
     var _getViewRenderingParameters = Module.cwrap('getViewRenderingParameters', 'number', ['string']);
     var _getViewInputData = Module.cwrap('getViewInputData', 'number', ['string']);
 
@@ -5282,10 +5282,10 @@ if (workerMode) {
       return this.canvas.width;
     };
 
-    tulip.View.prototype.setGraph = function(graph) {
+    tulip.View.prototype.setGraph = function(graph, viewTakesGraphOwnership) {
       if (!graph.cppPointerValid()) return;
       this.graph = graph;
-      _setCanvasGraph(this.canvasId, graph.cppPointer);
+      _setCanvasGraph(this.canvasId, graph.cppPointer, viewTakesGraphOwnership);
       graphHierarchyIdToView[graph.getRoot().getCppPointer()] = this;
       graphHierarchyIdToWrapper[graph.getRoot().getCppPointer()] = graph.getRoot();
     };
@@ -5319,7 +5319,7 @@ if (workerMode) {
           FS.writeFile(graphFilePath, new Uint8Array(arrayBuffer), {'encoding' : 'binary'});
           var graph = tulip.loadGraph(graphFilePath, false);
           FS.unlink(graphFilePath);
-          view.setGraph(graph);
+          view.setGraph(graph, true);
           if (graphLoadedCallback) {
             graphLoadedCallback(view.graph);
           }
@@ -5332,7 +5332,7 @@ if (workerMode) {
       var view = this;
       if (loadGraphInWorker) {
         var graph = tulip.Graph();
-        view.setGraph(graph);
+        view.setGraph(graph, true);
         if (graphLoadedCallback) {
           graphLoadedCallbacks[view.graph.getCppPointer()] = graphLoadedCallback;
         }
@@ -5353,7 +5353,7 @@ if (workerMode) {
         FS.writeFile(graphFilePath, new Uint8Array(graphFileData), {'encoding' : 'binary'});
         var graph = tulip.loadGraph(graphFilePath, false);
         FS.unlink(graphFilePath);
-        view.setGraph(graph);
+        view.setGraph(graph, true);
         if (graphLoadedCallback) {
           graphLoadedCallback(view.graph);
         }

@@ -58,6 +58,7 @@ static std::map<std::string, EMSCRIPTEN_WEBGL_CONTEXT_HANDLE> webGlContextHandle
 static std::map<std::string, GlScene *> glScene;
 static std::map<std::string, GlGraph *> glGraph;
 static std::map<std::string, tlp::Graph *> graph;
+static std::map<std::string, bool> canDeleteGraph;
 static std::map<tlp::Graph *, std::string> graphToCanvas;
 static std::map<std::string, GlSceneInteractor*> currentCanvasInteractor;
 
@@ -368,8 +369,11 @@ void cleanManagedCanvasIfNeeded() {
   for (size_t i = 0 ; i < removedCanvas.size() ; ++i) {
     setCurrentCanvas(removedCanvas[i].c_str());
     canvasIds.erase(std::remove(canvasIds.begin(), canvasIds.end(), removedCanvas[i]), canvasIds.end());
-    emscripten_webgl_destroy_context(webGlContextHandle[removedCanvas[i]]);
     delete glScene[removedCanvas[i]];
+    if (canDeleteGraph[removedCanvas[i]]) {
+      delete graph[removedCanvas[i]]->getRoot();
+    }
+    emscripten_webgl_destroy_context(webGlContextHandle[removedCanvas[i]]);
     glScene.erase(removedCanvas[i]);
     graph.erase(removedCanvas[i]);
     glGraph.erase(removedCanvas[i]);
@@ -546,12 +550,17 @@ void EMSCRIPTEN_KEEPALIVE clearGraphsHulls(const char *canvasId) {
   graphsHulls[canvasId].clear();
 }
 
-void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
+void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g, bool viewTakesGraphOwnership) {
 
   setCurrentCanvas(canvasId);
 
   if (graph.find(canvasId) != graph.end() && graph[canvasId]->getRoot() != g->getRoot()) {
+
     clearGraphsHulls(canvasId);
+
+    if (canDeleteGraph[canvasId]) {
+      delete graph[canvasId]->getRoot();
+    }
   }
 
   tlp::StringProperty *viewTexture = g->getProperty<tlp::StringProperty>("viewTexture");
@@ -566,6 +575,7 @@ void EMSCRIPTEN_KEEPALIVE setCanvasGraph(const char *canvasId, tlp::Graph *g) {
   }
   viewTexture->addListener(&glDrawObserver);
   graph[canvasId] = g;
+  canDeleteGraph[canvasId] = viewTakesGraphOwnership;
   graphToCanvas[g] = canvasId;
   glGraph[canvasId]->setGraph(g);
 

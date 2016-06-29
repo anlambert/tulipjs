@@ -278,6 +278,8 @@
     renderingParameters.setDisplayEdgesExtremities($('#edge-extremities').prop('checked'));
     renderingParameters.setEdges3D($('#edges-3d').prop('checked'));
     renderingParameters.setMinSizeOfLabels(parseInt($('#labels-min-size').prop('value')));
+    renderingParameters.setElementsOrdered(false);
+    renderingParameters.setElementsOrderingProperty(null);
     renderingParameters.setMaxSizeOfLabels(parseInt($('#labels-max-size').prop('value')));
     tulipView.setGraphsHullsVisible($('#display-hulls').prop('checked'), true);
     var viewGlow = graph.getBooleanProperty('viewGlow');

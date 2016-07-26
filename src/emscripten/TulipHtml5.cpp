@@ -398,7 +398,7 @@ void EMSCRIPTEN_KEEPALIVE initCanvas(const char *canvasId, int width, int height
     EmscriptenWebGLContextAttributes webGlContextAttributes;
     emscripten_webgl_init_context_attributes(&webGlContextAttributes);
     webGlContextAttributes.stencil = true;
-    webGlContextAttributes.alpha = false;
+    webGlContextAttributes.alpha = true;
     webGlContextAttributes.preserveDrawingBuffer = true;
 
     webGlContextHandle[canvasId] = emscripten_webgl_create_context(canvasId, &webGlContextAttributes);
@@ -978,6 +978,68 @@ void EMSCRIPTEN_KEEPALIVE GlGraphInputData_reloadGraphProperties(GlGraphInputDat
   inputData->reloadGraphProperties(resetDefaulProperties);
 }
 
+//==============================================================
+
+Camera* EMSCRIPTEN_KEEPALIVE getViewCamera(const char *canvasId) {
+  return glScene[canvasId]->getLayer("Main")->getCamera();
 }
 
+void EMSCRIPTEN_KEEPALIVE Camera_getViewport(Camera *camera, int *buffer) {
+  tlp::Vec4i vp = camera->getViewport();
+  for (int i = 0 ; i < 4 ; ++i) {
+    buffer[i] = vp[i];
+  }
+}
+
+void EMSCRIPTEN_KEEPALIVE Camera_modelViewMatrix(Camera *camera, float *buffer) {
+  const tlp::MatrixGL &mdvMat = camera->modelviewMatrix();
+  for (int i = 0 ; i < 4 ; ++i) {
+    for (int j = 0 ; j < 4 ; ++j) {
+      buffer[i*4+j] = mdvMat[i][j];
+    }
+  }
+}
+
+void EMSCRIPTEN_KEEPALIVE Camera_setModelViewMatrix(Camera *camera, float *buffer) {
+  tlp::MatrixGL mdvMat;
+  for (int i = 0 ; i < 4 ; ++i) {
+    for (int j = 0 ; j < 4 ; ++j) {
+      mdvMat[i][j] = buffer[i*4+j];
+    }
+  }
+  camera->setModelViewMatrix(mdvMat);
+}
+
+void EMSCRIPTEN_KEEPALIVE Camera_projectionMatrix(Camera *camera, float *buffer) {
+  const tlp::MatrixGL &projMat = camera->projectionMatrix();
+  for (int i = 0 ; i < 4 ; ++i) {
+    for (int j = 0 ; j < 4 ; ++j) {
+      buffer[i*4+j] = projMat[i][j];
+    }
+  }
+}
+
+void EMSCRIPTEN_KEEPALIVE Camera_setProjectionMatrix(Camera *camera, float *buffer) {
+  tlp::MatrixGL projMat;
+  for (int i = 0 ; i < 4 ; ++i) {
+    for (int j = 0 ; j < 4 ; ++j) {
+       projMat[i][j] = buffer[i*4+j];
+    }
+  }
+  camera->setProjectionMatrix(projMat);
+}
+
+//==============================================================
+
+void EMSCRIPTEN_KEEPALIVE setViewBackgroundColor(const char *canvasId, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+  glScene[canvasId]->setBackgroundColor(tlp::Color(r, g, b , a));
+  glScene[canvasId]->requestDraw();
+}
+
+void EMSCRIPTEN_KEEPALIVE setViewBackupBackBuffer(const char *canvasId, bool backup) {
+  glScene[canvasId]->setBackupBackBuffer(backup);
+}
+
+
+}
 

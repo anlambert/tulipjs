@@ -110,6 +110,8 @@ public:
     return _projectionMatrix;
   }
 
+  void setProjectionMatrix(const tlp::MatrixGL &projMat);
+
   const tlp::MatrixGL &transformMatrix() const {
     return _transformMatrix;
   }
@@ -122,9 +124,9 @@ public:
     return _normalMatrix;
   }
 
-  tlp::Coord screenTo3DWorld(const tlp::Coord &point) ;
+  tlp::Coord screenTo3DWorld(const tlp::Coord &point);
 
-  tlp::Coord worldTo2DScreen(const tlp::Coord &obj) ;
+  tlp::Coord worldTo2DScreen(const tlp::Coord &obj);
 
   void pushProjectionMatrix();
   void popProjectionMatrix();

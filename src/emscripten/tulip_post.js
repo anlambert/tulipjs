@@ -5157,11 +5157,15 @@ if (workerMode) {
     var _setCanvasGraph = Module.cwrap('setCanvasGraph', null, ['string', 'number', 'number']);
     var _getViewRenderingParameters = Module.cwrap('getViewRenderingParameters', 'number', ['string']);
     var _getViewInputData = Module.cwrap('getViewInputData', 'number', ['string']);
+    var _getViewCamera = Module.cwrap('getViewCamera', 'number', ['string']);
+    var _setViewBackgroundColor = Module.cwrap('setViewBackgroundColor', null, ['string', 'number', 'number', 'number', 'number']);
+    var _setViewBackupBackBuffer = Module.cwrap('setViewBackupBackBuffer', null, ['string', 'number']);
 
     var nextCanvasId = 0;
 
     tulip.View = function(container, width, height) {
       var newObject = createObject(tulip.View, this);
+      newObject.canvasOverlayDiv = null;
       if (arguments.length > 0) {
         if (typeof(container) == 'string') {
           newObject.container = document.getElementById(container);
@@ -5169,31 +5173,48 @@ if (workerMode) {
           newObject.container = container;
         }
 
-        newObject.container.style.position = 'relative';
+        if (newObject.container.tagName == 'DIV') {
+          newObject.container.style.position = 'relative';
 
-        var currentId = nextCanvasId++;
+          var currentId = nextCanvasId++;
 
-        newObject.canvasId = 'tulip-canvas-' + currentId;
-        newObject.canvas = document.createElement("canvas");
-        newObject.canvas.style.outline = 'none';
-        newObject.canvas.style.position = 'absolute';
-        newObject.canvas.style.top = '0';
-        newObject.canvas.style.left = '0';
-        newObject.canvas.id = newObject.canvasId;
-        newObject.canvas.tabIndex = -1;
-        newObject.container.appendChild(newObject.canvas);
-        if (typeOf(width) != 'undefined' && typeOf(height) != 'undefined') {
+          newObject.canvasId = 'tulip-canvas-' + currentId;
+          newObject.canvas = document.createElement("canvas");
+          newObject.canvas.style.outline = 'none';
+          newObject.canvas.style.position = 'absolute';
+          newObject.canvas.style.top = '0';
+          newObject.canvas.style.left = '0';
+          newObject.canvas.id = newObject.canvasId;
+          newObject.canvas.tabIndex = -1;
+          newObject.container.appendChild(newObject.canvas);
+          if (typeOf(width) != 'undefined' && typeOf(height) != 'undefined') {
+            newObject.sizeRelativeToContainer = false;
+          } else {
+            newObject.sizeRelativeToContainer = true;
+            newObject.canvas.style.width = '100%';
+            newObject.canvas.style.height = '100%';
+            width = newObject.container.clientWidth;
+            height = newObject.container.clientHeight;
+          }
+        } else if (newObject.container.tagName == 'CANVAS') {
+          newObject.canvas = newObject.container;
+          newObject.container = null;
+          if (newObject.canvas.id != "") {
+            newObject.canvasId = newObject.canvas.id;
+          } else {
+            newObject.canvas.id = 'tulip-canvas-' + nextCanvasId++;
+            newObject.canvasId = newObject.canvas.id;
+          }
           newObject.sizeRelativeToContainer = false;
-        } else {
-          newObject.sizeRelativeToContainer = true;
-          newObject.canvas.style.width = '100%';
-          newObject.canvas.style.height = '100%';
-          width = newObject.container.clientWidth;
-          height = newObject.container.clientHeight;
+          width = newObject.canvas.width;
+          height = newObject.canvas.height;
         }
 
         _initCanvas(newObject.canvasId, width, height, newObject.sizeRelativeToContainer);
-        addHTMLProgressBarToView(newObject);
+
+        if (newObject.container) {
+          addHTMLProgressBarToView(newObject);
+        }
 
         newObject.graph = null;
         newObject.graphDrawingChanged = false;
@@ -5212,6 +5233,16 @@ if (workerMode) {
       _updateGlScene(this.canvasId);
     }
 
+    tulip.View.prototype.setBackgroundColor = function(color) {
+      checkArgumentsTypes(arguments, [tulip.Color]);
+      _setViewBackgroundColor(this.canvasId, color.r, color.g, color.b, color.a);
+    }
+
+    tulip.View.prototype.setBackupBackBuffer = function(backup) {
+      checkArgumentsTypes(arguments, ["boolean"]);
+      _setViewBackupBackBuffer(this.canvasId, backup);
+    }
+
     tulip.View.prototype.draw = function() {
       if (this.sizeRelativeToContainer && !this.fullScreenActivated) {
         _resizeCanvas(this.canvasId, this.container.clientWidth, this.container.clientHeight, this.sizeRelativeToContainer);
@@ -5224,13 +5255,17 @@ if (workerMode) {
     };
 
     tulip.View.prototype.setProgressBarComment = function(comment) {
-      this.canvasOverlayDiv.style.display = "";
-      this.progressComment.innerHTML = comment;
+      if (this.canvasOverlayDiv) {
+        this.canvasOverlayDiv.style.display = "";
+        this.progressComment.innerHTML = comment;
+      }
     };
 
     tulip.View.prototype.setProgressBarPercent = function(percent) {
-      this.canvasOverlayDiv.style.display = "";
-      this.progress.value = percent;
+      if (this.canvasOverlayDiv) {
+        this.canvasOverlayDiv.style.display = "";
+        this.progress.value = percent;
+      }
     };
 
     tulip.View.prototype.startBusyAnimation = function() {
@@ -5238,9 +5273,11 @@ if (workerMode) {
         return;
       }
 
-      this.canvasOverlayDiv.style.display = "";
-      this.progress.removeAttribute('value');
-      this.busyAnimationStarted = true;
+      if (this.canvasOverlayDiv) {
+        this.canvasOverlayDiv.style.display = "";
+        this.progress.removeAttribute('value');
+        this.busyAnimationStarted = true;
+      }
     };
 
     tulip.View.prototype.stopBusyAnimation = function(canvasId) {
@@ -5280,6 +5317,10 @@ if (workerMode) {
 
     tulip.View.prototype.getWidth = function() {
       return this.canvas.width;
+    };
+
+    tulip.View.prototype.getHeight = function() {
+      return this.canvas.height;
     };
 
     tulip.View.prototype.setGraph = function(graph, viewTakesGraphOwnership) {
@@ -5393,6 +5434,10 @@ if (workerMode) {
 
     tulip.View.prototype.getInputData = function() {
       return tulip.GlGraphInputData(_getViewInputData(this.canvasId));
+    };
+
+    tulip.View.prototype.getCamera = function() {
+      return tulip.Camera(_getViewCamera(this.canvasId));
     };
 
     tulip.View.prototype.graphHasHull = function(graph) {
@@ -5891,6 +5936,67 @@ if (workerMode) {
     tulip.GlGraphInputData.prototype.reloadGraphProperties = function tulip_GlGraphInputData_prototype_reloadGraphProperties(reset) {
       checkArgumentsTypes(arguments, ["boolean"], 0);
       _GlGraphInputData_reloadGraphProperties(this.cppPointer, reset);
+    };
+
+    // ==================================================================================================
+
+    var _Camera_getViewport = Module.cwrap('Camera_getViewport', null, ['number', 'number']);
+    var _Camera_modelViewMatrix = Module.cwrap('Camera_modelViewMatrix', null, ['number', 'number']);
+    var _Camera_projectionMatrix = Module.cwrap('Camera_projectionMatrix', null, ['number', 'number']);
+    var _Camera_setModelViewMatrix = Module.cwrap('Camera_setModelViewMatrix', null, ['number', 'number']);
+    var _Camera_setProjectionMatrix = Module.cwrap('Camera_setProjectionMatrix', null, ['number', 'number']);
+
+    tulip.Camera = function tulip_Camera(cppPointer) {
+      var newObject = createObject(tulip.Camera, this);
+      tulip.CppObjectWrapper.call(newObject, cppPointer, "Camera");
+      return newObject;
+    };
+    tulip.Camera.inheritsFrom(tulip.CppObjectWrapper);
+
+    tulip.Camera.prototype.getViewport = function tulip_Camera_prototype_getViewport() {
+      var intBuffer = allocArrayInEmHeap(Int32Array, 4);
+      _Camera_getViewport(this.cppPointer, intBuffer.byteOffset);
+      var ret = Array.prototype.slice.call(intBuffer).map(Number);
+      freeArrayInEmHeap(intBuffer);
+      return ret;
+    };
+
+    tulip.Camera.prototype.modelViewMatrix = function tulip_Camera_prototype_modelViewMatrix() {
+      var floatBuffer = allocArrayInEmHeap(Float32Array, 16);
+      _Camera_modelViewMatrix(this.cppPointer, floatBuffer.byteOffset);
+      var ret = Array.prototype.slice.call(floatBuffer).map(Number);
+      freeArrayInEmHeap(floatBuffer);
+      return ret;
+    };
+
+    tulip.Camera.prototype.setModelViewMatrix = function tulip_Camera_prototype_setModelViewMatrix(mdvMat) {
+      checkArgumentsTypes(arguments, ["array"]);
+      checkArrayOfType(mdvMat, "number", 0);
+      if (mdvMat.length == 16) {
+        var floatBuffer = allocArrayInEmHeap(Float32Array, 16);
+        floatBuffer.set(mdvMat);
+        _Camera_setModelViewMatrix(this.cppPointer, floatBuffer.byteOffset);
+        freeArrayInEmHeap(floatBuffer);
+      }
+    };
+
+    tulip.Camera.prototype.projectionMatrix = function tulip_Camera_prototype_projectionMatrix() {
+      var floatBuffer = allocArrayInEmHeap(Float32Array, 16);
+      _Camera_projectionMatrix(this.cppPointer, floatBuffer.byteOffset);
+      var ret = Array.prototype.slice.call(floatBuffer).map(Number);
+      freeArrayInEmHeap(floatBuffer);
+      return ret;
+    };
+
+    tulip.Camera.prototype.setProjectionMatrix = function tulip_Camera_prototype_setProjectionMatrix(projMat) {
+      checkArgumentsTypes(arguments, ["array"]);
+      checkArrayOfType(projMat, "number", 0);
+      if (projMat.length == 16) {
+        var floatBuffer = allocArrayInEmHeap(Float32Array, 16);
+        floatBuffer.set(projMat);
+        _Camera_setProjectionMatrix(this.cppPointer, floatBuffer.byteOffset);
+        freeArrayInEmHeap(floatBuffer);
+      }
     };
 
     // ==================================================================================================

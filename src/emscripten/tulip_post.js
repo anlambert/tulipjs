@@ -2168,6 +2168,9 @@ var _saveGraph = Module.cwrap('saveGraph', 'number', ['number', 'string', 'numbe
 var _getDefaultAlgorithmParametersJSON = Module.cwrap('getDefaultAlgorithmParametersJSON', 'string', ['string', 'number']);
 
 
+
+
+
 tulip.loadGraph = function tulip_loadGraph(filename, notifyProgress) {
   checkArgumentsTypes(arguments, ["string", "boolean"]);
   var graphPointer = _loadGraph(filename, notifyProgress);
@@ -2176,6 +2179,35 @@ tulip.loadGraph = function tulip_loadGraph(filename, notifyProgress) {
   } else {
     return null;
   }
+};
+
+tulip.loadGraphAsync = function tulip_loadGraphAsync(graphFileUrl, graphLoadedCallback) {
+  checkArgumentsTypes(arguments, ["string", "function"]);
+  var graphReq = new XMLHttpRequest();
+  graphReq.open("GET", graphFileUrl, true);
+  graphReq.responseType = "arraybuffer";
+  graphReq.onload = function (oEvent) {
+    var arrayBuffer = graphReq.response;
+    var paths = graphFileUrl.split('/');
+
+    var file = FS.findObject(graphFileUrl);
+    if (!file) {
+      var filePath = "/";
+      for (var i = 0; i < paths.length - 1; ++i) {
+        filePath += paths[i];
+        filePath += "/";
+      }
+      FS.createPath('/', filePath, true, true);
+      FS.createFile('/', graphFileUrl, {}, true, true);
+    }
+    FS.writeFile(graphFileUrl, new Uint8Array(arrayBuffer), {'encoding' : 'binary'});
+    var graph = tulip.loadGraph(graphFileUrl, false);
+    FS.unlink(graphFileUrl);
+    if (graphLoadedCallback) {
+      graphLoadedCallback(graph);
+    }
+  };
+  graphReq.send(null);
 };
 
 tulip.saveGraph = function tulip_saveGraph(graph, filename, notifyProgress) {

@@ -425,6 +425,7 @@ GlGraph::GlGraph(Graph *graph, GlLODCalculator *lodCalculator) :
   _canUseUIntIndices(true),
   _graphElementsPickingMode(false),
   _lodCalculator(lodCalculator),
+  _maxEdgePoints(0),
   _updateQuadTree(true)
 {
 
@@ -648,7 +649,6 @@ void GlGraph::endEdgesData() {
     _edgeLineVerticesIndices[e] = lineIndices;
   }
   _edgeLineRenderingDataBuffer->allocate(edgesLinesRenderingData);
-
 
   _updateQuadTree = true;
 

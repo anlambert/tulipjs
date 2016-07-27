@@ -1695,7 +1695,7 @@ var _LayoutProperty_getEdgeDefaultNumberOfBends = Module.cwrap('LayoutProperty_g
 var _LayoutProperty_getEdgeDefaultValue = Module.cwrap('LayoutProperty_getEdgeDefaultValue', null, ['number', 'number']);
 var _LayoutProperty_getEdgeNumberOfBends = Module.cwrap('LayoutProperty_getEdgeNumberOfBends', 'number', ['number', 'number']);
 var _LayoutProperty_getEdgeValue = Module.cwrap('LayoutProperty_getEdgeValue', null, ['number', 'number', 'number']);
-var _LayoutProperty_setEdgeValue = Module.cwrap('LayoutProperty_setAllEdgeValue', null, ['number', 'number', 'number', 'number']);
+var _LayoutProperty_setEdgeValue = Module.cwrap('LayoutProperty_setEdgeValue', null, ['number', 'number', 'number', 'number']);
 var _LayoutProperty_setAllEdgeValue = Module.cwrap('LayoutProperty_setAllEdgeValue', null, ['number', 'number', 'number']);
 var _LayoutProperty_getMin = Module.cwrap('LayoutProperty_getMin', null, ['number', 'number', 'number']);
 var _LayoutProperty_getMax = Module.cwrap('LayoutProperty_getMax', null, ['number', 'number', 'number']);
@@ -1786,6 +1786,7 @@ tulip.LayoutProperty.prototype.setEdgeValue = function tulip_LayoutProperty_prot
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, [tulip.Edge, "array"]);
   checkArrayOfType(bends, tulip.Coord, 1);
+  if (bends.length == 0) return;
   var floatArray = allocArrayInEmHeap(Float32Array, bends.length*3);
   for (var i = 0 ; i < bends.length ; ++i) {
     floatArray[3*i] = bends[i].x;
@@ -1798,6 +1799,7 @@ tulip.LayoutProperty.prototype.setEdgeValue = function tulip_LayoutProperty_prot
 tulip.LayoutProperty.prototype.setAllEdgeValue = function tulip_LayoutProperty_prototype_setAllEdgeValue(bends) {
   checkWrappedCppPointer(this.cppPointer);
   checkArgumentsTypes(arguments, ["array"]);
+  if (bends.length == 0) return;
   checkArrayOfType(bends, tulip.Coord, 0);
   var floatArray = allocArrayInEmHeap(Float32Array, bends.length*3);
   for (var i = 0 ; i < bends.length ; ++i) {

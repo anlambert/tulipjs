@@ -77,7 +77,11 @@ void GlScene::initGlParameters(bool drawBackBufferBackup) {
     glDepthFunc(GL_LEQUAL);
     if (!_pickingMode) {
       glEnable(GL_BLEND);
+#ifdef __EMSCRIPTEN__
+      glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+#else
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+#endif
     } else {
       glDisable(GL_BLEND);
     }

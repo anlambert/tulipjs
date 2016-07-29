@@ -19,6 +19,8 @@ public:
     _currentCanvasId = canvasId;
   }
 
+  static std::string getShaderSrcPrefix();
+
   static std::string getFXAAFunctionsSource();
 
   GlShaderProgram *getFlatRenderingShader() const {

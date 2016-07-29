@@ -14,76 +14,52 @@
 #include "GlGraph.h"
 
 
-static std::string fisheyeVertexShaderSrc =
-    #ifdef __EMSCRIPTEN__
-    "precision highp float;\n"
-    "precision highp int;\n"
-    #else
-    "#version 120\n"
-    #endif
+static std::string fisheyeVertexShaderSrc = ShaderManager::getShaderSrcPrefix() + R"(
+  uniform mat4 u_modelviewMatrix;
+  uniform mat4 u_projectionMatrix;
 
-    "uniform mat4 u_modelviewMatrix;"
-    "uniform mat4 u_projectionMatrix;"
+  attribute vec3 a_position;
+  attribute vec2 a_texCoord;
 
-    "attribute vec3 a_position;"
-    "attribute vec2 a_texCoord;"
+  varying vec2 v_texCoord;
 
-    "varying vec2 v_texCoord;"
-
-    "void main() {"
-    "  gl_Position = u_projectionMatrix * u_modelviewMatrix * vec4(a_position, 1.0);"
-    "  v_texCoord = a_texCoord;"
-    "}"
-    ;
+  void main() {
+    gl_Position = u_projectionMatrix * u_modelviewMatrix * vec4(a_position, 1.0);
+    v_texCoord = a_texCoord;
+  }
+)";
 
 static std::string fisheyeFragmentShaderSrc() {
+  return ShaderManager::getShaderSrcPrefix() + ShaderManager::getFXAAFunctionsSource() + R"(
+    uniform sampler2D u_texture;
+    uniform sampler2D u_fisheyeTexture;
+    uniform float u_fisheyeRadius;
+    uniform float u_fisheyeHeight;
+    uniform float u_fisheyeTextureSize;
+    uniform vec2 u_mouse;
+    uniform vec2 u_resolution;
 
-  return
+    varying vec2 v_texCoord;
 
-    #ifdef __EMSCRIPTEN__
-    "precision highp float;\n"
-    "precision highp int;\n"
-    #else
-    "#version 120\n"
-    #endif
-
-    "uniform sampler2D u_texture;"
-    "uniform sampler2D u_fisheyeTexture;"
-
-    "uniform float u_fisheyeRadius;"
-    "uniform float u_fisheyeHeight;"
-    "uniform float u_fisheyeTextureSize;"
-
-    "uniform vec2 u_mouse;"
-    "uniform vec2 u_resolution;"
-
-    "varying vec2 v_texCoord;"
-
-    +
-
-    ShaderManager::getFXAAFunctionsSource()
-
-    +
-
-    "void main(void) {"
-    "  vec2 pos = v_texCoord * u_resolution;"
-    "  vec2 center = u_mouse;"
-    "  float radius = u_fisheyeRadius;"
-    "  float height = u_fisheyeHeight;"
-    "  float dist = distance(center, pos);"
-    "  if (dist < radius && u_fisheyeHeight < -0.05) {"
-    "		 float coeff = (height + 1.0) * dist / (height * dist/ radius + 1.0);"
-    "		 vec2 dir = normalize(pos - center) * coeff;"
-    "		 pos = center + dir;"
-    "    vec2 fisheyePos = vec2(pos.x - (u_mouse.x - u_fisheyeRadius), pos.y - (u_mouse.y - u_fisheyeRadius)) / vec2(2.0*u_fisheyeRadius);"
-    "    vec2 fisheyeTexRes = vec2(u_fisheyeTextureSize);"
-    "    vec2 fisheyeFragCoord = fisheyePos * fisheyeTexRes;"
-    "    gl_FragColor = applyFXAA(u_fisheyeTexture, fisheyeFragCoord, fisheyeTexRes);"
-    "  } else {"
-    "    gl_FragColor = texture2D(u_texture, pos / u_resolution);"
-    "  }"
-    "}"
-    ;
+    void main(void) {
+      vec2 pos = v_texCoord * u_resolution;
+      vec2 center = u_mouse;
+      float radius = u_fisheyeRadius;
+      float height = u_fisheyeHeight;
+      float dist = distance(center, pos);
+      if (dist < radius && u_fisheyeHeight < -0.05) {
+        float coeff = (height + 1.0) * dist / (height * dist/ radius + 1.0);
+        vec2 dir = normalize(pos - center) * coeff;
+        pos = center + dir;
+        vec2 fisheyePos = vec2(pos.x - (u_mouse.x - u_fisheyeRadius), pos.y - (u_mouse.y - u_fisheyeRadius)) / vec2(2.0*u_fisheyeRadius);
+        vec2 fisheyeTexRes = vec2(u_fisheyeTextureSize);
+        vec2 fisheyeFragCoord = fisheyePos * fisheyeTexRes;
+        gl_FragColor = applyFXAA(u_fisheyeTexture, fisheyeFragCoord, fisheyeTexRes);
+      } else {
+        gl_FragColor = texture2D(u_texture, pos / u_resolution);
+      }
+    }
+  )";
 }
 
 FisheyeInteractor::FisheyeInteractor(GlScene *scene) :

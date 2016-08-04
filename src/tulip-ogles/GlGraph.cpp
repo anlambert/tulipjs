@@ -232,9 +232,8 @@ static string curveVertexShaderSrc = R"(
     vec3 xu = normalize(cross(un, lookDir));
     vec3 xv = normalize(cross(vn, -lookDir));
     vec3 xu_xv = normalize(xu+xv);
-    //   float angle = M_PI - acos(dot(u,v)/length(u)*length(v));
-    //   if (angle != angle) angle = 0.0;
-    //   size = size/cos(angle/2.0);
+    vec3 perp = vec3(-un.y, un.x, un.z);
+    size = size / dot(xu_xv, perp);
     pos = currentCurvePoint + ori * xu_xv * size;
     return pos;
   }
@@ -529,6 +528,7 @@ void GlGraph::clearObservers() {
 }
 
 void GlGraph::computeGraphBoundingBox() {
+  if (!_graph) return;
   _boundingBox = tlp::computeBoundingBox(_graph, _inputData.getElementLayout(), _inputData.getElementSize(), _inputData.getElementRotation());
 }
 
@@ -606,7 +606,7 @@ void GlGraph::endEdgesData() {
     Color edgeColor = _inputData.getElementColor()->getEdgeValue(e);
     const Color &srcColor = _inputData.getElementColor()->getNodeValue(_graph->source(e));
     const Color &tgtColor = _inputData.getElementColor()->getNodeValue(_graph->target(e));
-    const Color &selectionColor = uintToColor(_graph->numberOfNodes() + e.id + 1);
+    const Color &selectionColor = uintToColor(_graph->getRoot()->numberOfNodes() + e.id + 1);
 
     if (_inputData.getElementBorderWidth()->getEdgeValue(e) > 0) {
       edgeColor = _inputData.getElementBorderColor()->getEdgeValue(e);
@@ -1767,7 +1767,7 @@ void GlGraph::treatEvent(const tlp::Event &message) {
   if (message.sender() == &_inputData) {
     notifyModified();
   } else if (gEvt) {
-    if (gEvt->getType() == GraphEvent::TLP_ADD_NODE) {
+    if (gEvt->getType() == GraphEvent::TLP_ADD_NODE || gEvt->getType() == GraphEvent::TLP_DEL_NODE) {
       _nodesToUpdate.insert(gEvt->getNode());
     } else if (gEvt->getType() == GraphEvent::TLP_ADD_NODES) {
       const std::vector<node> nodes = gEvt->getNodes();
@@ -1777,7 +1777,6 @@ void GlGraph::treatEvent(const tlp::Event &message) {
     } else if (gEvt->getType() == GraphEvent::TLP_DEL_NODE) {
       _labelsRenderer->removeNodeLabel(_graph, gEvt->getNode());
       _updateQuadTree = true;
-      notifyModified();
     } else if (gEvt->getType() == GraphEvent::TLP_ADD_EDGE ||
                gEvt->getType() == GraphEvent::TLP_AFTER_SET_ENDS ||
                gEvt->getType() == GraphEvent::TLP_REVERSE_EDGE) {
@@ -1789,16 +1788,17 @@ void GlGraph::treatEvent(const tlp::Event &message) {
       }
     } else if (gEvt->getType() == GraphEvent::TLP_DEL_EDGE) {
       _updateQuadTree = true;
-      notifyModified();
     }
   }
   else if (pEvt && (pEvt->getProperty() == _inputData.getElementLayout() || pEvt->getProperty() == _inputData.getElementSize() || pEvt->getProperty() == _inputData.getElementColor())) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE && _graph->isElement(pEvt->getNode())) {
+      _updateQuadTree = true;
       forEach(e, _graph->getInOutEdges(pEvt->getNode())) {
         _edgesToUpdate.insert(e);
       }
     }
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE) {
+      _updateQuadTree = true;
       forEach(e, _graph->getEdges()) {
         _edgesToUpdate.insert(e);
       }
@@ -1831,21 +1831,10 @@ void GlGraph::treatEvent(const tlp::Event &message) {
     if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_EDGE_VALUE && _graph->isElement(pEvt->getEdge())) {
       _edgesToUpdate.insert(pEvt->getEdge());
     }
-    if (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE) {
-      notifyModified();
-    }
-  } else if (pEvt && (pEvt->getProperty() == _inputData.getElementGlow() || pEvt->getProperty() == _inputData.getElementFontAwesomeIcon() || pEvt->getProperty() == _inputData.getElementLabelColor()) &&
-             (pEvt->getType() == PropertyEvent::TLP_AFTER_SET_ALL_NODE_VALUE || pEvt->getType() == PropertyEvent::TLP_AFTER_SET_NODE_VALUE)) {
-
-    notifyModified();
-  } else if (pEvt && pEvt->getProperty() == _inputData.getElementSelection()) {
-    notifyModified();
   } else if (rpEvt && (rpEvt->getType() == GlGraphRenderingParametersEvent::DISPLAY_EDGES_EXTREMITIES_TOGGLED)) {
     forEach(e, _graph->getEdges()) {
       _edgesToUpdate.insert(e);
     }
-  } else if (rpEvt && rpEvt->getType() == GlGraphRenderingParametersEvent::RENDERING_PARAMETERS_MODIFIED) {
-    notifyModified();
   }
 }
 
@@ -1869,12 +1858,14 @@ void GlGraph::treatEvents(const std::vector<tlp::Event> &) {
     _edgesToUpdate.clear();
     _nodesToUpdate.clear();
 
-    computeGraphBoundingBox();
-
     _updateQuadTree = true;
 
-    notifyModified();
-
   }
+
+  if (_updateQuadTree) {
+    computeGraphBoundingBox();
+  }
+
+  notifyModified();
 
 }

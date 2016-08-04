@@ -504,6 +504,16 @@ bool GlScene::selectEntities(RenderingEntitiesFlag type, int x, int y, int width
   _pickingMode = true;
   vector<SelectedEntity> selectedEntitiesInternal;
   selectedEntities.clear();
+
+  x = clamp(x, 0, _viewport[2]);
+  y = clamp(y, 0, _viewport[3]);
+  if (x+width > _viewport[2]) {
+    width -= x+width-_viewport[2];
+  }
+  if (y+height > _viewport[3]) {
+    height -= y+height-_viewport[3];
+  }
+
   GlFrameBufferObject *fbo = new GlFrameBufferObject(_viewport[2], _viewport[3], GlFrameBufferObject::NoAttachment);
   fbo->bind();
   unsigned int bufferSize = width*height*4;

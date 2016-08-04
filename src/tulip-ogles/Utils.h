@@ -35,6 +35,11 @@ std::string toString(const T &val) {
   return oss.str();
 }
 
+template <typename T>
+const T &clamp(const T& n, const T& lower, const T& upper) {
+  return std::max(lower, std::min(n, upper));
+}
+
 void addColorToVecFloat(const tlp::Color &c, std::vector<float> &v);
 
 void getSizes(const std::vector<tlp::Coord> &line, float s1, float s2, std::vector<float> &result);

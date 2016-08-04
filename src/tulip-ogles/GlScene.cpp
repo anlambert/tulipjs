@@ -519,7 +519,7 @@ bool GlScene::selectEntities(RenderingEntitiesFlag type, int x, int y, int width
   unsigned int bufferSize = width*height*4;
   unsigned char *buffer = new unsigned char[bufferSize];
   bool done = false;
-  _selectionViewport = Vec4i(x - _viewport[2], _viewport[3] - y, width, height);
+  _selectionViewport = Vec4i(x, y, width, height);
 
   std::vector<std::pair<std::string, GlLayer*> > layersList = getLayersList();
   std::map<GlLayer *, bool> layersVisibility;

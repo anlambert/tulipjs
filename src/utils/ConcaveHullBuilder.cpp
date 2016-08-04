@@ -225,13 +225,12 @@ std::vector<std::vector<tlp::Coord> > ConcaveHullBuilder::computeGraphHullVertic
       vector<float> sizes;
       bool interpolateEdgeSizes = true;
       if (interpolateEdgeSizes) {
-        getSizes(edgePoints, std::min(srcSize[0]/(2*divisor)+ spacing, srcSize[1]/(2*divisor)+ spacing), std::min(tgtSize[0]/(2*divisor)+ spacing, tgtSize[1]/(2*divisor)+ spacing), sizes);
+        sizes = getSizes(edgePoints, std::min(srcSize[0]/(2*divisor)+ spacing, srcSize[1]/(2*divisor)+ spacing), std::min(tgtSize[0]/(2*divisor)+ spacing, tgtSize[1]/(2*divisor)+ spacing));
       } else {
-        getSizes(edgePoints, viewSize->getEdgeValue(e)[0]/divisor + spacing, viewSize->getEdgeValue(e)[0]/divisor + spacing, sizes);
+        sizes = getSizes(edgePoints, viewSize->getEdgeValue(e)[0]/divisor + spacing, viewSize->getEdgeValue(e)[0]/divisor + spacing);
       }
 
-      vector<Coord> extrusion;
-      buildCurvePoints(edgePoints, sizes, edgePoints[0] - (edgePoints[1] - edgePoints[0]), edgePoints.back() + (edgePoints.back() - edgePoints[edgePoints.size() - 2]), extrusion);
+      vector<Coord> extrusion = buildCurvePoints(edgePoints, sizes, edgePoints[0] - (edgePoints[1] - edgePoints[0]), edgePoints.back() + (edgePoints.back() - edgePoints[edgePoints.size() - 2]));
 
       vector<Coord> extrusionPoly;
       for (size_t i = 0 ; i < extrusion.size() / 2 ; ++i) {

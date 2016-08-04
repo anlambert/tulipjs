@@ -45,7 +45,8 @@ static float lineLength(const vector<Coord> &line) {
   return result;
 }
 //===========================================================================================================
-void getSizes(const vector<Coord> &line, float s1, float s2,vector<float> &result) {
+vector<float> getSizes(const vector<Coord> &line, float s1, float s2) {
+  vector<float> result;
   result.resize(line.size());
   result[0] = s1;
   result[line.size()-1] = s2;
@@ -57,6 +58,7 @@ void getSizes(const vector<Coord> &line, float s1, float s2,vector<float> &resul
     s1 += s2 * delta;
     result[i] = s1;
   }
+  return result;
 }
 //================================================
 void getColors(const vector<Coord> &line, const Color &c1, const Color &c2, vector<Color> &result) {
@@ -180,14 +182,14 @@ static int computeExtrusion(const Coord &pBefore, const Coord &pCurrent, const C
   return inversion;
 }
 //===========================================================================================================
-void buildCurvePoints (const vector<Coord> &vertices,
+vector<Coord> buildCurvePoints (const vector<Coord> &vertices,
                        const vector<float> &sizes,
                        const Coord &startN,
-                       const Coord &endN,
-                       vector<Coord> &result) {
+                       const Coord &endN) {
 
   int inversion=1;
   bool twoPointsCurve=(vertices.size()==2);
+  vector<Coord> result;
 
   result.reserve(vertices.size()*2);
 
@@ -208,6 +210,7 @@ void buildCurvePoints (const vector<Coord> &vertices,
   else {
     inversion = computeExtrusion(vertices[vertices.size()-2], vertices[vertices.size()-1], vertices[vertices.size()-1] + (vertices[vertices.size()-1] - vertices[vertices.size()-2]), sizes[sizes.size() - 1], inversion, result, true,twoPointsCurve);
   }
+  return result;
 }
 //===========================================================================================================
 vector<Coord> computeRegularPolygon(unsigned int numberOfSides, float startAngle, const Coord &position, const Size &size) {
@@ -576,7 +579,7 @@ float calculateAABBSize(const BoundingBox &bb,const Coord &eye, const MatrixGL &
 
   for(int i=0; i<num; i++) {
     dst[i] = projectPoint(src[(int)hullVertexTable[pos][i+1]],transformMatrix,globalViewport);
-    dst[i][1] = globalViewport[1] + globalViewport[3] - (dst[i][1] - globalViewport[1]);
+    dst[i] -= Coord(globalViewport[0], globalViewport[1]);
   }
 
   bool inScreen=false;

@@ -1497,7 +1497,7 @@ bool GlGraph::pickNodesAndEdges(const Camera &camera,
   unsigned char *buffer = new unsigned char[bufferSize];
   bool done = false;
   setGraphElementsPickingMode(true);
-  setSelectionViewport(Vec4i(x - viewport[2], viewport[3] - y, width, height));
+  setSelectionViewport(Vec4i(x, y, width, height));
   while (!done) {
     std::set<tlp::node> tmpNodeSet;
     std::set<tlp::edge> tmpEdgeSet;

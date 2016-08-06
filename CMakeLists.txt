@@ -239,10 +239,11 @@ FILE(GLOB_RECURSE TULIP_PLUGINS_LIBRARIES "${TULIP_PLUGINS_DIR}/*.so")
 
 ############################################################################################################
 
+IF(NOT USE_WASM)
+
 ADD_EXECUTABLE(tulip-node.js ${TULIPJS_CORE_SRCS})
 
 TARGET_LINK_LIBRARIES(tulip-node.js ${TULIP_CORE_LIBRARY} ${TULIP_OGDF_LIBRARY} ${TULIP_PLUGINS_LIBRARIES})
-
 
 SET(TULIP_NODE_LINK_FLAGS "--bind -s USE_ZLIB=1 -s ALLOW_MEMORY_GROWTH=1 -s EVAL_CTORS=0 -s MODULARIZE=1 -s EXPORT_NAME=\\\"tulipjs\\\" --memory-init-file 0")
 
@@ -259,6 +260,8 @@ EM_LINK_JS_LIBRARY(tulip-node.js ${CMAKE_SOURCE_DIR}/src/emscripten/tulip_librar
 ADD_CUSTOM_COMMAND(TARGET tulip-node.js POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -DTULIP_VIZ_FEATURES=OFF -DTULIP_USE_WORKER=OFF -DJSFILE=tulip-node.js -DJSUTILSFILE=${CMAKE_SOURCE_DIR}/src/emscripten/utils.js -P ${CMAKE_SOURCE_DIR}/src/emscripten/wrap_compiled_code.cmake
                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+ENDIF(NOT USE_WASM)
 
 ############################################################################################################
 

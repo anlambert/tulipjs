@@ -14,7 +14,8 @@
 #include "GlGraph.h"
 
 
-static std::string fisheyeVertexShaderSrc = ShaderManager::getShaderSrcPrefix() + R"(
+static std::string fisheyeVertexShaderSrc() {
+  return ShaderManager::getShaderSrcPrefix() + R"(
   uniform mat4 u_modelviewMatrix;
   uniform mat4 u_projectionMatrix;
 
@@ -28,6 +29,7 @@ static std::string fisheyeVertexShaderSrc = ShaderManager::getShaderSrcPrefix() 
     v_texCoord = a_texCoord;
   }
 )";
+}
 
 static std::string fisheyeFragmentShaderSrc() {
   return ShaderManager::getShaderSrcPrefix() + ShaderManager::getFXAAFunctionsSource() + R"(
@@ -71,7 +73,7 @@ FisheyeInteractor::FisheyeInteractor(GlScene *scene) :
 
 void FisheyeInteractor::activate() {
   _fisheyeShader = new GlShaderProgram();
-  _fisheyeShader->addShaderFromSourceCode(GlShader::Vertex, fisheyeVertexShaderSrc);
+  _fisheyeShader->addShaderFromSourceCode(GlShader::Vertex, fisheyeVertexShaderSrc());
   _fisheyeShader->addShaderFromSourceCode(GlShader::Fragment, fisheyeFragmentShaderSrc());
   _fisheyeShader->link();
   _fisheyeShader->printInfoLog();

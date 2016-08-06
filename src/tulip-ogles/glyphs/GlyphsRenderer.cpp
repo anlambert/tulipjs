@@ -155,7 +155,8 @@ static std::string genGlyphsVertexShaderSrc(const unsigned int maxNbGlyphsByRend
   return shaderSrc;
 }
 
-static std::string glyphsVertexShaderHardwareInstancingSrc = ShaderManager::getShaderSrcPrefix() + R"(
+static std::string glyphsVertexShaderHardwareInstancingSrc() {
+  return ShaderManager::getShaderSrcPrefix() + R"(
   uniform mat4 u_modelviewMatrix;
   uniform mat4 u_projectionMatrix;
   uniform mat4 u_normalMatrix;
@@ -293,8 +294,10 @@ static std::string glyphsVertexShaderHardwareInstancingSrc = ShaderManager::getS
    v_ambientGlobalColor = u_lightModelAmbientColor * u_materialAmbientColor;
   }
 )";
+}
 
-static std::string glyphsFragmentShaderSrc = ShaderManager::getShaderSrcPrefix() + R"(
+static std::string glyphsFragmentShaderSrc() {
+  return ShaderManager::getShaderSrcPrefix() + R"(
   uniform bool u_flatShading;
   uniform bool u_textureActivated;
   uniform sampler2D u_textures[4];
@@ -356,6 +359,7 @@ static std::string glyphsFragmentShaderSrc = ShaderManager::getShaderSrcPrefix()
     gl_FragColor = color;
   }
 )";
+}
 
 static const unsigned int ushortMax = 65535;
 
@@ -396,15 +400,16 @@ GlyphsRenderer::GlyphsRenderer() : _billboardMode(false) {
   while (!glyphShaderOk) {
     _glyphShader = new GlShaderProgram();
     if (_canUseHardwareInstancing) {
-      _glyphShader->addShaderFromSourceCode(GlShader::Vertex, glyphsVertexShaderHardwareInstancingSrc);
+      _glyphShader->addShaderFromSourceCode(GlShader::Vertex, glyphsVertexShaderHardwareInstancingSrc());
     } else {
       _glyphShader->addShaderFromSourceCode(GlShader::Vertex, genGlyphsVertexShaderSrc(maxNbGlyphsByRenderingBatch));
     }
-    _glyphShader->addShaderFromSourceCode(GlShader::Fragment, glyphsFragmentShaderSrc);
+    _glyphShader->addShaderFromSourceCode(GlShader::Fragment, glyphsFragmentShaderSrc());
 
     _glyphShader->link();
     if (!_glyphShader->isLinked()) {
       --maxNbGlyphsByRenderingBatch;
+      _glyphShader->printInfoLog();
       delete _glyphShader;
     } else {
       glyphShaderOk = true;

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string shaderSrcPrefix =
+static string shaderSrcPrefix =
 #ifdef __EMSCRIPTEN__
   "precision highp float;\n"
   "precision highp int;\n"

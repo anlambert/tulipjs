@@ -76,9 +76,15 @@ void GlScene::initGlParameters(bool drawBackBufferBackup) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     if (!_pickingMode) {
-      glEnable(GL_BLEND);
+      glEnable(GL_BLEND);      
 #ifdef __EMSCRIPTEN__
-      glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+      // assuming we are blending a Tulip scene with DOM elemements under the rendering canvas,
+      // need to use a blending function that works with premultiplied alpha
+      if (_backgroundColor[3] != 255 || !_clearBufferAtDraw) {
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+      } else {
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      }
 #else
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 #endif
@@ -179,7 +185,7 @@ void GlScene::backupBackBuffer() {
   }
   glBindTexture(GL_TEXTURE_2D, _backBufferTexture);
 #ifdef __EMSCRIPTEN__
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _viewport[0], _viewport[1], _viewport[2], _viewport[3], 0);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _viewport[0], _viewport[1], _viewport[2], _viewport[3], 0);
 #else
   // On desktop OpenGL, glCopyTexImage2D does not preserve antialiasing so we grab the back buffer content
   // and create a texture from it
